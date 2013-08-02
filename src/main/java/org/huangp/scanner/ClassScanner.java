@@ -2,5 +2,5 @@ package org.huangp.scanner;
 
 public interface ClassScanner
 {
-    void scan(Class clazz);
+    Iterable<EntityClass> scan(Class clazz);
 }

@@ -1,19 +1,15 @@
 package org.huangp.scanner;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import javax.persistence.Access;
-import javax.persistence.AccessType;
+import java.util.List;
 import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
 
-import org.huangp.internal.BootstrapService;
-import org.huangp.internal.NodeProperties;
-import org.neo4j.graphdb.Node;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.reflect.Invokable;
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,7 +20,14 @@ import lombok.extern.slf4j.Slf4j;
 public class EntityClassScanner implements ClassScanner
 {
    @Override
-   public void scan(Class clazz)
+   public Iterable<EntityClass> scan(Class clazz)
+   {
+      List<EntityClass> current = Lists.newArrayList();
+      recursiveScan(clazz, current);
+      return ImmutableList.copyOf(Lists.reverse(current));
+   }
+
+   private static void recursiveScan(final Class clazz, List<EntityClass> current)
    {
       String classUnderScan = clazz.getName();
       log.debug("scanning class: {}", classUnderScan);
@@ -32,84 +35,47 @@ public class EntityClassScanner implements ClassScanner
       Annotation entityAnnotation = clazz.getAnnotation(Entity.class);
       Preconditions.checkState(entityAnnotation != null, "This scans only entity class");
 
-      Optional<Node> optionalNode = BootstrapService.INSTANCE.tryFindNodeByName(classUnderScan);
-      Node startNode;
-      if (optionalNode.isPresent())
+      EntityClass startNode = getOrCreateNode(current, clazz);
+      if (startNode.isScanned())
       {
-         log.debug("Entity [{}] already in graph", classUnderScan);
-         startNode = optionalNode.get();
-         if (startNode.hasProperty(NodeProperties.SCANNED.name()))
+         log.trace("{} has been scanned", startNode);
+         return;
+      }
+      Iterable<Class<?>> dependingTypes = startNode.getDependingEntityTypes();
+
+      for (Class<?> dependingType : dependingTypes)
+      {
+         EntityClass dependingNode = getOrCreateNode(current, dependingType);
+
+         if (!clazz.equals(dependingNode.getType()))
          {
-            log.debug("{} has been scanned", classUnderScan);
-            return;
+            current.add(dependingNode);
+         }
+         if (shouldScanDependingNode(dependingNode, clazz))
+         {
+            recursiveScan(dependingNode.getType(), current);
          }
       }
-      else
-      {
-         startNode = BootstrapService.INSTANCE.addNode(classUnderScan);
-      }
-
-      // access type is field
-      Annotation access = clazz.getAnnotation(Access.class);
-      if (access != null)
-      {
-         AccessType accessType = ((Access) access).value();
-         if (accessType == AccessType.FIELD)
-         {
-            // field based annotation
-            Field[] fields = clazz.getFields();
-            for (Field field : fields)
-            {
-               Annotation[] annotations = field.getAnnotations();
-               for (Annotation annotation : annotations)
-               {
-                  if (annotation.annotationType() == ManyToOne.class)
-                  {
-                     Class<?> dependingEntityType = field.getType();
-                     log.debug("found many to one entity: {} on {}", dependingEntityType.getName(), classUnderScan);
-
-                     Optional<Node> dependingNodeOptional = BootstrapService.INSTANCE.tryFindNodeByName(dependingEntityType.getName());
-                     if (!dependingNodeOptional.isPresent())
-                     {
-                        Node dependingNode = BootstrapService.INSTANCE.addNode(dependingEntityType.getName());
-                        BootstrapService.INSTANCE.setDependency(startNode, dependingNode);
-                        scan(dependingEntityType);
-                     }
-                     else
-                     {
-                        BootstrapService.INSTANCE.setDependency(startNode, dependingNodeOptional.get());
-                     }
-                  }
-               }
-            }
-         }
-      }
-      else
-      {
-         // property based annotation
-         Method[] methods = clazz.getMethods();
-         for (Method method : methods)
-         {
-            Invokable<?, Object> invokable = Invokable.from(method);
-            if (invokable.isAnnotationPresent(ManyToOne.class))
-            {
-               Class<?> dependingEntityType = invokable.getReturnType().getRawType();
-               log.debug("found many to one entity: {} on {}", dependingEntityType.getName(), classUnderScan);
-
-               Optional<Node> dependingNodeOptional = BootstrapService.INSTANCE.tryFindNodeByName(dependingEntityType.getName());
-               if (!dependingNodeOptional.isPresent())
-               {
-                  Node dependingNode = BootstrapService.INSTANCE.addNode(dependingEntityType.getName());
-                  BootstrapService.INSTANCE.setDependency(startNode, dependingNode);
-                  scan(dependingEntityType);
-               }
-               else
-               {
-                  BootstrapService.INSTANCE.setDependency(startNode, dependingNodeOptional.get());
-               }
-            }
-         }
-      }
-      BootstrapService.INSTANCE.markNodeScanned(startNode);
+      startNode.markScanned();
    }
+
+   private static EntityClass getOrCreateNode(List<EntityClass> current, final Class<?> entityType)
+   {
+      Optional<EntityClass> dependingOptional = Iterables.tryFind(current, new Predicate<EntityClass>()
+      {
+         @Override
+         public boolean apply(EntityClass input)
+         {
+            return input.getType() == entityType;
+         }
+      });
+      return dependingOptional.isPresent() ? dependingOptional.get() : EntityClassImpl.from(entityType);
+   }
+
+   private static boolean shouldScanDependingNode(EntityClass dependingNode, Class clazz)
+   {
+      return !dependingNode.isScanned() && !dependingNode.getType().equals(clazz);
+   }
+
+
 }
