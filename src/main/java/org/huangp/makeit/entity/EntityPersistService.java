@@ -11,4 +11,6 @@ public interface EntityPersistService
    Queue<Object> getRequiredEntitiesFor(Class entity);
 
    void persistInOrder(EntityManager entityManager, Queue<Object> queue);
+
+   <T> T createAndPersist(EntityManager entityManager, Class<T> entityType);
 }

@@ -12,8 +12,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 import org.huangp.makeit.util.ClassUtil;
+import org.huangp.makeit.util.FieldToSettableFunction;
 import org.huangp.makeit.util.Settable;
-import org.huangp.makeit.util.SettableField;
 import org.huangp.makeit.util.SettableProperty;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -180,18 +180,6 @@ public class EntityClassImpl implements EntityClass
       public Settable apply(Method input)
       {
          return SettableProperty.from(ownerType, input);
-      }
-   }
-
-   @RequiredArgsConstructor
-   private static class FieldToSettableFunction implements Function<Field, Settable>
-   {
-      private final Class ownerType;
-
-      @Override
-      public Settable apply(Field input)
-      {
-         return SettableField.from(ownerType, input);
       }
    }
 

@@ -8,9 +8,8 @@ import com.google.common.reflect.TypeToken;
 /**
  * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
  */
-public enum BeanValueHolderImpl implements BeanValueHolder
+public class BeanValueHolderImpl implements BeanValueHolder
 {
-   HOLDER;
 
    private TypeToInstanceMap<Object> map = new MutableTypeToInstanceMap<Object>();
 

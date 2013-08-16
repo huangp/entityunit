@@ -14,15 +14,19 @@ public class SettableParameter implements Settable
 {
    @Delegate(types = AnnotatedElement.class)
    private final Parameter parameter;
+   private transient final String simpleName;
+   private transient final String fullName;
 
-   private SettableParameter(Parameter parameter)
+   private SettableParameter(Class<?> ownerType, Parameter parameter)
    {
+      simpleName = parameter.toString().replaceFirst("^.+\\s", "");
+      this.fullName = ownerType.getName() + "(" + simpleName + ")";
       this.parameter = parameter;
    }
 
-   public static Settable from(Parameter parameter)
+   public static Settable from(Class<?> ownerType, Parameter parameter)
    {
-      return new SettableParameter(parameter);
+      return new SettableParameter(ownerType, parameter);
    }
 
    @Override
@@ -34,7 +38,7 @@ public class SettableParameter implements Settable
    @Override
    public String getSimpleName()
    {
-      return parameter.toString();
+      return simpleName;
    }
 
    @Override
@@ -52,6 +56,6 @@ public class SettableParameter implements Settable
    @Override
    public String fullyQualifiedName()
    {
-      return parameter.toString();
+      return fullName;
    }
 }

@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 class ReuseOrNullMaker implements Maker<Object>
 {
-   private static BeanValueHolder holder = BeanValueHolderImpl.HOLDER;
+   private final BeanValueHolder holder;
 
    private final Class type;
 

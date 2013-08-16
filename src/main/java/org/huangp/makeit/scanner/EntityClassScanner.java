@@ -2,11 +2,16 @@ package org.huangp.makeit.scanner;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import javax.persistence.Entity;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.base.Throwables;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -19,8 +24,31 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EntityClassScanner implements ClassScanner
 {
+   private static Cache<Class, Iterable<EntityClass>> cache = CacheBuilder.newBuilder()
+         .maximumSize(100)
+         .build();
+
    @Override
-   public Iterable<EntityClass> scan(Class clazz)
+   public Iterable<EntityClass> scan(final Class clazz)
+   {
+      try
+      {
+         return cache.get(clazz, new Callable<Iterable<EntityClass>>()
+         {
+            @Override
+            public Iterable<EntityClass> call() throws Exception
+            {
+               return doRealScan(clazz);
+            }
+         });
+      }
+      catch (ExecutionException e)
+      {
+         throw Throwables.propagate(e);
+      }
+   }
+
+   private Iterable<EntityClass> doRealScan(Class clazz)
    {
       List<EntityClass> current = Lists.newArrayList();
       recursiveScan(clazz, current);

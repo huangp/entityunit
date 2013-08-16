@@ -36,7 +36,7 @@ public class StringMakerTest
 
       String value = maker.value();
 
-      assertThat(value, Matchers.equalTo("nobody@nowhere.org"));
+      assertThat(value, Matchers.endsWith("@nowhere.org"));
    }
 
    @Test

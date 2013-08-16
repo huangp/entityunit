@@ -35,7 +35,8 @@ class StringMaker implements Maker<String>
       boolean isEmail = false;
       int min = 0;
       int max = DEFAULT_MAX;
-      for (Annotation annotation : optionalElement.get().getAnnotations())
+      Settable settable = optionalElement.get();
+      for (Annotation annotation : settable.getAnnotations())
       {
          if (annotation instanceof Email)
          {
@@ -56,7 +57,7 @@ class StringMaker implements Maker<String>
          }
          if (annotation instanceof Pattern)
          {
-            log.warn("can not auto generate string matches pattern constraint");
+            log.warn("can not auto generate string matches pattern constraint for {}", settable.fullyQualifiedName());
          }
          // TODO Max and Min?
       }
@@ -68,8 +69,9 @@ class StringMaker implements Maker<String>
    {
       if (isEmail)
       {
-         return "nobody@nowhere.org";
+         return RandomStringUtils.randomAlphabetic(5) + "@nowhere.org";
       }
-      return RandomStringUtils.randomAlphabetic(max);
+      int length = Math.min(DEFAULT_MAX, this.max);
+      return RandomStringUtils.randomAlphabetic(Math.max(length, min));
    }
 }

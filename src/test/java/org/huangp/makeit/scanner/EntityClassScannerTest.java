@@ -1,6 +1,10 @@
 package org.huangp.makeit.scanner;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import java.util.List;
+
+import lombok.extern.slf4j.Slf4j;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -15,9 +19,6 @@ import org.zanata.model.HTextFlowTarget;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-
-import lombok.extern.slf4j.Slf4j;
-import static org.hamcrest.MatcherAssert.*;
 
 /**
  * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
@@ -40,7 +41,7 @@ public class EntityClassScannerTest
 
       List<EntityClass> result = Lists.newArrayList(dependents);
 
-      EntityClassScannerTest.log.info("result: {}", result);
+      log.info("result: {}", result);
       assertThat(result, Matchers.hasSize(10));
       List<Class> types = Lists.transform(result, new Function<EntityClass, Class>()
       {
@@ -50,7 +51,7 @@ public class EntityClassScannerTest
             return input.getType();
          }
       });
-      assertThat(types, Matchers.<Class>contains(
+      assertThat(types, Matchers.<Class> contains(
             HPerson.class,
             HProject.class,
             HProjectIteration.class,
@@ -61,5 +62,17 @@ public class EntityClassScannerTest
             HPerson.class,
             HLocale.class,
             HPerson.class));
+   }
+
+   @Test
+   public void scanResultIsCached()
+   {
+      // scan twice
+      Iterable<EntityClass> dependents = scanner.scan(HTextFlowTarget.class);
+      scanner.scan(HTextFlowTarget.class);
+
+      List<EntityClass> result = Lists.newArrayList(dependents);
+
+      assertThat(result, Matchers.hasSize(10));
    }
 }

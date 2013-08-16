@@ -4,23 +4,28 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import javax.persistence.EntityManager;
 
 import org.huangp.makeit.holder.BeanValueHolder;
 import org.huangp.makeit.holder.BeanValueHolderImpl;
-import org.huangp.makeit.maker.SingleEntityMaker;
+import org.huangp.makeit.maker.BeanMaker;
 import org.huangp.makeit.scanner.ClassScanner;
 import org.huangp.makeit.scanner.EntityClass;
 import org.huangp.makeit.scanner.EntityClassScanner;
 import org.huangp.makeit.util.ClassUtil;
 import org.jodah.typetools.TypeResolver;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicates;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Queues;
 import com.google.common.reflect.TypeToken;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -29,7 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EntityPersistServiceImpl implements EntityPersistService
 {
-   private static final BeanValueHolder holder = BeanValueHolderImpl.HOLDER;
    private final ClassScanner scanner = new EntityClassScanner();
 
    @Override
@@ -39,13 +43,14 @@ public class EntityPersistServiceImpl implements EntityPersistService
       Queue<Object> queue = Queues.newLinkedBlockingQueue();
 
       // create all depending (ManyToOne or required OneToOne) entities
+      BeanValueHolder holder = new BeanValueHolderImpl();
       for (EntityClass entityClass : dependingEntities)
       {
-         Serializable entity = new SingleEntityMaker<Serializable>(entityClass.getType()).value();
+         Serializable entity = new BeanMaker<Serializable>(entityClass.getType(), holder).value();
          holder.putIfNotNull(TypeToken.of(entityClass.getType()), entity);
          queue.offer(entity);
       }
-      Serializable askingEntity = new SingleEntityMaker<Serializable>(askingClass).value();
+      Serializable askingEntity = new BeanMaker<Serializable>(askingClass, holder).value();
 
       holder.putIfNotNull(askingClass, askingEntity);
       queue.offer(askingEntity);
@@ -61,11 +66,11 @@ public class EntityPersistServiceImpl implements EntityPersistService
             Type returnType = method.getGenericReturnType();
             if (ClassUtil.isCollection(returnType))
             {
-               addManySideEntityIfExists(entity, method);
+               addManySideEntityIfExists(entity, method, holder);
             }
             if (ClassUtil.isMap(returnType))
             {
-               putManySideEntityIfExists(entity, method);
+               putManySideEntityIfExists(entity, method, holder);
             }
          }
       }
@@ -73,7 +78,7 @@ public class EntityPersistServiceImpl implements EntityPersistService
       // @see SingleEntityMaker
       // @see ReuseOrNullMaker
 
-      debugPrint(queue);
+      log.debug("result {}", new QueuePrinter(queue));
       return queue;
    }
 
@@ -88,7 +93,21 @@ public class EntityPersistServiceImpl implements EntityPersistService
       entityManager.getTransaction().commit();
    }
 
-   private static void addManySideEntityIfExists(Object entity, Method method)
+   @Override
+   public <T> T createAndPersist(EntityManager entityManager, Class<T> entityType)
+   {
+      Queue<Object> entities = getRequiredEntitiesFor(entityType);
+      persistInOrder(entityManager, entities);
+      return findEntity(entities, entityType).get();
+   }
+
+   public static <T> Optional<T> findEntity(Queue<Object> entityQueue, Class<T> typeToFind)
+   {
+      List<Object> entities = ImmutableList.copyOf(entityQueue);
+      return (Optional<T>) Iterables.tryFind(entities, Predicates.instanceOf(typeToFind));
+   }
+
+   private static void addManySideEntityIfExists(Object entity, Method method, BeanValueHolder holder)
    {
       Class<?> genericType = TypeResolver.resolveRawArgument(method.getGenericReturnType(), Collection.class);
       Optional<?> manySideExists = holder.tryGet(genericType);
@@ -103,7 +122,7 @@ public class EntityPersistServiceImpl implements EntityPersistService
       }
    }
 
-   private static void putManySideEntityIfExists(Object entity, Method method)
+   private static void putManySideEntityIfExists(Object entity, Method method, BeanValueHolder holder)
    {
       Class<?>[] genericTypes = TypeResolver.resolveRawArguments(method.getGenericReturnType(), Collection.class);
       Class<?> keyType = genericTypes[0];
@@ -146,12 +165,25 @@ public class EntityPersistServiceImpl implements EntityPersistService
       }
    }
 
-   private static void debugPrint(Queue<Object> queue)
+   @RequiredArgsConstructor
+   private static class QueuePrinter
    {
-      if (log.isDebugEnabled())
+      private static final String NEW_LINE = "\n";
+      private static final String THEN = "    ==> ";
+      private final Queue<Object> queue;
+
+      @Override
+      public String toString()
       {
-         String print = EntityUtil.prettyPrint(queue);
-         log.debug("result {}", print);
+         List<Object> entities = ImmutableList.copyOf(queue);
+         StringBuilder builder = new StringBuilder();
+         builder.append(NEW_LINE);
+         for (Object entity : entities)
+         {
+            builder.append(THEN).append(entity);
+            builder.append(NEW_LINE);
+         }
+         return builder.toString();
       }
    }
 

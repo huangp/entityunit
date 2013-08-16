@@ -45,6 +45,17 @@
       </dependency>
 
       <dependency>
+         <groupId>org.hamcrest</groupId>
+         <artifactId>hamcrest-core</artifactId>
+         <version>${hamcrest.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.hamcrest</groupId>
+         <artifactId>hamcrest-library</artifactId>
+         <version>${hamcrest.version}</version>
+      </dependency>
+
+      <dependency>
          <groupId>org.jodah</groupId>
          <artifactId>typetools</artifactId>
          <version>${typetools.version}</version>
@@ -72,6 +83,7 @@
          <groupId>ch.qos.logback</groupId>
          <artifactId>logback-classic</artifactId>
          <version>${logback.version}</version>
+         <scope>provided</scope>
       </dependency>
 
       <dependency>
@@ -97,18 +109,6 @@
          <groupId>junit</groupId>
          <artifactId>junit</artifactId>
          <version>${junit.version}</version>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.hamcrest</groupId>
-         <artifactId>hamcrest-core</artifactId>
-         <version>${hamcrest.version}</version>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.hamcrest</groupId>
-         <artifactId>hamcrest-library</artifactId>
-         <version>${hamcrest.version}</version>
          <scope>test</scope>
       </dependency>
 

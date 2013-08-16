@@ -3,20 +3,32 @@ package org.huangp.makeit.maker;
 import java.lang.reflect.Type;
 import java.util.Date;
 
+import org.huangp.makeit.holder.BeanValueHolder;
+import org.huangp.makeit.holder.BeanValueHolderImpl;
+import org.huangp.makeit.scanner.EntityClass;
 import org.huangp.makeit.util.ClassUtil;
 import org.huangp.makeit.util.Settable;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.reflect.TypeToken;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
  */
 @Slf4j
-public enum ScalarValueMakerFactory
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+class ScalarValueMakerFactory
 {
-   FACTORY;
+   private final BeanValueHolder holder;
+
+   static ScalarValueMakerFactory factory(BeanValueHolder holder)
+   {
+      return new ScalarValueMakerFactory(holder);
+   }
 
    public Maker from(Settable settable)
    {
@@ -67,11 +79,13 @@ public enum ScalarValueMakerFactory
       }
       if (ClassUtil.isEntity(type))
       {
-         log.info("{} is entity type. Use EntityMaker or EntityPersistService if you want to make a new one", token);
-         return new ReuseOrNullMaker(token.getRawType());
+         log.debug("{} is entity type", token);
+         // we don't want to make unnecessary entities
+         // @see org.huangp.makeit.entity.EntityPersistService
+         return new ReuseOrNullMaker(holder, token.getRawType());
       }
       log.debug("guessing this is a bean {}", token);
-      return new BeanMaker(token.getRawType());
+      return new BeanMaker(token.getRawType(), holder);
    }
 
 }
