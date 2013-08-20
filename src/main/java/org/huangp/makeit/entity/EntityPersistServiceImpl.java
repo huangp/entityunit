@@ -107,6 +107,21 @@ public class EntityPersistServiceImpl implements EntityPersistService
       return (Optional<T>) Iterables.tryFind(entities, Predicates.instanceOf(typeToFind));
    }
 
+   @Override
+   public void deleteAll(final EntityManager entityManager, Iterable<Class> entities)
+   {
+      entityManager.getTransaction().begin();
+      for (Class entity : entities)
+      {
+         // TODO need to consider @Entity(name)
+         String queryString = "delete from " + entity.getSimpleName();
+         int result = entityManager.createQuery(queryString).executeUpdate();
+         log.debug("execute [{}], affected row: {}", queryString, result);
+      }
+
+      entityManager.getTransaction().commit();
+   }
+
    private static void addManySideEntityIfExists(Object entity, Method method, BeanValueHolder holder)
    {
       Class<?> genericType = TypeResolver.resolveRawArgument(method.getGenericReturnType(), Collection.class);

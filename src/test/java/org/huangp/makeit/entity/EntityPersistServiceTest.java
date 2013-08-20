@@ -1,5 +1,6 @@
 package org.huangp.makeit.entity;
 
+import java.util.List;
 import java.util.Queue;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -16,6 +17,9 @@ import org.junit.Test;
 import org.zanata.model.HProject;
 import org.zanata.model.HProjectIteration;
 import org.zanata.model.HTextFlow;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 
 import lombok.extern.slf4j.Slf4j;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -88,11 +92,10 @@ public class EntityPersistServiceTest
    }
 
    @Test
-   public void canMakeUltimateObjectTree()
+   public void canMakeUltimateObjectTreeAndDeleteAll()
    {
       Queue<Object> queue = service.getRequiredEntitiesFor(HTextFlow.class);
 
-      EntityManager entityManager = emFactory.createEntityManager();
       service.persistInOrder(entityManager, queue);
 
       HTextFlow textFlow = entityManager.createQuery("from HTextFlow", HTextFlow.class).getSingleResult();
@@ -104,6 +107,18 @@ public class EntityPersistServiceTest
       assertThat(textFlow.getDocument().getProjectIteration().getId(), Matchers.notNullValue());
       assertThat(textFlow.getDocument().getProjectIteration().getProject(), Matchers.notNullValue());
       assertThat(textFlow.getDocument().getProjectIteration().getProject().getId(), Matchers.notNullValue());
+
+      List<Object> entities = Lists.reverse(Lists.newArrayList(queue));
+      List<Class> classes = Lists.transform(entities, new Function<Object, Class>()
+      {
+         @Override
+         public Class apply(Object input)
+         {
+            return input.getClass();
+         }
+      });
+      log.debug("about to delete: {}", classes);
+      service.deleteAll(entityManager, classes);
 
    }
 

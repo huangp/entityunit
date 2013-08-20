@@ -13,4 +13,6 @@ public interface EntityPersistService
    void persistInOrder(EntityManager entityManager, Queue<Object> queue);
 
    <T> T createAndPersist(EntityManager entityManager, Class<T> entityType);
+
+   void deleteAll(EntityManager entityManager, Iterable<Class> entities);
 }
