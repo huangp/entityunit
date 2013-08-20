@@ -8,6 +8,8 @@ import java.lang.reflect.Type;
  */
 public interface Settable extends AnnotatedElement
 {
+   String FULL_NAME_FORMAT = "%s - %s";
+
    String getSimpleName();
 
    Type getType();
@@ -16,5 +18,16 @@ public interface Settable extends AnnotatedElement
 
    String setterMethodName();
 
+   /**
+    * Use owner_class_name - simpleName as format.
+    * For settable field, property, i.e. org.example.Person - name.
+    * For settable constructor parameter, simple name is arg# where # is the index of argument,
+    * i.e. org.example.Locale - arg0
+    *
+    * @see Settable#FULL_NAME_FORMAT
+    * @see org.huangp.makeit.maker.PreferredValueMakersRegistry
+    *
+    * @return owner_class_name - simpleName
+    */
    String fullyQualifiedName();
 }

@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.huangp.makeit.util.Settable;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -33,6 +34,22 @@ public class PreferredValueMakersRegistry
       return this;
    }
 
+   public PreferredValueMakersRegistry addFieldOrPropertyMaker(Class ownerType, String propertyName, Maker<?> maker)
+   {
+      Preconditions.checkNotNull(ownerType);
+      Preconditions.checkNotNull(propertyName);
+      makers.put(Matchers.equalTo(String.format(Settable.FULL_NAME_FORMAT, ownerType.getName(), propertyName)), maker);
+      return this;
+   }
+
+   public PreferredValueMakersRegistry addConstructorParameterMaker(Class ownerType, int argIndex, Maker<?> maker)
+   {
+      Preconditions.checkNotNull(ownerType);
+      Preconditions.checkArgument(argIndex >= 0);
+      makers.put(Matchers.equalTo(String.format(Settable.FULL_NAME_FORMAT, ownerType.getName(), "arg" + argIndex)), maker);
+      return this;
+   }
+
    public Optional<Maker<?>> getMaker(Settable settable)
    {
       for (Matcher<?> matcher : makers.keySet())
@@ -43,5 +60,11 @@ public class PreferredValueMakersRegistry
          }
       }
       return Optional.absent();
+   }
+
+   public PreferredValueMakersRegistry clear()
+   {
+      makers.clear();
+      return this;
    }
 }

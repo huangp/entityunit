@@ -40,6 +40,7 @@ public class BeanMakerTest
    public void setUp()
    {
       holder = new BeanValueHolderImpl();
+      PreferredValueMakersRegistry.registry().clear();
    }
 
    @Test

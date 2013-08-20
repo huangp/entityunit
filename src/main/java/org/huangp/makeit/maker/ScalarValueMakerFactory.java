@@ -45,6 +45,10 @@ class ScalarValueMakerFactory
    protected Maker from(Type type, Optional<Settable> optionalAnnotatedElement)
    {
       TypeToken<?> token = TypeToken.of(type);
+      if (token.getRawType().isPrimitive())
+      {
+         return new PrimitiveMaker(token.getRawType());
+      }
       if (type == String.class)
       {
          return StringMaker.from(optionalAnnotatedElement);

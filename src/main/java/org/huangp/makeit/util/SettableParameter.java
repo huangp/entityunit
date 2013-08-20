@@ -20,7 +20,7 @@ public class SettableParameter implements Settable
    private SettableParameter(Class<?> ownerType, Parameter parameter)
    {
       simpleName = parameter.toString().replaceFirst("^.+\\s", "");
-      this.fullName = ownerType.getName() + "(" + simpleName + ")";
+      this.fullName = String.format(FULL_NAME_FORMAT, ownerType.getName(), simpleName);
       this.parameter = parameter;
    }
 

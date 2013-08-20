@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.zanata.common.ProjectType;
 import org.zanata.model.HCopyTransOptions;
+import org.zanata.model.HLocale;
 import org.zanata.model.StatusCount;
 import com.google.common.base.Optional;
 import com.google.common.reflect.Invokable;
@@ -84,7 +85,8 @@ public class ScalarValueMakerFactoryTest
    @Test
    public void canRegisterPreferredValueMakerAndUseIt() throws Exception
    {
-      PreferredValueMakersRegistry.registry().add(Matchers.equalTo("org.huangp.entities.Person#name"), new FixedValueMaker<String>("admin"));
+      PreferredValueMakersRegistry.registry()
+            .add(Matchers.equalTo("org.huangp.entities.Person - name"), new FixedValueMaker<String>("admin"));
       Maker<String> maker = factory.from(SettableProperty.from(Person.class, Person.class.getMethod("getName")));
 
       String name = maker.value();
@@ -94,7 +96,8 @@ public class ScalarValueMakerFactoryTest
    @Test
    public void preferredValueMakerWorksOnConstructor() throws NoSuchMethodException
    {
-      PreferredValueMakersRegistry.registry().add(Matchers.containsString("TestClass(arg0)"), new FixedValueMaker<String>("constructor"));
+      PreferredValueMakersRegistry.registry()
+            .add(Matchers.containsString("TestClass - arg0"), new FixedValueMaker<String>("constructor"));
       Settable settableParam = SettableParameter.from(TestClass.class, Invokable.from(TestClass.class.getConstructor(String.class)).getParameters().get(0));
 
       log.debug("settable parameter: {}", settableParam.fullyQualifiedName());
@@ -102,6 +105,20 @@ public class ScalarValueMakerFactoryTest
 
       String name = maker.value();
       assertThat(name, Matchers.equalTo("constructor"));
+   }
+
+   @Test
+   public void primitiveTypeCanBeSet() throws NoSuchMethodException
+   {
+
+      PreferredValueMakersRegistry.registry().clear()
+            .add(Matchers.containsString("enabledByDefault"), new FixedValueMaker<Boolean>(true));
+
+      Maker<Boolean> enableByDefaultMaker = factory.from(SettableProperty.from(HLocale.class, HLocale.class.getMethod("isEnabledByDefault")));
+      Maker<Boolean> activeMaker = factory.from(SettableProperty.from(HLocale.class, HLocale.class.getMethod("isActive")));
+
+      assertThat(enableByDefaultMaker.value(), Matchers.is(true));
+      assertThat(activeMaker.value(), Matchers.is(false));
    }
 
    @RequiredArgsConstructor

@@ -30,7 +30,7 @@ public class SettableField implements Settable
          getter = "get" + capitalized;
       }
       setter = "set" + capitalized;
-      fullName = String.format("%s#%s", ownerType.getName(), field.getName());
+      fullName = String.format(FULL_NAME_FORMAT, ownerType.getName(), field.getName());
    }
 
    public static Settable from(Class ownerType, Field field)

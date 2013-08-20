@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FixedValueMaker<V> implements Maker<V>
 {
+   public static final FixedValueMaker<Boolean> ALWAYS_TRUE_MAKER = new FixedValueMaker<Boolean>(true);
+
    private final V fixedValue;
 
    @Override

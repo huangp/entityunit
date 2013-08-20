@@ -110,6 +110,7 @@ public class EntityPersistServiceImpl implements EntityPersistService
    @Override
    public void deleteAll(final EntityManager entityManager, Iterable<Class> entities)
    {
+      // TODO ManyToMany table can not be deleted (see HAccountRole.HAccountRoleGroups)
       entityManager.getTransaction().begin();
       for (Class entity : entities)
       {

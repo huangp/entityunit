@@ -108,7 +108,7 @@ public class BeanMaker<T> implements Maker<T>
       Iterable<Settable> elements = EntityClassImpl.from(type).getElements();
 
       Predicate<Settable> settablePredicate = Predicates.not(
-            Predicates.or(new SameTypePredicate(result.getClass()), new DoNotNeedValuePredicate<T>(result)));
+            Predicates.or(new SameTypePredicate(result.getClass()), new HasDefaultValuePredicate<T>(result)));
 
       Iterable<Settable> fieldsToSet = Iterables.filter(elements, settablePredicate);
       for (Settable settable : fieldsToSet)
@@ -154,7 +154,7 @@ public class BeanMaker<T> implements Maker<T>
    }
 
    @RequiredArgsConstructor
-   private static class DoNotNeedValuePredicate<T> implements Predicate<Settable>
+   private static class HasDefaultValuePredicate<T> implements Predicate<Settable>
    {
       private final T object;
 
@@ -164,7 +164,7 @@ public class BeanMaker<T> implements Maker<T>
          try
          {
             Method getter = object.getClass().getMethod(input.getterMethodName());
-            return getter.getReturnType().isPrimitive() || getter.invoke(object) != null;
+            return !getter.getReturnType().isPrimitive() && getter.invoke(object) != null;
          }
          catch (IllegalAccessException e)
          {

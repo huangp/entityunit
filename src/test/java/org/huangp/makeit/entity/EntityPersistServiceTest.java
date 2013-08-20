@@ -10,10 +10,14 @@ import org.hamcrest.Matchers;
 import org.huangp.entities.Category;
 import org.huangp.entities.LineItem;
 import org.huangp.entities.Person;
+import org.huangp.makeit.maker.FixedValueMaker;
+import org.huangp.makeit.maker.PreferredValueMakersRegistry;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.zanata.common.LocaleId;
+import org.zanata.model.HLocale;
 import org.zanata.model.HProject;
 import org.zanata.model.HProjectIteration;
 import org.zanata.model.HTextFlow;
@@ -89,6 +93,22 @@ public class EntityPersistServiceTest
       log.info("result {}, {}", numOfIteration, numOfProject);
       assertThat(project.getId(), Matchers.notNullValue());
       assertThat(project.getProjectIterations().get(0).getId(), Matchers.notNullValue());
+   }
+
+   @Test
+   public void canSetPreferredValue() {
+      PreferredValueMakersRegistry.registry()
+            .addConstructorParameterMaker(HLocale.class, 0, new FixedValueMaker<LocaleId>(LocaleId.DE))
+            .addFieldOrPropertyMaker(HLocale.class, "enabledByDefault", FixedValueMaker.ALWAYS_TRUE_MAKER)
+            .addFieldOrPropertyMaker(HLocale.class, "active", FixedValueMaker.ALWAYS_TRUE_MAKER);
+
+      Queue<Object> queue = service.getRequiredEntitiesFor(HLocale.class);
+
+      HLocale locale = (HLocale) queue.poll();
+
+      assertThat(locale.getLocaleId(), Matchers.equalTo(LocaleId.DE)); //override default value
+      assertThat(locale.isActive(), Matchers.equalTo(true)); //override default value
+      assertThat(locale.isEnabledByDefault(), Matchers.equalTo(true)); //override default value
    }
 
    @Test

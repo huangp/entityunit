@@ -30,7 +30,7 @@ public class SettableProperty implements Settable
       String lower = stripped.substring(0, 1).toLowerCase();
       String rest = stripped.substring(1);
       simpleName = lower + rest;
-      fullName = String.format("%s#%s", ownerType.getName(), simpleName);
+      fullName = String.format(FULL_NAME_FORMAT, ownerType.getName(), simpleName);
    }
    public static Settable from(Class ownerType, Method method)
    {
