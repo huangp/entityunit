@@ -3,6 +3,8 @@ package com.github.huangp.makeit.entity;
 import java.util.Queue;
 import javax.persistence.EntityManager;
 
+import com.github.huangp.makeit.holder.BeanValueHolder;
+
 /**
  * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
  */
@@ -14,7 +16,7 @@ public interface EntityPersistService
 
    void deleteAll(EntityManager entityManager, Iterable<Class> entities);
 
-   MakeContext getCurrentContext();
+   BeanValueHolder exportImmutableCopyOfBeans();
 
    public interface Callback
    {

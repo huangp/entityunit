@@ -29,11 +29,18 @@ import lombok.extern.slf4j.Slf4j;
  * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
  */
 @Slf4j
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 class EntityPersistServiceImpl implements EntityPersistService
 {
    private final EntityClassScanner scanner;
    private final MakeContext context;
+   private final BeanValueHolder valueHolder;
+
+   EntityPersistServiceImpl(EntityClassScanner scanner, MakeContext context)
+   {
+      this.scanner = scanner;
+      this.context = context;
+      valueHolder = context.getBeanValueHolder();
+   }
 
    @Override
    public <T> T makeAndPersist(EntityManager entityManager, Class<T> entityType)
@@ -62,7 +69,7 @@ class EntityPersistServiceImpl implements EntityPersistService
       // now work backwards to fill in the one to many side
       for (EntityClass entityNode : dependingEntities)
       {
-         Object entity = context.getBeanValueHolder().tryGet(entityNode.getType()).get();
+         Object entity = valueHolder.tryGet(entityNode.getType()).get();
 
          Iterable<Method> getterMethods = entityNode.getContainingEntitiesGetterMethods();
          for (Method method : getterMethods)
@@ -70,11 +77,11 @@ class EntityPersistServiceImpl implements EntityPersistService
             Type returnType = method.getGenericReturnType();
             if (ClassUtil.isCollection(returnType))
             {
-               addManySideEntityIfExists(entity, method, context.getBeanValueHolder());
+               addManySideEntityIfExists(entity, method, valueHolder);
             }
             if (ClassUtil.isMap(returnType))
             {
-               putManySideEntityIfExists(entity, method, context.getBeanValueHolder());
+               putManySideEntityIfExists(entity, method, valueHolder);
             }
          }
       }
@@ -88,7 +95,7 @@ class EntityPersistServiceImpl implements EntityPersistService
 
    private void reuseOrMakeNew(Queue<Object> queue, EntityClass entityClass)
    {
-      Optional existing = context.getBeanValueHolder().tryGet(entityClass.getType());
+      Optional existing = valueHolder.tryGet(entityClass.getType());
       if (existing.isPresent())
       {
          queue.offer(existing.get());
@@ -140,9 +147,9 @@ class EntityPersistServiceImpl implements EntityPersistService
    }
 
    @Override
-   public MakeContext getCurrentContext()
+   public BeanValueHolder exportImmutableCopyOfBeans()
    {
-      return context;
+      return valueHolder.immutableCopy();
    }
 
    private static void deleteTable(EntityManager entityManager, String table)

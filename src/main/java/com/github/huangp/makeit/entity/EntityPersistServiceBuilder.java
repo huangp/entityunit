@@ -1,8 +1,13 @@
 package com.github.huangp.makeit.entity;
 
+import java.io.Serializable;
+import java.util.List;
+
 import com.github.huangp.makeit.holder.BeanValueHolder;
 import com.github.huangp.makeit.maker.Maker;
 import com.github.huangp.makeit.maker.PreferredValueMakersRegistry;
+import com.google.common.collect.ImmutableList;
+import com.google.common.reflect.TypeToken;
 
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,13 +42,24 @@ public class EntityPersistServiceBuilder
       return this;
    }
 
-   public EntityPersistServiceBuilder addFieldMaker(Class<?> ownerType, String fieldName, Maker<?> maker)
+   public EntityPersistServiceBuilder reuseEntities(Object first, Object... rest)
+   {
+      List<Object> objects = ImmutableList.builder().add(first).add(rest).build();
+      for (Object object : objects)
+      {
+         Class aClass = object.getClass();
+         valueHolder.putIfNotNull(aClass, object);
+      }
+      return this;
+   }
+
+   public EntityPersistServiceBuilder addFieldOrPropertyMaker(Class<?> ownerType, String fieldName, Maker<?> maker)
    {
       registry.addFieldOrPropertyMaker(ownerType, fieldName, maker);
       return this;
    }
 
-   public EntityPersistServiceBuilder addConstructorMaker(Class<?> ownerType, int argIndex, Maker<?> maker)
+   public EntityPersistServiceBuilder addConstructorParameterMaker(Class<?> ownerType, int argIndex, Maker<?> maker)
    {
       registry.addConstructorParameterMaker(ownerType, argIndex, maker);
       return this;

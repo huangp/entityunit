@@ -4,6 +4,8 @@ import java.util.Map;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.reflect.ImmutableTypeToInstanceMap;
 import com.google.common.reflect.MutableTypeToInstanceMap;
 import com.google.common.reflect.TypeToInstanceMap;
 import com.google.common.reflect.TypeToken;
@@ -51,10 +53,22 @@ public class BeanValueHolder
       for (Map.Entry<TypeToken<?>, Object> entry : other.map.entrySet())
       {
          TypeToken key = entry.getKey();
-         Object value = entry.getValue();
-         this.map.putInstance(key, value);
+         this.map.putInstance(key, entry.getValue());
       }
       return this;
+   }
+
+   public BeanValueHolder immutableCopy()
+   {
+      ImmutableTypeToInstanceMap.Builder<Object> builder = ImmutableTypeToInstanceMap.builder();
+      for (Map.Entry<TypeToken<?>, Object> entry : map.entrySet())
+      {
+         TypeToken key = entry.getKey();
+         builder.put(key, entry.getValue());
+      }
+      BeanValueHolder result = new BeanValueHolder();
+      result.map = builder.build();
+      return result;
    }
 
    @Override

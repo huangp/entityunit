@@ -19,9 +19,7 @@ import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.zanata.common.LocaleId;
-import org.zanata.model.HAccount;
 import org.zanata.model.HLocale;
-import org.zanata.model.HPerson;
 import org.zanata.model.HProject;
 import org.zanata.model.HProjectIteration;
 import org.zanata.model.HTextFlow;
@@ -105,9 +103,9 @@ public class EntityPersistServiceTest
    public void canSetPreferredValue()
    {
       service = EntityPersistServiceBuilder.builder()
-            .addConstructorMaker(HLocale.class, 0, new FixedValueMaker<LocaleId>(LocaleId.DE))
-            .addFieldMaker(HLocale.class, "enabledByDefault", FixedValueMaker.ALWAYS_TRUE_MAKER)
-            .addFieldMaker(HLocale.class, "active", FixedValueMaker.ALWAYS_TRUE_MAKER)
+            .addConstructorParameterMaker(HLocale.class, 0, new FixedValueMaker<LocaleId>(LocaleId.DE))
+            .addFieldOrPropertyMaker(HLocale.class, "enabledByDefault", FixedValueMaker.ALWAYS_TRUE_MAKER)
+            .addFieldOrPropertyMaker(HLocale.class, "active", FixedValueMaker.ALWAYS_TRUE_MAKER)
       .build();
 
       service.makeAndPersist(mockEntityManager, HLocale.class, copyCallback);
@@ -169,7 +167,7 @@ public class EntityPersistServiceTest
    public void willNotInheritContext()
    {
       service = EntityPersistServiceBuilder.builder()
-            .addConstructorMaker(HLocale.class, 0, new FixedValueMaker<LocaleId>(LocaleId.DE))
+            .addConstructorParameterMaker(HLocale.class, 0, new FixedValueMaker<LocaleId>(LocaleId.DE))
             .build();
 
       service.makeAndPersist(mockEntityManager, HLocale.class, copyCallback);
@@ -178,37 +176,14 @@ public class EntityPersistServiceTest
 
       // re-create service will override previous set up
       service = EntityPersistServiceBuilder.builder()
-            .addConstructorMaker(HLocale.class, 0, new FixedValueMaker<LocaleId>(LocaleId.FR))
+            .addConstructorParameterMaker(HLocale.class, 0, new FixedValueMaker<LocaleId>(LocaleId.FR))
             .build();
 
       service.makeAndPersist(mockEntityManager, HLocale.class, copyCallback);
       assertThat(copyCallback.<HLocale>getFromCopy(0).getLocaleId(), Matchers.equalTo(LocaleId.FR));
    }
 
-   @Test
-   public void canReuseMakeContext() {
-      service = EntityPersistServiceBuilder.builder()
-            .addConstructorMaker(HLocale.class, 0, new FixedValueMaker<LocaleId>(LocaleId.DE))
-            .includeOptionalOneToOne()
-            .build();
 
-      // make something
-      HLocale hLocale = service.makeAndPersist(mockEntityManager, HLocale.class, copyCallback);
-      assertThat(hLocale.getLocaleId(), Matchers.equalTo(LocaleId.DE));
-      MakeContext currentContext = service.getCurrentContext();
-
-      service = EntityPersistServiceBuilder.builder()
-            .reuseObjects(currentContext.getBeanValueHolder())
-            .reusePreferredValueMakers(currentContext.getPreferredValueMakers())
-            .build();
-
-      // make another
-      HTextFlow hTextFlow = service.makeAndPersist(mockEntityManager, HTextFlow.class, copyCallback);
-
-      assertThat(hTextFlow.getLocale(), Matchers.equalTo(LocaleId.DE));
-      assertThat(hTextFlow.getDocument().getLocale(), Matchers.sameInstance(hLocale));
-
-   }
 
    static class CopyCallback implements EntityPersistService.Callback
    {

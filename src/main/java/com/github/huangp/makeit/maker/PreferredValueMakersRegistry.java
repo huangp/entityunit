@@ -10,6 +10,7 @@ import com.github.huangp.makeit.util.Settable;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 
 import lombok.NoArgsConstructor;
 
@@ -68,6 +69,13 @@ public class PreferredValueMakersRegistry
    {
       makers.clear();
       return this;
+   }
+
+   public PreferredValueMakersRegistry immutableCopy()
+   {
+      PreferredValueMakersRegistry result = new PreferredValueMakersRegistry();
+      result.makers = ImmutableMap.copyOf(this.makers);
+      return result;
    }
 
    @Override
