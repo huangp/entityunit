@@ -7,6 +7,8 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -21,6 +23,9 @@ import com.github.huangp.makeit.util.SettableProperty;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.base.Throwables;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -40,11 +45,13 @@ import static com.github.huangp.makeit.entity.EntityClass.HasAnnotationPredicate
 @ToString(of = "type")
 public class EntityClass
 {
+   private static Cache<CacheKey, EntityClass> cache = CacheBuilder.newBuilder()
+         .maximumSize(100)
+         .build();
+
    private Predicate<AnnotatedElement> oneToOnePredicate;
    @Getter
    private final Class type;
-   @Getter
-   private boolean scanned;
    @Getter
    private final Iterable<Settable> elements;
 
@@ -83,7 +90,27 @@ public class EntityClass
     * @param scanOption whether consider optional OneToOne as required
     * @return a wrapper for the entity class
     */
-   public static EntityClass from(final Class clazz, ScanOption scanOption)
+   public static EntityClass from(final Class clazz, final ScanOption scanOption)
+   {
+
+      try
+      {
+         return cache.get(CacheKey.of(clazz, scanOption), new Callable<EntityClass>()
+         {
+            @Override
+            public EntityClass call() throws Exception
+            {
+               return createEntityClass(clazz, scanOption);
+            }
+         });
+      }
+      catch (ExecutionException e)
+      {
+         throw Throwables.propagate(e);
+      }
+   }
+
+   private static EntityClass createEntityClass(Class clazz, ScanOption scanOption)
    {
       List<Field> allInstanceFields = ClassUtil.getAllInstanceFields(clazz);
       List<Settable> settableFields = Lists.transform(allInstanceFields, new FieldToSettableFunction(clazz));
@@ -108,12 +135,6 @@ public class EntityClass
          List<Settable> settableMethods = newArrayList(Iterables.transform(methods, new MethodToSettableFunction(clazz)));
          return new EntityClass(clazz, settableMethods, scanOption);
       }
-   }
-
-   public EntityClass markScanned()
-   {
-      scanned = true;
-      return this;
    }
 
    public Iterable<Class<?>> getDependingEntityTypes()

@@ -150,7 +150,7 @@ public final class ClassUtil
       return TypeToken.of(type).getRawType().isAnnotationPresent(Entity.class);
    }
 
-   public static <T> T findEntity(Collection<Object> entityQueue, Class<T> typeToFind)
+   public static <T> T findEntity(Iterable<Object> entityQueue, Class<T> typeToFind)
    {
       List<Object> entities = ImmutableList.copyOf(entityQueue);
       return (T) Iterables.find(entities, Predicates.instanceOf(typeToFind));

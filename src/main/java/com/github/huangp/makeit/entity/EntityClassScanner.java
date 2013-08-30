@@ -6,6 +6,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import javax.persistence.Entity;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
@@ -24,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class EntityClassScanner
 {
-   private static Cache<Class, Iterable<EntityClass>> cache = CacheBuilder.newBuilder()
+   private static Cache<CacheKey, Iterable<EntityClass>> cache = CacheBuilder.newBuilder()
          .maximumSize(100)
          .build();
    private final ScanOption scanOption;
@@ -32,7 +33,6 @@ class EntityClassScanner
    public EntityClassScanner(ScanOption scanOption)
    {
       this.scanOption = scanOption;
-      cache.invalidateAll();
    }
 
    public EntityClassScanner()
@@ -44,7 +44,7 @@ class EntityClassScanner
    {
       try
       {
-         return cache.get(clazz, new Callable<Iterable<EntityClass>>()
+         return cache.get(CacheKey.of(clazz, scanOption), new Callable<Iterable<EntityClass>>()
          {
             @Override
             public Iterable<EntityClass> call() throws Exception
@@ -63,7 +63,7 @@ class EntityClassScanner
    {
       List<EntityClass> current = Lists.newArrayList();
       recursiveScan(clazz, current);
-      return ImmutableList.copyOf(Lists.reverse(current));
+      return ImmutableList.copyOf(current);
    }
 
    private void recursiveScan(final Class clazz, List<EntityClass> current)
@@ -75,7 +75,7 @@ class EntityClassScanner
       Preconditions.checkState(entityAnnotation != null, "This scans only entity class");
 
       EntityClass startNode = getOrCreateNode(current, clazz);
-      if (startNode.isScanned())
+      if (current.contains(startNode))
       {
          log.trace("{} has been scanned", startNode);
          return;
@@ -84,18 +84,22 @@ class EntityClassScanner
 
       for (Class<?> dependingType : dependingTypes)
       {
-         EntityClass dependingNode = getOrCreateNode(current, dependingType);
-
-         if (!clazz.equals(dependingNode.getType()))
+         if (!dependingType.equals(clazz))
          {
-            current.add(dependingNode);
-         }
-         if (shouldScanDependingNode(dependingNode, clazz, current))
-         {
-            recursiveScan(dependingNode.getType(), current);
+            recursiveScan(dependingType, current);
          }
       }
-      startNode.markScanned();
+      Iterable<EntityClass> dependents = Iterables.transform(dependingTypes, new Function<Class<?>, EntityClass>()
+      {
+         @Override
+         public EntityClass apply(Class<?> input)
+         {
+            return EntityClass.from(input, scanOption);
+         }
+      });
+
+      Iterables.addAll(current, dependents);
+      current.remove(startNode); // remove itself
    }
 
    private EntityClass getOrCreateNode(List<EntityClass> current, final Class<?> entityType)
@@ -109,11 +113,6 @@ class EntityClassScanner
          }
       });
       return dependingOptional.isPresent() ? dependingOptional.get() : EntityClass.from(entityType, scanOption);
-   }
-
-   private static boolean shouldScanDependingNode(EntityClass dependingNode, Class clazz, List<EntityClass> current)
-   {
-      return !dependingNode.isScanned() && !dependingNode.getType().equals(clazz);
    }
 
 

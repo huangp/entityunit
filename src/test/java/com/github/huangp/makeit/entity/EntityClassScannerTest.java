@@ -43,7 +43,7 @@ public class EntityClassScannerTest
 
       List<EntityClass> result = Lists.newArrayList(dependents);
 
-      log.info("result: {}", result);
+      printNice(result);
       assertThat(result, Matchers.hasSize(10));
       List<Class> types = Lists.transform(result, new Function<EntityClass, Class>()
       {
@@ -54,17 +54,28 @@ public class EntityClassScannerTest
          }
       });
       assertThat(types, Matchers.<Class> contains(
-            HPerson.class,
             HProject.class,
+            HPerson.class,
+            HLocale.class,
             HProjectIteration.class,
-            HLocale.class,
-            HPerson.class,
             HDocument.class,
-            HTextFlow.class,
             HPerson.class,
             HLocale.class,
+            HPerson.class,
+            HTextFlow.class,
             HPerson.class));
    }
+
+   private void printNice(List<EntityClass> result)
+   {
+      log.info("============ result ==============");
+      for (EntityClass entityClass : result)
+      {
+         log.info("{}", entityClass);
+      }
+      log.info("============ result ==============");
+   }
+
 
    @Test
    public void canScanOptionalOneToOne()
@@ -75,7 +86,7 @@ public class EntityClassScannerTest
 
       List<EntityClass> result = Lists.newArrayList(dependents);
 
-      EntityClassScannerTest.log.info("result: {}", result);
+      printNice(result);
       assertThat(result, Matchers.hasSize(1));
       assertThat(result.get(0).getType(), Matchers.<Class>equalTo(HAccount.class));
    }

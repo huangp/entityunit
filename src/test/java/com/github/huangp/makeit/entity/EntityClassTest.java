@@ -3,10 +3,10 @@ package com.github.huangp.makeit.entity;
 import java.lang.reflect.Method;
 
 import org.hamcrest.Matchers;
-import com.github.huangp.makeit.util.Settable;
 import org.junit.Test;
 import org.zanata.model.HProjectIteration;
 import org.zanata.model.HTextFlowTargetReviewComment;
+import com.github.huangp.makeit.util.Settable;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 

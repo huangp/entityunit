@@ -157,8 +157,8 @@ public class EntityPersistServiceTest
       List<Object> result = copyCallback.getCopy();
       assertThat(result, Matchers.iterableWithSize(3));
 
-      Person person = copyCallback.getFromCopy(0);
-      Category category = copyCallback.getFromCopy(1);
+      Category category = copyCallback.getFromCopy(0);
+      Person person = copyCallback.getFromCopy(1);
       LineItem lineItem = copyCallback.getFromCopy(2);
 
       assertThat(lineItem.getCategory(), Matchers.sameInstance(category));
@@ -205,7 +205,7 @@ public class EntityPersistServiceTest
       private List<Object> copy;
 
       @Override
-      public Queue<Object> beforePersist(Queue<Object> toBePersisted)
+      public Iterable<Object> beforePersist(Iterable<Object> toBePersisted)
       {
          copy = ImmutableList.copyOf(toBePersisted);
          return toBePersisted;

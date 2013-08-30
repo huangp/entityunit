@@ -46,12 +46,12 @@ class EntityPersistServiceImpl implements EntityPersistService
    @Override
    public <T> T makeAndPersist(EntityManager entityManager, Class<T> entityType)
    {
-      Queue<Object> entities = getRequiredEntitiesFor(entityType);
+      Iterable<Object> entities = getRequiredEntitiesFor(entityType);
       persistInOrder(entityManager, entities);
       return ClassUtil.findEntity(entities, entityType);
    }
 
-   private Queue<Object> getRequiredEntitiesFor(Class askingClass)
+   private Iterable<Object> getRequiredEntitiesFor(Class askingClass)
    {
       Iterable<EntityClass> dependingEntities = scanner.scan(askingClass);
       Queue<Object> queue = Queues.newLinkedBlockingQueue();
@@ -122,8 +122,8 @@ class EntityPersistServiceImpl implements EntityPersistService
    @Override
    public <T> T makeAndPersist(EntityManager entityManager, Class<T> entityType, Callback callback)
    {
-      Queue<Object> allObjects = getRequiredEntitiesFor(entityType);
-      Queue<Object> toPersist = callback.beforePersist(allObjects);
+      Iterable<Object> allObjects = getRequiredEntitiesFor(entityType);
+      Iterable<Object> toPersist = callback.beforePersist(allObjects);
       persistInOrder(entityManager, toPersist);
       return ClassUtil.findEntity(toPersist, entityType);
    }
