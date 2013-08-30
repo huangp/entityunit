@@ -52,6 +52,7 @@ public class EntityClass
    private transient Iterable<Method> associationGetters;
    private transient List<Method> allDeclaredMethods;
    private transient Iterable<String> manyToManyTables;
+   private transient Iterable<Method> manyToManyGetters;
 
    private EntityClass(Class type, Iterable<Settable> elements, ScanOption scanOption)
    {
@@ -79,7 +80,7 @@ public class EntityClass
     * Factory method.
     *
     * @param clazz the class to wrap
-    * @param scanOption
+    * @param scanOption whether consider optional OneToOne as required
     * @return a wrapper for the entity class
     */
    public static EntityClass from(final Class clazz, ScanOption scanOption)
@@ -153,6 +154,17 @@ public class EntityClass
 
       }
       return manyToManyTables;
+   }
+
+   public Iterable<Method> getManyToManyMethods()
+   {
+      if (manyToManyGetters == null)
+      {
+         Iterable<Settable> manyToMany = Iterables.filter(elements, Predicates.and(has(ManyToMany.class), has(JoinTable.class)));
+         List<String> methodNames = newArrayList(Iterables.transform(manyToMany, SettableGetterMethodFunction.FUNCTION));
+         manyToManyGetters = filter(allDeclaredMethods, new MethodNameMatchPredicate(methodNames));
+      }
+      return manyToManyGetters;
    }
 
    private static enum NameComparator implements Comparator<Settable>

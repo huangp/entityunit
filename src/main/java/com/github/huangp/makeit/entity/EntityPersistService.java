@@ -14,6 +14,8 @@ public interface EntityPersistService
 
    <T> T makeAndPersist(EntityManager entityManager, Class<T> entityType, Callback callback);
 
+   void wireManyToMany(EntityManager entityManager, Object a, Object b);
+
    void deleteAll(EntityManager entityManager, Iterable<Class> entities);
 
    BeanValueHolder exportImmutableCopyOfBeans();

@@ -1,16 +1,18 @@
 package com.github.huangp.makeit.entity;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import java.util.List;
 import java.util.Queue;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+
 import org.hamcrest.Matchers;
-import com.github.huangp.entities.Category;
-import com.github.huangp.entities.LineItem;
-import com.github.huangp.entities.Person;
-import com.github.huangp.makeit.maker.FixedValueMaker;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -19,18 +21,20 @@ import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.zanata.common.LocaleId;
+import org.zanata.model.HAccount;
+import org.zanata.model.HAccountRole;
 import org.zanata.model.HLocale;
 import org.zanata.model.HProject;
 import org.zanata.model.HProjectIteration;
 import org.zanata.model.HTextFlow;
 
+import com.github.huangp.entities.Category;
+import com.github.huangp.entities.LineItem;
+import com.github.huangp.entities.Person;
+import com.github.huangp.makeit.maker.FixedValueMaker;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
@@ -96,7 +100,7 @@ public class EntityPersistServiceTest
       assertThat(hProjectIteration.getId(), Matchers.notNullValue());
       assertThat(hProjectIteration.getProject().getId(), Matchers.notNullValue());
 
-      service.deleteAll(entityManager, Lists.<Class>newArrayList(HProjectIteration.class, HProject.class));
+      service.deleteAll(entityManager, Lists.<Class> newArrayList(HProjectIteration.class, HProject.class));
    }
 
    @Test
@@ -106,7 +110,7 @@ public class EntityPersistServiceTest
             .addConstructorParameterMaker(HLocale.class, 0, new FixedValueMaker<LocaleId>(LocaleId.DE))
             .addFieldOrPropertyMaker(HLocale.class, "enabledByDefault", FixedValueMaker.ALWAYS_TRUE_MAKER)
             .addFieldOrPropertyMaker(HLocale.class, "active", FixedValueMaker.ALWAYS_TRUE_MAKER)
-      .build();
+            .build();
 
       service.makeAndPersist(mockEntityManager, HLocale.class, copyCallback);
       HLocale locale = copyCallback.getFromCopy(0);
@@ -131,7 +135,6 @@ public class EntityPersistServiceTest
       assertThat(textFlow.getDocument().getProjectIteration().getId(), Matchers.notNullValue());
       assertThat(textFlow.getDocument().getProjectIteration().getProject(), Matchers.notNullValue());
       assertThat(textFlow.getDocument().getProjectIteration().getProject().getId(), Matchers.notNullValue());
-
 
       List<Object> entities = Lists.reverse(Lists.newArrayList(copyCallback.getCopy()));
       List<Class> classes = Lists.transform(entities, new Function<Object, Class>()
@@ -172,7 +175,7 @@ public class EntityPersistServiceTest
 
       service.makeAndPersist(mockEntityManager, HLocale.class, copyCallback);
 
-      assertThat(copyCallback.<HLocale>getFromCopy(0).getLocaleId(), Matchers.equalTo(LocaleId.DE));
+      assertThat(copyCallback.<HLocale> getFromCopy(0).getLocaleId(), Matchers.equalTo(LocaleId.DE));
 
       // re-create service will override previous set up
       service = EntityPersistServiceBuilder.builder()
@@ -180,10 +183,21 @@ public class EntityPersistServiceTest
             .build();
 
       service.makeAndPersist(mockEntityManager, HLocale.class, copyCallback);
-      assertThat(copyCallback.<HLocale>getFromCopy(0).getLocaleId(), Matchers.equalTo(LocaleId.FR));
+      assertThat(copyCallback.<HLocale> getFromCopy(0).getLocaleId(), Matchers.equalTo(LocaleId.FR));
    }
 
+   @Test
+   public void canWireManyToManyRelationship()
+   {
+      service = EntityPersistServiceBuilder.builder().build();
 
+      HAccount hAccount = service.makeAndPersist(mockEntityManager, HAccount.class);
+      HAccountRole hAccountRole = service.makeAndPersist(mockEntityManager, HAccountRole.class);
+
+      service.wireManyToMany(mockEntityManager, hAccount, hAccountRole);
+
+      assertThat(hAccount.getRoles(), Matchers.contains(hAccountRole));
+   }
 
    static class CopyCallback implements EntityPersistService.Callback
    {

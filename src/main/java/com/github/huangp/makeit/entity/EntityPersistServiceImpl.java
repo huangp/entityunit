@@ -13,15 +13,16 @@ import javax.persistence.Query;
 import org.jodah.typetools.TypeResolver;
 import com.github.huangp.makeit.holder.BeanValueHolder;
 import com.github.huangp.makeit.maker.BeanMaker;
-import com.github.huangp.makeit.maker.PreferredValueMakersRegistry;
 import com.github.huangp.makeit.util.ClassUtil;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import com.google.common.reflect.TypeToken;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -108,7 +109,7 @@ class EntityPersistServiceImpl implements EntityPersistService
       }
    }
 
-   private static void persistInOrder(EntityManager entityManager, Queue<Object> queue)
+   private static void persistInOrder(EntityManager entityManager, Iterable<Object> queue)
    {
       entityManager.getTransaction().begin();
       for (Object entity : queue)
@@ -125,6 +126,39 @@ class EntityPersistServiceImpl implements EntityPersistService
       Queue<Object> toPersist = callback.beforePersist(allObjects);
       persistInOrder(entityManager, toPersist);
       return ClassUtil.findEntity(toPersist, entityType);
+   }
+
+   @Override
+   public void wireManyToMany(EntityManager entityManager, Object one, Object other)
+   {
+      addManyToMany(one, other);
+      addManyToMany(other, one);
+      persistInOrder(entityManager, Lists.newArrayList(one, other));
+   }
+
+   private static void addManyToMany(Object manyOwner, final Object manyElement)
+   {
+      EntityClass oneEntityClass = EntityClass.from(manyOwner.getClass());
+
+      Iterable<Method> manyToManyGetters = oneEntityClass.getManyToManyMethods();
+
+      Optional<Method> methodFound = Iterables.tryFind(manyToManyGetters, new Predicate<Method>()
+      {
+         @Override
+         public boolean apply(Method input)
+         {
+            Class<?> genericType = TypeResolver.resolveRawArgument(input.getGenericReturnType(), Collection.class);
+            return genericType.isInstance(manyElement);
+         }
+      });
+      if (methodFound.isPresent())
+      {
+         Collection collection = invokeGetter(manyOwner, methodFound.get(), Collection.class);
+         if (collection != null)
+         {
+            collection.add(manyElement);
+         }
+      }
    }
 
    @Override
