@@ -22,6 +22,6 @@ public interface EntityPersistService
 
    public interface Callback
    {
-      Iterable<Object> beforePersist(Iterable<Object> toBePersisted);
+      Iterable<Object> beforePersist(EntityManager entityManager, Iterable<Object> toBePersisted);
    }
 }

@@ -3,7 +3,6 @@ package com.github.huangp.makeit.entity;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.List;
-import java.util.Queue;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -24,6 +23,7 @@ import org.zanata.common.LocaleId;
 import org.zanata.model.HAccount;
 import org.zanata.model.HAccountRole;
 import org.zanata.model.HLocale;
+import org.zanata.model.HPerson;
 import org.zanata.model.HProject;
 import org.zanata.model.HProjectIteration;
 import org.zanata.model.HTextFlow;
@@ -191,12 +191,13 @@ public class EntityPersistServiceTest
    {
       service = EntityPersistServiceBuilder.builder().build();
 
-      HAccount hAccount = service.makeAndPersist(mockEntityManager, HAccount.class);
       HAccountRole hAccountRole = service.makeAndPersist(mockEntityManager, HAccountRole.class);
 
-      service.wireManyToMany(mockEntityManager, hAccount, hAccountRole);
+      HPerson hPerson = EntityPersistServiceBuilder.builder()
+            .includeOptionalOneToOne()
+            .build().makeAndPersist(mockEntityManager, HPerson.class, new WireManyToManyCallback(HAccount.class, hAccountRole));
 
-      assertThat(hAccount.getRoles(), Matchers.contains(hAccountRole));
+      assertThat(hPerson.getAccount().getRoles(), Matchers.contains(hAccountRole));
    }
 
    static class CopyCallback implements EntityPersistService.Callback
@@ -205,7 +206,7 @@ public class EntityPersistServiceTest
       private List<Object> copy;
 
       @Override
-      public Iterable<Object> beforePersist(Iterable<Object> toBePersisted)
+      public Iterable<Object> beforePersist(EntityManager entityManager, Iterable<Object> toBePersisted)
       {
          copy = ImmutableList.copyOf(toBePersisted);
          return toBePersisted;

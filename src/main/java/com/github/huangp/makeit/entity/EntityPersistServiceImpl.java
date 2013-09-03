@@ -16,7 +16,6 @@ import com.github.huangp.makeit.maker.BeanMaker;
 import com.github.huangp.makeit.util.ClassUtil;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -123,7 +122,7 @@ class EntityPersistServiceImpl implements EntityPersistService
    public <T> T makeAndPersist(EntityManager entityManager, Class<T> entityType, Callback callback)
    {
       Iterable<Object> allObjects = getRequiredEntitiesFor(entityType);
-      Iterable<Object> toPersist = callback.beforePersist(allObjects);
+      Iterable<Object> toPersist = callback.beforePersist(entityManager, allObjects);
       persistInOrder(entityManager, toPersist);
       return ClassUtil.findEntity(toPersist, entityType);
    }
@@ -133,7 +132,12 @@ class EntityPersistServiceImpl implements EntityPersistService
    {
       addManyToMany(one, other);
       addManyToMany(other, one);
-      persistInOrder(entityManager, Lists.newArrayList(one, other));
+      entityManager.getTransaction().begin();
+      for (Object entity : Lists.newArrayList(one, other))
+      {
+         entityManager.persist(entity);
+      }
+      entityManager.getTransaction().commit();
    }
 
    private static void addManyToMany(Object manyOwner, final Object manyElement)
@@ -153,7 +157,7 @@ class EntityPersistServiceImpl implements EntityPersistService
       });
       if (methodFound.isPresent())
       {
-         Collection collection = invokeGetter(manyOwner, methodFound.get(), Collection.class);
+         Collection collection = ClassUtil.invokeGetter(manyOwner, methodFound.get(), Collection.class);
          if (collection != null)
          {
             collection.add(manyElement);
@@ -208,7 +212,7 @@ class EntityPersistServiceImpl implements EntityPersistService
       if (manySideExists.isPresent())
       {
          Object existValue = manySideExists.get();
-         Collection collection = invokeGetter(entity, method, Collection.class);
+         Collection collection = ClassUtil.invokeGetter(entity, method, Collection.class);
          if (collection != null)
          {
             collection.add(existValue);
@@ -229,7 +233,7 @@ class EntityPersistServiceImpl implements EntityPersistService
       {
          Object key = keyOptional.get();
          Object value = valueOptional.get();
-         Map map = invokeGetter(entity, method, Map.class);
+         Map map = ClassUtil.invokeGetter(entity, method, Map.class);
          if (map != null)
          {
             map.put(key, value);
@@ -242,20 +246,6 @@ class EntityPersistServiceImpl implements EntityPersistService
       if (expression)
       {
          log.warn(logTemplate, method.getGenericReturnType(), entity.getClass().getSimpleName(), method.getName());
-      }
-   }
-
-   private static <T> T invokeGetter(Object entity, Method method, Class<T> getterReturnType)
-   {
-      try
-      {
-         T result = (T) method.invoke(entity);
-         warningIfTrue(result == null, "after invoke getter {} {}.{}() the field is still null", entity, method);
-         return result;
-      }
-      catch (Exception e)
-      {
-         throw Throwables.propagate(e);
       }
    }
 

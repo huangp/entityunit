@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Entity;
@@ -150,9 +149,21 @@ public final class ClassUtil
       return TypeToken.of(type).getRawType().isAnnotationPresent(Entity.class);
    }
 
-   public static <T> T findEntity(Iterable<Object> entityQueue, Class<T> typeToFind)
+   public static <T> T findEntity(Iterable<Object> entities, Class<T> typeToFind)
    {
-      List<Object> entities = ImmutableList.copyOf(entityQueue);
       return (T) Iterables.find(entities, Predicates.instanceOf(typeToFind));
+   }
+
+   public static <T> T invokeGetter(Object entity, Method method, Class<T> getterReturnType)
+   {
+      try
+      {
+         T result = (T) method.invoke(entity);
+         return result;
+      }
+      catch (Exception e)
+      {
+         throw Throwables.propagate(e);
+      }
    }
 }
