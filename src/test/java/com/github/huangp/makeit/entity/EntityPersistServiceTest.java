@@ -8,7 +8,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import org.hamcrest.Matchers;
@@ -33,7 +32,6 @@ import com.github.huangp.entities.LineItem;
 import com.github.huangp.entities.Person;
 import com.github.huangp.makeit.maker.FixedValueMaker;
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 /**
@@ -47,7 +45,7 @@ public class EntityPersistServiceTest
    private EntityManager entityManager;
    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
    private EntityManager mockEntityManager;
-   private CopyCallback copyCallback;
+   private TakeCopyCallback copyCallback;
 
    @BeforeClass
    public static void setupEmFactory()
@@ -61,7 +59,7 @@ public class EntityPersistServiceTest
       MockitoAnnotations.initMocks(this);
       service = EntityPersistServiceBuilder.builder().build();
       entityManager = emFactory.createEntityManager();
-      copyCallback = new CopyCallback();
+      copyCallback = new TakeCopyCallback();
    }
 
    @After
@@ -76,11 +74,11 @@ public class EntityPersistServiceTest
       service.makeAndPersist(mockEntityManager, HProjectIteration.class, copyCallback);
 
       // first element in queue should be project
-      HProject hProject = copyCallback.getFromCopy(0);
+      HProject hProject = copyCallback.getByIndex(0);
       assertThat(hProject, Matchers.notNullValue());
 
       // second element should be iteration
-      HProjectIteration hProjectIteration = copyCallback.getFromCopy(1);
+      HProjectIteration hProjectIteration = copyCallback.getByIndex(1);
 
       assertThat(hProjectIteration.getProject(), Matchers.sameInstance(hProject));
       assertThat(hProjectIteration.getProject().getProjectIterations(), Matchers.contains(hProjectIteration));
@@ -113,7 +111,7 @@ public class EntityPersistServiceTest
             .build();
 
       service.makeAndPersist(mockEntityManager, HLocale.class, copyCallback);
-      HLocale locale = copyCallback.getFromCopy(0);
+      HLocale locale = copyCallback.getByIndex(0);
 
       assertThat(locale.getLocaleId(), Matchers.equalTo(LocaleId.DE)); //override default value
       assertThat(locale.isActive(), Matchers.equalTo(true)); //override default value
@@ -157,9 +155,9 @@ public class EntityPersistServiceTest
       List<Object> result = copyCallback.getCopy();
       assertThat(result, Matchers.iterableWithSize(3));
 
-      Category category = copyCallback.getFromCopy(0);
-      Person person = copyCallback.getFromCopy(1);
-      LineItem lineItem = copyCallback.getFromCopy(2);
+      Category category = copyCallback.getByIndex(0);
+      Person person = copyCallback.getByIndex(1);
+      LineItem lineItem = copyCallback.getByIndex(2);
 
       assertThat(lineItem.getCategory(), Matchers.sameInstance(category));
       assertThat(lineItem.getOwner(), Matchers.sameInstance(person));
@@ -175,7 +173,7 @@ public class EntityPersistServiceTest
 
       service.makeAndPersist(mockEntityManager, HLocale.class, copyCallback);
 
-      assertThat(copyCallback.<HLocale> getFromCopy(0).getLocaleId(), Matchers.equalTo(LocaleId.DE));
+      assertThat(copyCallback.getByType(HLocale.class).getLocaleId(), Matchers.equalTo(LocaleId.DE));
 
       // re-create service will override previous set up
       service = EntityPersistServiceBuilder.builder()
@@ -183,7 +181,7 @@ public class EntityPersistServiceTest
             .build();
 
       service.makeAndPersist(mockEntityManager, HLocale.class, copyCallback);
-      assertThat(copyCallback.<HLocale> getFromCopy(0).getLocaleId(), Matchers.equalTo(LocaleId.FR));
+      assertThat(copyCallback.getByType(HLocale.class).getLocaleId(), Matchers.equalTo(LocaleId.FR));
    }
 
    @Test
@@ -200,22 +198,4 @@ public class EntityPersistServiceTest
       assertThat(hPerson.getAccount().getRoles(), Matchers.contains(hAccountRole));
    }
 
-   static class CopyCallback implements EntityPersistService.Callback
-   {
-      @Getter
-      private List<Object> copy;
-
-      @Override
-      public Iterable<Object> beforePersist(EntityManager entityManager, Iterable<Object> toBePersisted)
-      {
-         copy = ImmutableList.copyOf(toBePersisted);
-         return toBePersisted;
-      }
-
-      <T> T getFromCopy(int index)
-      {
-         return (T) copy.get(index);
-      }
-
-   }
 }
