@@ -18,7 +18,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import com.google.common.reflect.TypeToken;
 
@@ -127,19 +126,6 @@ class EntityPersistServiceImpl implements EntityPersistService
       return ClassUtil.findEntity(toPersist, entityType);
    }
 
-   @Override
-   public void wireManyToMany(EntityManager entityManager, Object one, Object other)
-   {
-      addManyToMany(one, other);
-      addManyToMany(other, one);
-      entityManager.getTransaction().begin();
-      for (Object entity : Lists.newArrayList(one, other))
-      {
-         entityManager.persist(entity);
-      }
-      entityManager.getTransaction().commit();
-   }
-
    private static void addManyToMany(Object manyOwner, final Object manyElement)
    {
       EntityClass oneEntityClass = EntityClass.from(manyOwner.getClass());
@@ -185,9 +171,9 @@ class EntityPersistServiceImpl implements EntityPersistService
    }
 
    @Override
-   public BeanValueHolder exportImmutableCopyOfBeans()
+   public BeanValueHolder exportCopyOfBeans()
    {
-      return valueHolder.immutableCopy();
+      return valueHolder.getCopy();
    }
 
    private static void deleteTable(EntityManager entityManager, String table)

@@ -1,8 +1,7 @@
 package com.github.huangp.makeit.util;
 
 import java.lang.reflect.Field;
-
-import com.google.common.base.Objects;
+import java.lang.reflect.Method;
 
 import lombok.Delegate;
 
@@ -11,26 +10,24 @@ import lombok.Delegate;
  */
 public class SettableField implements Settable
 {
+   private final Class ownerType;
    @Delegate
    private final Field field;
-   private transient final String getter;
-   private transient final String setter;
+   private final Method getterMethod;
    private transient final String fullName;
 
    private SettableField(Class ownerType, Field field)
    {
+      this.ownerType = ownerType;
       this.field = field;
-      String capitalized = capitalizeFieldName(field.getName());
-      if (field.getType().isPrimitive() && field.getType().equals(boolean.class))
-      {
-         getter = "is" + capitalized;
-      }
-      else
-      {
-         getter = "get" + capitalized;
-      }
-      setter = "set" + capitalized;
+      getterMethod = ClassUtil.getterMethod(ownerType, field.getName());
       fullName = String.format(FULL_NAME_FORMAT, ownerType.getName(), field.getName());
+   }
+
+   @Override
+   public Method getterMethod()
+   {
+      return getterMethod;
    }
 
    public static Settable from(Class ownerType, Field field)
@@ -38,29 +35,10 @@ public class SettableField implements Settable
       return new SettableField(ownerType, field);
    }
 
-   private static String capitalizeFieldName(String simpleName)
-   {
-      String cap = simpleName.substring(0, 1).toUpperCase();
-      String rest = simpleName.substring(1);
-      return cap + rest;
-   }
-
    @Override
    public String getSimpleName()
    {
       return field.getName();
-   }
-
-   @Override
-   public String getterMethodName()
-   {
-      return getter;
-   }
-
-   @Override
-   public String setterMethodName()
-   {
-      return setter;
    }
 
    @Override
@@ -72,10 +50,6 @@ public class SettableField implements Settable
    @Override
    public String toString()
    {
-      return Objects.toStringHelper(this)
-            .add("field", field)
-            .add("getter", getter)
-            .add("setter", setter)
-            .toString();
+      return ownerType.getSimpleName() + "." + getSimpleName();
    }
 }

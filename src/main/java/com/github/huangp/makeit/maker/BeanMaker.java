@@ -118,7 +118,7 @@ public class BeanMaker<T> implements Maker<T>
 
    private void tryPopulatePropertyValue(T result, Settable settable)
    {
-      log.debug("about to make {}.{}", type.getSimpleName(), settable.getSimpleName());
+      log.debug("about to make {}", settable);
       Object fieldValue = factory.from(settable).value();
       log.debug("value {}", fieldValue);
       try
@@ -127,7 +127,7 @@ public class BeanMaker<T> implements Maker<T>
       }
       catch (Exception e)
       {
-         log.warn("can not set property: {}={}", settable.getSimpleName(), fieldValue);
+         log.warn("can not set property: {}={}", settable, fieldValue);
       }
    }
 
@@ -153,24 +153,24 @@ public class BeanMaker<T> implements Maker<T>
       {
          try
          {
-            Method getter = object.getClass().getMethod(input.getterMethodName());
-            return !getter.getReturnType().isPrimitive() && getter.invoke(object) != null;
+            Method getter = input.getterMethod();
+            return notPrimitive(getter) && getter.invoke(object) != null;
          }
          catch (IllegalAccessException e)
          {
             log.warn("can not determine field has default value or not");
-            return true;
-         }
-         catch (NoSuchMethodException e)
-         {
-            log.warn("getter method not found {}", e.getMessage());
-            return true;
+            return false;
          }
          catch (InvocationTargetException e)
          {
             log.warn("can not invoke getter method {}", e.getMessage());
-            return true;
+            return false;
          }
+      }
+
+      private static boolean notPrimitive(Method getter)
+      {
+         return !getter.getReturnType().isPrimitive();
       }
    }
 }

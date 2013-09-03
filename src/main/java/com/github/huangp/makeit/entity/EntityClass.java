@@ -35,9 +35,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import static com.google.common.collect.Iterables.filter;
-import static com.google.common.collect.Lists.newArrayList;
 import static com.github.huangp.makeit.entity.EntityClass.HasAnnotationPredicate.has;
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
@@ -57,14 +56,12 @@ public class EntityClass
 
    private transient Iterable<Class<?>> dependingTypes;
    private transient Iterable<Method> associationGetters;
-   private transient List<Method> allDeclaredMethods;
    private transient Iterable<String> manyToManyTables;
    private transient Iterable<Method> manyToManyGetters;
 
    private EntityClass(Class type, Iterable<Settable> elements, ScanOption scanOption)
    {
       this.type = type;
-      allDeclaredMethods = ClassUtil.getAllDeclaredMethods(type);
       List<Settable> settables = newArrayList(elements);
       Collections.sort(settables, NameComparator.COMPARATOR);
       this.elements = ImmutableList.copyOf(settables);
@@ -112,27 +109,18 @@ public class EntityClass
 
    private static EntityClass createEntityClass(Class clazz, ScanOption scanOption)
    {
-      List<Field> allInstanceFields = ClassUtil.getAllInstanceFields(clazz);
-      List<Settable> settableFields = Lists.transform(allInstanceFields, new FieldToSettableFunction(clazz));
       if (ClassUtil.isAccessTypeIsField(clazz))
       {
+         List<Field> allInstanceFields = ClassUtil.getAllInstanceFields(clazz);
+         List<Settable> settableFields = Lists.transform(allInstanceFields, new FieldToSettableFunction(clazz));
          // field based annotation
          return new EntityClass(clazz, settableFields, scanOption);
       }
       else
       {
          // property based annotation
-         List<Method> allMethods = ClassUtil.getAllDeclaredMethods(clazz);
-         // find all getter methods
-         Iterable<Method> methods = Iterables.filter(allMethods, new Predicate<Method>()
-         {
-            @Override
-            public boolean apply(Method input)
-            {
-               return input.getName().matches("^(is|get)\\w+");
-            }
-         });
-         List<Settable> settableMethods = newArrayList(Iterables.transform(methods, new MethodToSettableFunction(clazz)));
+         Iterable<Method> allMethods = ClassUtil.getAllPropertyReadMethods(clazz);
+         List<Settable> settableMethods = newArrayList(Iterables.transform(allMethods, new MethodToSettableFunction(clazz)));
          return new EntityClass(clazz, settableMethods, scanOption);
       }
    }
@@ -152,8 +140,7 @@ public class EntityClass
       if (associationGetters == null)
       {
          Iterable<Settable> oneToMany = Iterables.filter(elements, has(OneToMany.class));
-         List<String> methodNames = newArrayList(Iterables.transform(oneToMany, SettableGetterMethodFunction.FUNCTION));
-         associationGetters = filter(allDeclaredMethods, new MethodNameMatchPredicate(methodNames));
+         associationGetters = Iterables.transform(oneToMany, SettableGetterMethodFunction.FUNCTION);
       }
       return associationGetters;
    }
@@ -182,8 +169,7 @@ public class EntityClass
       if (manyToManyGetters == null)
       {
          Iterable<Settable> manyToMany = Iterables.filter(elements, Predicates.and(has(ManyToMany.class), has(JoinTable.class)));
-         List<String> methodNames = newArrayList(Iterables.transform(manyToMany, SettableGetterMethodFunction.FUNCTION));
-         manyToManyGetters = filter(allDeclaredMethods, new MethodNameMatchPredicate(methodNames));
+         manyToManyGetters = Iterables.transform(manyToMany, SettableGetterMethodFunction.FUNCTION);
       }
       return manyToManyGetters;
    }
@@ -208,13 +194,13 @@ public class EntityClass
       }
    }
 
-   private static enum SettableGetterMethodFunction implements Function<Settable, String>
+   private static enum SettableGetterMethodFunction implements Function<Settable, Method>
    {
       FUNCTION;
       @Override
-      public String apply(Settable input)
+      public Method apply(Settable input)
       {
-         return input.getterMethodName();
+         return input.getterMethod();
       }
    }
 
@@ -230,22 +216,6 @@ public class EntityClass
       }
    }
 
-   private static class MethodNameMatchPredicate implements Predicate<Method>
-   {
-      private final List<String> methodNames;
-
-      public MethodNameMatchPredicate(List<String> methodNames)
-      {
-         this.methodNames = methodNames;
-      }
-
-      @Override
-      public boolean apply(Method input)
-      {
-         return methodNames.contains(input.getName());
-      }
-   }
-
    @RequiredArgsConstructor
    private static class MethodToSettableFunction implements Function<Method, Settable>
    {
@@ -258,9 +228,6 @@ public class EntityClass
       }
    }
 
-   /**
-   * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
-   */
    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
    static class HasAnnotationPredicate<A extends AnnotatedElement> implements Predicate<A>
    {
@@ -278,9 +245,6 @@ public class EntityClass
       }
    }
 
-   /**
-   * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
-   */
    @RequiredArgsConstructor
    private static class FieldToSettableFunction implements Function<Field, Settable>
    {

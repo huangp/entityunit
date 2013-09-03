@@ -58,7 +58,7 @@ public class BeanValueHolder
       return this;
    }
 
-   public BeanValueHolder immutableCopy()
+   public BeanValueHolder getCopy()
    {
       ImmutableTypeToInstanceMap.Builder<Object> builder = ImmutableTypeToInstanceMap.builder();
       for (Map.Entry<TypeToken<?>, Object> entry : map.entrySet())

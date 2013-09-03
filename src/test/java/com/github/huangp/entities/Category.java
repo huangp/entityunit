@@ -10,13 +10,15 @@ import javax.validation.constraints.Size;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
  */
 @Entity
-@Data
+@Getter
+@Setter
 @Access(AccessType.FIELD)
 public class Category extends Identifier
 {

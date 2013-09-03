@@ -1,6 +1,7 @@
 package com.github.huangp.makeit.util;
 
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 /**
@@ -14,9 +15,7 @@ public interface Settable extends AnnotatedElement
 
    Type getType();
 
-   String getterMethodName();
-
-   String setterMethodName();
+   Method getterMethod();
 
    /**
     * Use owner_class_name - simpleName as format.

@@ -1,11 +1,17 @@
 package com.github.huangp.makeit.util;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.MethodDescriptor;
+import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -15,6 +21,7 @@ import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Entity;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
@@ -61,17 +68,26 @@ public final class ClassUtil
       }));
    }
 
-   public static List<Method> getAllDeclaredMethods(Class clazz)
+   public static Iterable<Method> getAllPropertyReadMethods(Class clazz)
    {
-      List<Method> methods = Lists.newArrayList(clazz.getDeclaredMethods());
-
-      Class<?> superClass = clazz.getSuperclass();
-      while (superClass != null && superClass != Object.class)
+      try
       {
-         methods.addAll(Lists.newArrayList(superClass.getDeclaredMethods()));
-         superClass = superClass.getSuperclass();
+         List<PropertyDescriptor> propertyDescriptors = Lists.newArrayList(
+               Introspector.getBeanInfo(clazz, Object.class).getPropertyDescriptors());
+         List<Method> methods = Lists.transform(propertyDescriptors, new Function<PropertyDescriptor, Method>()
+         {
+            @Override
+            public Method apply(PropertyDescriptor input)
+            {
+               return input.getReadMethod();
+            }
+         });
+         return Iterables.filter(methods, Predicates.notNull());
       }
-      return ImmutableList.copyOf(methods);
+      catch (IntrospectionException e)
+      {
+         throw Throwables.propagate(e);
+      }
    }
 
    public static <T> Optional<T> tryFindPublicConstants(final Class<T> type, T instance) throws IllegalAccessException
@@ -165,5 +181,25 @@ public final class ClassUtil
       {
          throw Throwables.propagate(e);
       }
+   }
+
+   public static Method getterMethod(Class type, String name)
+   {
+      try
+      {
+         BeanInfo beanInfo = Introspector.getBeanInfo(type, Object.class);
+         for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors())
+         {
+            if (propertyDescriptor.getName().equals(name))
+            {
+               return propertyDescriptor.getReadMethod();
+            }
+         }
+      }
+      catch (IntrospectionException e)
+      {
+         throw Throwables.propagate(e);
+      }
+      throw new RuntimeException("not found");
    }
 }

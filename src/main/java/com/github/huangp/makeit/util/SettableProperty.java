@@ -6,24 +6,23 @@ import java.lang.reflect.Type;
 import com.google.common.base.Objects;
 
 import lombok.Delegate;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
  */
 public class SettableProperty implements Settable
 {
+   private final Class ownerType;
    @Delegate
    private final Method method;
 
-   private transient final String setterMethodName;
    private transient final String simpleName;
    private transient final String fullName;
 
    private SettableProperty(Class ownerType, Method method)
    {
+      this.ownerType = ownerType;
       this.method = method;
-      setterMethodName = method.getName().replaceFirst("get|is", "set");
       String stripped = method.getName().replaceFirst("get|is", "");
       String lower = stripped.substring(0, 1).toLowerCase();
       String rest = stripped.substring(1);
@@ -33,6 +32,12 @@ public class SettableProperty implements Settable
    public static Settable from(Class ownerType, Method method)
    {
       return new SettableProperty(ownerType, method);
+   }
+
+   @Override
+   public Method getterMethod()
+   {
+      return method;
    }
 
    @Override
@@ -48,18 +53,6 @@ public class SettableProperty implements Settable
    }
 
    @Override
-   public String getterMethodName()
-   {
-      return method.getName();
-   }
-
-   @Override
-   public String setterMethodName()
-   {
-      return setterMethodName;
-   }
-
-   @Override
    public String fullyQualifiedName()
    {
       return fullName;
@@ -68,10 +61,7 @@ public class SettableProperty implements Settable
    @Override
    public String toString()
    {
-      return Objects.toStringHelper(this)
-            .add("simpleName", simpleName)
-            .add("setterMethodName", setterMethodName)
-            .toString();
+      return ownerType.getSimpleName() + "." + getSimpleName();
    }
 
 }

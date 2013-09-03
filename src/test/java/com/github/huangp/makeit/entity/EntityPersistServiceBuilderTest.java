@@ -57,7 +57,7 @@ public class EntityPersistServiceBuilderTest
       // make something
       HLocale hLocale = service.makeAndPersist(em, HLocale.class);
       assertThat(hLocale.getLocaleId(), Matchers.equalTo(LocaleId.DE));
-      BeanValueHolder beans = service.exportImmutableCopyOfBeans();
+      BeanValueHolder beans = service.exportCopyOfBeans();
 
       service = EntityPersistServiceBuilder.builder()
             .reuseObjects(beans)

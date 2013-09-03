@@ -7,7 +7,8 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.Email;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 
 /**
@@ -15,7 +16,8 @@ import lombok.Data;
  */
 @Entity
 @Access(AccessType.FIELD)
-@Data
+@Getter
+@Setter
 public class Person extends Identifier
 {
    @Email

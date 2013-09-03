@@ -1,6 +1,7 @@
 package com.github.huangp.makeit.util;
 
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 import com.google.common.reflect.Parameter;
@@ -42,13 +43,7 @@ public class SettableParameter implements Settable
    }
 
    @Override
-   public String getterMethodName()
-   {
-      throw new UnsupportedOperationException("This should not be called");
-   }
-
-   @Override
-   public String setterMethodName()
+   public Method getterMethod()
    {
       throw new UnsupportedOperationException("This should not be called");
    }

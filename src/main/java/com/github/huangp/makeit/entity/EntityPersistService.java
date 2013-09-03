@@ -1,6 +1,5 @@
 package com.github.huangp.makeit.entity;
 
-import java.util.Queue;
 import javax.persistence.EntityManager;
 
 import com.github.huangp.makeit.holder.BeanValueHolder;
@@ -14,11 +13,10 @@ public interface EntityPersistService
 
    <T> T makeAndPersist(EntityManager entityManager, Class<T> entityType, Callback callback);
 
-   void wireManyToMany(EntityManager entityManager, Object a, Object b);
-
    void deleteAll(EntityManager entityManager, Iterable<Class> entities);
 
-   BeanValueHolder exportImmutableCopyOfBeans();
+   // TODO do we need this anymore? TakeCopyCallback should handle it
+   BeanValueHolder exportCopyOfBeans();
 
    public interface Callback
    {
