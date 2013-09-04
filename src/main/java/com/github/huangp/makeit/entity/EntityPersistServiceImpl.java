@@ -8,16 +8,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import javax.persistence.EntityManager;
+import javax.persistence.Id;
 import javax.persistence.Query;
 
 import org.jodah.typetools.TypeResolver;
 import com.github.huangp.makeit.holder.BeanValueHolder;
 import com.github.huangp.makeit.maker.BeanMaker;
 import com.github.huangp.makeit.util.ClassUtil;
+import com.github.huangp.makeit.util.Settable;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.Queues;
 import com.google.common.reflect.TypeToken;
 
@@ -88,7 +95,7 @@ class EntityPersistServiceImpl implements EntityPersistService
       // @see SingleEntityMaker
       // @see ReuseOrNullMaker
 
-      log.debug("result {}", new QueuePrinter(queue));
+      log.debug("result {}", new NiceIterablePrinter(queue));
       return queue;
    }
 
@@ -126,48 +133,70 @@ class EntityPersistServiceImpl implements EntityPersistService
       return ClassUtil.findEntity(toPersist, entityType);
    }
 
-   private static void addManyToMany(Object manyOwner, final Object manyElement)
-   {
-      EntityClass oneEntityClass = EntityClass.from(manyOwner.getClass());
-
-      Iterable<Method> manyToManyGetters = oneEntityClass.getManyToManyMethods();
-
-      Optional<Method> methodFound = Iterables.tryFind(manyToManyGetters, new Predicate<Method>()
-      {
-         @Override
-         public boolean apply(Method input)
-         {
-            Class<?> genericType = TypeResolver.resolveRawArgument(input.getGenericReturnType(), Collection.class);
-            return genericType.isInstance(manyElement);
-         }
-      });
-      if (methodFound.isPresent())
-      {
-         Collection collection = ClassUtil.invokeGetter(manyOwner, methodFound.get(), Collection.class);
-         if (collection != null)
-         {
-            collection.add(manyElement);
-         }
-      }
-   }
-
    @Override
-   public void deleteAll(final EntityManager entityManager, Iterable<Class> entities)
+   public void deleteAll(final EntityManager entityManager, Iterable<Class> entityClasses)
    {
       entityManager.getTransaction().begin();
-      for (Class entity : entities)
+      for (Class entityType : entityClasses)
       {
-         // TODO need to consider @Entity(name)
-         EntityClass entityClass = EntityClass.from(entity);
+         EntityClass entityClass = EntityClass.from(entityType);
          Iterable<String> manyToManyTables = entityClass.getManyToManyTables();
          for (String table : manyToManyTables)
          {
             deleteTable(entityManager, table);
          }
-         deleteEntity(entityManager, entity.getSimpleName());
+         deleteEntity(entityManager, entityType.getSimpleName());
       }
 
       entityManager.getTransaction().commit();
+   }
+
+   @Override
+   public void deleteAllExcept(EntityManager entityManager, Iterable<Class> entityClasses, Object... excludedEntities)
+   {
+      if (excludedEntities.length == 0)
+      {
+         deleteAll(entityManager, entityClasses);
+      }
+      ImmutableListMultimap<Class, Object> exclusion = Multimaps.index(ImmutableSet.copyOf(excludedEntities), new Function<Object, Class>()
+      {
+         @Override
+         public Class apply(Object input)
+         {
+            return input.getClass();
+         }
+      });
+
+      entityManager.getTransaction().begin();
+      for (Class entityType : entityClasses)
+      {
+         EntityClass entityClass = EntityClass.from(entityType);
+         Iterable<String> manyToManyTables = entityClass.getManyToManyTables();
+
+         Settable idSettable = Iterables.find(entityClass.getElements(), EntityClass.HasAnnotationPredicate.has(Id.class));
+         List<Serializable> ids = getIds(exclusion.get(entityType), idSettable);
+
+         for (String table : manyToManyTables)
+         {
+            // TODO need to consider exclusion as well
+            deleteTable(entityManager, table);
+         }
+         deleteEntityExcept(entityManager, entityType.getSimpleName(), exclusion.get(entityType), idSettable, ids);
+      }
+
+      entityManager.getTransaction().commit();
+   }
+
+   private static List<Serializable> getIds(List<Object> entities, final Settable idSettable)
+   {
+      return Lists.transform(entities, new Function<Object, Serializable>()
+      {
+         @Override
+         public Serializable apply(Object input)
+         {
+            return ClassUtil.invokeGetter(input, idSettable.getterMethod(), Serializable.class);
+         }
+      });
    }
 
    @Override
@@ -189,6 +218,18 @@ class EntityPersistServiceImpl implements EntityPersistService
       String queryString = "delete from " + name;
       int result = entityManager.createQuery(queryString).executeUpdate();
       log.debug("execute [{}], affected row: {}", queryString, result);
+   }
+
+   private static void deleteEntityExcept(EntityManager entityManager, String name, List<Object> exclusion, Settable idSettable, List<Serializable> ids)
+   {
+      if (exclusion.isEmpty())
+      {
+         deleteEntity(entityManager, name);
+         return;
+      }
+      String queryString = String.format("delete %s e where e.%s not in (:excludedIds)", name, idSettable.getSimpleName());
+      int result = entityManager.createQuery(queryString).setParameter("excludedIds", ids).executeUpdate();
+      log.debug("executed [{}], affected row: {}", queryString, result);
    }
 
    private static void addManySideEntityIfExists(Object entity, Method method, BeanValueHolder holder)
@@ -236,16 +277,16 @@ class EntityPersistServiceImpl implements EntityPersistService
    }
 
    @RequiredArgsConstructor
-   private static class QueuePrinter
+   private static class NiceIterablePrinter
    {
       private static final String NEW_LINE = "\n";
       private static final String THEN = "    ==> ";
-      private final Queue<Object> queue;
+      private final Iterable<Object> iterable;
 
       @Override
       public String toString()
       {
-         List<Object> entities = ImmutableList.copyOf(queue);
+         List<Object> entities = ImmutableList.copyOf(iterable);
          StringBuilder builder = new StringBuilder();
          builder.append(NEW_LINE);
          for (Object entity : entities)

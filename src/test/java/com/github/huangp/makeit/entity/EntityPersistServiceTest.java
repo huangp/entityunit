@@ -2,6 +2,8 @@ package com.github.huangp.makeit.entity;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -196,6 +198,24 @@ public class EntityPersistServiceTest
             .build().makeAndPersist(mockEntityManager, HPerson.class, new WireManyToManyCallback(HAccount.class, hAccountRole));
 
       assertThat(hPerson.getAccount().getRoles(), Matchers.contains(hAccountRole));
+   }
+   
+   @Test
+   public void canDeleteWithExclusion() throws Exception
+   {
+      Category one = service.makeAndPersist(entityManager, Category.class);
+      Category two = service.makeAndPersist(entityManager, Category.class);
+
+      log.info("category 1: {}", one);
+      log.info("category 2: {}", two);
+
+      service.deleteAllExcept(entityManager, Lists.<Class>newArrayList(Category.class), two);
+
+      List<Category> result = entityManager.createQuery("from Category", Category.class).getResultList();
+      log.info("result: {}", result);
+
+      assertThat(result, Matchers.hasSize(1));
+      assertThat(result.get(0), Matchers.equalTo(two));
    }
 
 }

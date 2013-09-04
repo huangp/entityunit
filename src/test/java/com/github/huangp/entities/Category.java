@@ -33,6 +33,7 @@ public class Category extends Identifier
    public String toString()
    {
       return Objects.toStringHelper(this)
+            .add("id", getId())
             .add("name", name)
             .add("lineItems", lineItems.size())
             .toString();
