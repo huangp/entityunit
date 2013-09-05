@@ -1,6 +1,7 @@
 package com.github.huangp.makeit.entity;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 
 import com.github.huangp.makeit.holder.BeanValueHolder;
@@ -41,16 +42,28 @@ public class EntityPersistServiceBuilder
       valueHolder.merge(beanValueHolder);
       return this;
    }
-
-   public EntityPersistServiceBuilder reuseEntities(Object first, Object... rest)
+   
+   public EntityPersistServiceBuilder reuseEntities(Collection<Object> entities)
    {
-      List<Object> objects = ImmutableList.builder().add(first).add(rest).build();
-      for (Object object : objects)
+      for (Object entity : entities)
       {
-         Class aClass = object.getClass();
-         valueHolder.putIfNotNull(aClass, object);
+         Class aClass = entity.getClass();
+         valueHolder.putIfNotNull(aClass, entity);
       }
       return this;
+   }
+
+   public EntityPersistServiceBuilder reuseEntity(Serializable entity)
+   {
+      Class aClass = entity.getClass();
+      valueHolder.putIfNotNull(aClass, entity);
+      return this;
+   }
+
+   public EntityPersistServiceBuilder reuseEntities(Object first, Object second, Object... rest)
+   {
+      List<Object> objects = ImmutableList.builder().add(first).add(second).add(rest).build();
+      return reuseEntities(objects);
    }
 
    public EntityPersistServiceBuilder addFieldOrPropertyMaker(Class<?> ownerType, String fieldName, Maker<?> maker)

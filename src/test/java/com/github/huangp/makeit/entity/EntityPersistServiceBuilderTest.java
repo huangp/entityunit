@@ -37,7 +37,7 @@ public class EntityPersistServiceBuilderTest
    {
       Category existEntity = new Category();
       EntityPersistService service = EntityPersistServiceBuilder.builder()
-            .reuseEntities(existEntity)
+            .reuseEntity(existEntity)
             .build();
 
       LineItem result = service.makeAndPersist(em, LineItem.class);

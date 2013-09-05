@@ -218,4 +218,22 @@ public class EntityPersistServiceTest
       assertThat(result.get(0), Matchers.equalTo(two));
    }
 
+//   @Test
+//   public void canNotReuseId()
+//   {
+//      HProject one = service.makeAndPersist(entityManager, HProject.class);
+//
+//      log.info("1: {}", one);
+//
+//      service.deleteAllExcept(entityManager, Lists.<Class>newArrayList(HProject.class));
+//
+//      HProject two = service.makeAndPersist(entityManager, HProject.class);
+//      List<HProject> result = entityManager.createQuery("from HProject", HProject.class).getResultList();
+//      log.info("result: {}", result);
+//      log.info("2: {}", two);
+//
+//      assertThat(result, Matchers.hasSize(1));
+//      assertThat(result.get(0).getId(), Matchers.equalTo(2L));
+//   }
+
 }
