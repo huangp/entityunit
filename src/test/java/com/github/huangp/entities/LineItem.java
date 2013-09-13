@@ -1,10 +1,13 @@
 package com.github.huangp.entities;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.Size;
 
+import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -22,6 +25,9 @@ public class LineItem extends Identifier
 
    private Category category;
 
+   @Setter(AccessLevel.PROTECTED)
+   private Integer number;
+
    @Size(min = 20)
    public String getContent()
    {
@@ -35,8 +41,15 @@ public class LineItem extends Identifier
    }
 
    @ManyToOne(targetEntity = Category.class)
+   @JoinColumn(name = "category_id", insertable = false, updatable = false, nullable = false)
    public Category getCategory()
    {
       return category;
+   }
+
+   @Column(insertable = false, updatable = false, nullable = false)
+   public Integer getNumber()
+   {
+      return number;
    }
 }

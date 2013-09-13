@@ -6,7 +6,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import javax.persistence.Entity;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
@@ -80,25 +79,25 @@ class EntityClassScanner
          log.trace("{} has been scanned", startNode);
          return;
       }
-      Iterable<Class<?>> dependingTypes = startNode.getDependingEntityTypes();
+      Iterable<EntityClass> dependingTypes = startNode.getDependingEntityTypes();
 
-      for (Class<?> dependingType : dependingTypes)
+      for (EntityClass dependingType : dependingTypes)
       {
-         if (!dependingType.equals(clazz))
+         if (!dependingType.getType().equals(clazz))
          {
-            recursiveScan(dependingType, current);
+            recursiveScan(dependingType.getType(), current);
          }
       }
-      Iterable<EntityClass> dependents = Iterables.transform(dependingTypes, new Function<Class<?>, EntityClass>()
-      {
-         @Override
-         public EntityClass apply(Class<?> input)
-         {
-            return EntityClass.from(input, scanOption);
-         }
-      });
+//      Iterable<EntityClass> dependents = Iterables.transform(dependingTypes, new Function<Class<?>, EntityClass>()
+//      {
+//         @Override
+//         public EntityClass apply(Class<?> input)
+//         {
+//            return EntityClass.from(input, scanOption);
+//         }
+//      });
 
-      Iterables.addAll(current, dependents);
+      Iterables.addAll(current, dependingTypes);
       current.remove(startNode); // remove itself
    }
 

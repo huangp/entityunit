@@ -9,6 +9,7 @@ import org.hibernate.validator.constraints.Email;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 
 /**
@@ -18,6 +19,7 @@ import lombok.Setter;
 @Access(AccessType.FIELD)
 @Getter
 @Setter
+@ToString
 public class Person extends Identifier
 {
    @Email

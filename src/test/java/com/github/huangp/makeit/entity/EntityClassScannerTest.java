@@ -2,7 +2,6 @@ package com.github.huangp.makeit.entity;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;

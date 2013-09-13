@@ -64,6 +64,7 @@ class EntityPersistServiceImpl implements EntityPersistService
       // create all depending (ManyToOne or required OneToOne) entities
       for (EntityClass entityClass : dependingEntities)
       {
+         // TODO required OneToOne can not be reused
          reuseOrMakeNew(queue, entityClass);
       }
       // we always make new asking class
@@ -102,7 +103,7 @@ class EntityPersistServiceImpl implements EntityPersistService
    private void reuseOrMakeNew(Queue<Object> queue, EntityClass entityClass)
    {
       Optional existing = valueHolder.tryGet(entityClass.getType());
-      if (existing.isPresent())
+      if (!entityClass.isRequireNewInstance() && existing.isPresent())
       {
          queue.offer(existing.get());
       }
@@ -123,10 +124,10 @@ class EntityPersistServiceImpl implements EntityPersistService
          {
             entityManager.persist(entity);
          }
-         else
-         {
-            entityManager.merge(entity);
-         }
+//         else
+//         {
+//            entityManager.merge(entity);
+//         }
       }
       entityManager.getTransaction().commit();
    }

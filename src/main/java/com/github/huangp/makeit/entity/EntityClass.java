@@ -30,16 +30,21 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import static com.github.huangp.makeit.util.HasAnnotationPredicate.has;
+import static com.google.common.collect.Iterables.filter;
+import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
  */
 @ToString(of = "type")
+@EqualsAndHashCode(of = {"type", "scanOption"})
 public class EntityClass
 {
    private static Cache<CacheKey, EntityClass> cache = CacheBuilder.newBuilder()
@@ -49,10 +54,15 @@ public class EntityClass
    private Predicate<AnnotatedElement> oneToOnePredicate;
    @Getter
    private final Class type;
+   private final ScanOption scanOption;
    @Getter
    private final Iterable<Settable> elements;
 
-   private transient Iterable<Class<?>> dependingTypes;
+   @Getter
+   @Setter
+   private boolean requireNewInstance;
+
+   private transient Iterable<EntityClass> requiredEntityTypes;
    private transient Iterable<Method> associationGetters;
    private transient Iterable<String> manyToManyTables;
    private transient Iterable<Method> manyToManyGetters;
@@ -60,6 +70,7 @@ public class EntityClass
    private EntityClass(Class type, Iterable<Settable> elements, ScanOption scanOption)
    {
       this.type = type;
+      this.scanOption = scanOption;
       List<Settable> settables = newArrayList(elements);
       Collections.sort(settables, NameComparator.COMPARATOR);
       this.elements = ImmutableList.copyOf(settables);
@@ -128,26 +139,27 @@ public class EntityClass
       {
          // property based annotation
          Iterable<Method> allMethods = ClassUtil.getAllPropertyReadMethods(clazz);
-         return newArrayList(Iterables.transform(allMethods, new MethodToSettableFunction(clazz)));
+         return newArrayList(transform(allMethods, new MethodToSettableFunction(clazz)));
       }
    }
 
-   public Iterable<Class<?>> getDependingEntityTypes()
+   public Iterable<EntityClass> getDependingEntityTypes()
    {
-      if (dependingTypes == null)
+      if (requiredEntityTypes == null)
       {
-         Iterable<Settable> manyToOne = Iterables.filter(elements, Predicates.or(has(ManyToOne.class), oneToOnePredicate));
-         dependingTypes = Iterables.transform(manyToOne, TypeFunction.FUNCTION);
+         Iterable<EntityClass> manyToOne = transform(filter(elements, has(ManyToOne.class)), new TypeFunction(scanOption, false));
+         Iterable<EntityClass> oneToOne = transform(filter(elements, oneToOnePredicate), new TypeFunction(scanOption, true));
+         requiredEntityTypes = Iterables.concat(manyToOne, oneToOne);
       }
-      return dependingTypes;
+      return requiredEntityTypes;
    }
 
    public Iterable<Method> getContainingEntitiesGetterMethods()
    {
       if (associationGetters == null)
       {
-         Iterable<Settable> oneToMany = Iterables.filter(elements, has(OneToMany.class));
-         associationGetters = Iterables.transform(oneToMany, SettableGetterMethodFunction.FUNCTION);
+         Iterable<Settable> oneToMany = filter(elements, has(OneToMany.class));
+         associationGetters = transform(oneToMany, SettableGetterMethodFunction.FUNCTION);
       }
       return associationGetters;
    }
@@ -156,8 +168,8 @@ public class EntityClass
    {
       if (manyToManyTables == null)
       {
-         Iterable<Settable> manyToMany = Iterables.filter(elements, Predicates.and(has(ManyToMany.class), has(JoinTable.class)));
-         manyToManyTables = Iterables.transform(manyToMany, new Function<Settable, String>()
+         Iterable<Settable> manyToMany = filter(elements, Predicates.and(has(ManyToMany.class), has(JoinTable.class)));
+         manyToManyTables = transform(manyToMany, new Function<Settable, String>()
          {
             @Override
             public String apply(Settable input)
@@ -175,8 +187,8 @@ public class EntityClass
    {
       if (manyToManyGetters == null)
       {
-         Iterable<Settable> manyToMany = Iterables.filter(elements, Predicates.and(has(ManyToMany.class), has(JoinTable.class)));
-         manyToManyGetters = Iterables.transform(manyToMany, SettableGetterMethodFunction.FUNCTION);
+         Iterable<Settable> manyToMany = filter(elements, Predicates.and(has(ManyToMany.class), has(JoinTable.class)));
+         manyToManyGetters = transform(manyToMany, SettableGetterMethodFunction.FUNCTION);
       }
       return manyToManyGetters;
    }
@@ -191,13 +203,18 @@ public class EntityClass
       }
    }
 
-   private static enum TypeFunction implements Function<Settable, Class<?>>
+   @RequiredArgsConstructor
+   private static class TypeFunction implements Function<Settable, EntityClass>
    {
-      FUNCTION;
+      private final ScanOption scanOption;
+      private final boolean requireNewInstance;
+
       @Override
-      public Class<?> apply(Settable input)
+      public EntityClass apply(Settable input)
       {
-         return TypeToken.of(input.getType()).getRawType();
+         EntityClass entityClass = EntityClass.from(TypeToken.of(input.getType()).getRawType(), scanOption);
+         entityClass.setRequireNewInstance(requireNewInstance);
+         return entityClass;
       }
    }
 

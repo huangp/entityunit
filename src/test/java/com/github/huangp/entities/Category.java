@@ -4,9 +4,11 @@ import java.util.List;
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.Size;
 
+import org.hibernate.annotations.IndexColumn;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
@@ -26,6 +28,8 @@ public class Category extends Identifier
    private String name;
 
    @OneToMany(targetEntity = LineItem.class)
+   @IndexColumn(name = "number", nullable = false)
+   @JoinColumn(name = "category_id", nullable = false)
    private List<LineItem> lineItems = Lists.newArrayList();
 
 

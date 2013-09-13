@@ -69,13 +69,16 @@ public class EntityPersistServiceImplTest
       service = EntityPersistServiceBuilder.builder().build();
       entityManager = emFactory.createEntityManager();
       service.deleteAll(entityManager, Lists.<Class> newArrayList(
+            // simple test entities
+            LineItem.class, Category.class, Person.class,
+            // zanata stuff
             Activity.class,
             HGlossaryEntry.class, HGlossaryTerm.class,
             HTextFlowTarget.class, HTextFlow.class, HDocument.class,
             HLocaleMember.class, HLocale.class,
             HProjectIteration.class, HProject.class,
             HPerson.class, HAccount.class
-      ));
+            ));
       copyCallback = new TakeCopyCallback();
    }
 
@@ -271,7 +274,6 @@ public class EntityPersistServiceImplTest
    }
 
    @Test
-   @Ignore("need to fix the HTextFlow.pos being null")
    public void canMakeMultipleEntitiesOfSameType()
    {
       // 3 documents
@@ -279,33 +281,19 @@ public class EntityPersistServiceImplTest
       HDocument document2 = service.makeAndPersist(entityManager, HDocument.class);
       HDocument document3 = service.makeAndPersist(entityManager, HDocument.class);
 
-      EntityPersistService.Callback callback = new EntityPersistService.Callback()
-      {
-         @Override
-         public Iterable<Object> beforePersist(EntityManager entityManager, Iterable<Object> toBePersisted)
-         {
-            HDocument document = ClassUtil.findEntity(toBePersisted, HDocument.class);
-            document.getTextFlows().clear();
-            HTextFlow textFlow = ClassUtil.findEntity(toBePersisted, HTextFlow.class);
-            textFlow.setObsolete(false);
-            document.getTextFlows().add(textFlow);
-            return toBePersisted;
-         }
-      };
-
       // 4 targets
       EntityPersistServiceBuilder.builder()
             .reuseEntity(document1)
-            .build().makeAndPersist(entityManager, HTextFlowTarget.class, callback);
+            .build().makeAndPersist(entityManager, HTextFlowTarget.class);
       EntityPersistServiceBuilder.builder()
             .reuseEntity(document2)
-            .build().makeAndPersist(entityManager, HTextFlowTarget.class, callback);
+            .build().makeAndPersist(entityManager, HTextFlowTarget.class);
       EntityPersistServiceBuilder.builder()
             .reuseEntity(document3)
-            .build().makeAndPersist(entityManager, HTextFlowTarget.class, callback);
+            .build().makeAndPersist(entityManager, HTextFlowTarget.class);
       EntityPersistServiceBuilder.builder()
             .reuseEntity(document1)
-            .build().makeAndPersist(entityManager, HTextFlowTarget.class, callback);
+            .build().makeAndPersist(entityManager, HTextFlowTarget.class);
 
       List<HTextFlowTarget> result = entityManager.createQuery("from HTextFlowTarget order by id", HTextFlowTarget.class).getResultList();
 
@@ -315,6 +303,21 @@ public class EntityPersistServiceImplTest
       assertThat(result.get(1).getTextFlow().getDocument(), Matchers.equalTo(document2));
       assertThat(result.get(2).getTextFlow().getDocument(), Matchers.equalTo(document3));
       assertThat(result.get(3).getTextFlow().getDocument(), Matchers.equalTo(document1));
+   }
+
+   @Test
+   public void canSetIndexColumn()
+   {
+      service.makeAndPersist(entityManager, LineItem.class);
+      service.makeAndPersist(entityManager, LineItem.class);
+
+      entityManager.clear();
+      List<LineItem> result = entityManager.createQuery("from LineItem it order by it.number", LineItem.class).getResultList();
+
+      assertThat(result, Matchers.hasSize(2));
+      log.info("result {}", result);
+      assertThat(result.get(0).getNumber(), Matchers.equalTo(0));
+      assertThat(result.get(1).getNumber(), Matchers.equalTo(1));
    }
 
 }

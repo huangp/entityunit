@@ -21,9 +21,9 @@ public class EntityClassTest
    {
       EntityClass entityClass = EntityClass.from(HTextFlowTargetReviewComment.class);
 
-      Iterable<Class<?>> elements = entityClass.getDependingEntityTypes();
+      Iterable<EntityClass> elements = entityClass.getDependingEntityTypes();
 
-      assertThat(elements, Matchers.<Class<?>> iterableWithSize(2));
+      assertThat(elements, Matchers.<EntityClass> iterableWithSize(2));
    }
 
    @Test
@@ -31,9 +31,9 @@ public class EntityClassTest
    {
       EntityClass entityClass = EntityClass.from(HProjectIteration.class);
 
-      Iterable<Class<?>> elements = entityClass.getDependingEntityTypes();
+      Iterable<EntityClass> elements = entityClass.getDependingEntityTypes();
 
-      assertThat(elements, Matchers.<Class<?>> iterableWithSize(2));
+      assertThat(elements, Matchers.<EntityClass> iterableWithSize(2));
    }
 
    @Test
@@ -45,7 +45,7 @@ public class EntityClassTest
 
       assertThat(elements, Matchers.<Settable> iterableWithSize(19));
 
-      assertThat(entityClass.getDependingEntityTypes(), Matchers.<Class<?>> iterableWithSize(2));
+      assertThat(entityClass.getDependingEntityTypes(), Matchers.<EntityClass> iterableWithSize(2));
       assertThat(entityClass.getContainingEntitiesGetterMethods(), Matchers.<Method> iterableWithSize(3));
    }
 

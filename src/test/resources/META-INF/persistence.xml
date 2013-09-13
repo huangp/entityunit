@@ -17,7 +17,7 @@
       <property name="hibernate.connection.driver_class" value="org.h2.Driver"/>
       <!-- Configure the in-memory database to be shared, and so that it
          doesn't disappear after it has been set up by Hibernate: -->
-      <property name="hibernate.connection.url" value="jdbc:h2:file:${project.build.directory}/h2/db;AUTO_SERVER=TRUE"/>
+      <property name="hibernate.connection.url" value="jdbc:h2:file:${project.build.directory}/h2/db;AUTO_SERVER=TRUE;MVCC=true"/>
       <property name="hibernate.connection.username" value="sa"/>
       <property name="hibernate.connection.password" value=""/>
       <!--hibernate3-maven-plugin:hbm2ddl needs this  -->

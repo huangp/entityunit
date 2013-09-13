@@ -8,7 +8,6 @@ import com.github.huangp.makeit.holder.BeanValueHolder;
 import com.github.huangp.makeit.maker.Maker;
 import com.github.huangp.makeit.maker.PreferredValueMakersRegistry;
 import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeToken;
 
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
