@@ -1,5 +1,18 @@
 package com.github.huangp.makeit.maker;
 
+import java.lang.annotation.Annotation;
+import java.util.List;
+import javax.persistence.Id;
+import javax.persistence.Version;
+
+import com.github.huangp.makeit.util.Settable;
+import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+
+import static com.google.common.base.Predicates.instanceOf;
+import static com.google.common.base.Predicates.or;
+
 /**
  * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
  */
@@ -16,5 +29,20 @@ class NumberMaker implements Maker<Number>
    private synchronized static int next()
    {
       return ++counter;
+   }
+
+   public static Maker<Number> from(Optional<Settable> optionalAnnotatedElement)
+   {
+      if (optionalAnnotatedElement.isPresent())
+      {
+         List<Annotation> annotations = Lists.newArrayList(optionalAnnotatedElement.get().getAnnotations());
+         Optional<Annotation> idOrVersion = Iterables.tryFind(annotations,
+               or(instanceOf(Id.class), instanceOf(Version.class)));
+         if (idOrVersion.isPresent())
+         {
+            return new NullMaker<Number>();
+         }
+      }
+      return new NumberMaker();
    }
 }

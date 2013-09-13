@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ScalarValueMakerFactory
 {
+   private static final TypeToken<Number> NUMBER_TYPE_TOKEN = TypeToken.of(Number.class);
    private final MakeContext context;
 
    public Maker from(Settable settable)
@@ -48,9 +49,9 @@ public class ScalarValueMakerFactory
       {
          return new DateMaker();
       }
-      if (TypeToken.of(Number.class).isAssignableFrom(type))
+      if (NUMBER_TYPE_TOKEN.isAssignableFrom(type))
       {
-         return new NumberMaker();
+         return NumberMaker.from(optionalAnnotatedElement);
       }
       if (token.isArray())
       {
@@ -70,7 +71,7 @@ public class ScalarValueMakerFactory
       if (ClassUtil.isMap(type))
       {
          log.debug("map: {}", token);
-         return new NullMaker();
+         return new NullMaker<Object>();
       }
       if (ClassUtil.isEntity(type))
       {

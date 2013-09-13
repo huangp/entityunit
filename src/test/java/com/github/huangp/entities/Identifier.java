@@ -14,12 +14,16 @@ import lombok.Setter;
  */
 
 @MappedSuperclass
-@Getter
 public class Identifier implements Serializable
 {
-   @Id
-   @GeneratedValue
    @Setter(AccessLevel.PACKAGE)
    protected Long id;
 
+   // TODO works fine in hibernate if @Id is on field. But EntityClass assumes this is property access type
+   @Id
+   @GeneratedValue
+   public Long getId()
+   {
+      return id;
+   }
 }

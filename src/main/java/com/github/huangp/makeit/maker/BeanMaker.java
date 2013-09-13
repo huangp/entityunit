@@ -158,7 +158,7 @@ public class BeanMaker<T> implements Maker<T>
          }
          catch (IllegalAccessException e)
          {
-            log.warn("can not determine field has default value or not");
+            log.warn("can not determine field {} has default value or not", input);
             return false;
          }
          catch (InvocationTargetException e)

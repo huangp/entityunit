@@ -1,6 +1,5 @@
 package com.github.huangp.makeit.entity;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -31,11 +30,10 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import static com.github.huangp.makeit.entity.EntityClass.HasAnnotationPredicate.has;
+import static com.github.huangp.makeit.util.HasAnnotationPredicate.has;
 import static com.google.common.collect.Lists.newArrayList;
 
 /**
@@ -89,7 +87,6 @@ public class EntityClass
     */
    public static EntityClass from(final Class clazz, final ScanOption scanOption)
    {
-
       try
       {
          return cache.get(CacheKey.of(clazz, scanOption), new Callable<EntityClass>()
@@ -109,19 +106,29 @@ public class EntityClass
 
    private static EntityClass createEntityClass(Class clazz, ScanOption scanOption)
    {
+      List<Settable> settables = Lists.newArrayList(getSettables(clazz));
+      Class<?> superClass = clazz.getSuperclass();
+      while (superClass != null && superClass != Object.class)
+      {
+         settables.addAll(getSettables(superClass));
+         superClass = superClass.getSuperclass();
+      }
+      return new EntityClass(clazz, settables, scanOption);
+   }
+
+   private static List<Settable> getSettables(Class clazz)
+   {
       if (ClassUtil.isAccessTypeIsField(clazz))
       {
-         List<Field> allInstanceFields = ClassUtil.getAllInstanceFields(clazz);
-         List<Settable> settableFields = Lists.transform(allInstanceFields, new FieldToSettableFunction(clazz));
          // field based annotation
-         return new EntityClass(clazz, settableFields, scanOption);
+         List<Field> allInstanceFields = ClassUtil.getAllInstanceFields(clazz);
+         return Lists.transform(allInstanceFields, new FieldToSettableFunction(clazz));
       }
       else
       {
          // property based annotation
          Iterable<Method> allMethods = ClassUtil.getAllPropertyReadMethods(clazz);
-         List<Settable> settableMethods = newArrayList(Iterables.transform(allMethods, new MethodToSettableFunction(clazz)));
-         return new EntityClass(clazz, settableMethods, scanOption);
+         return newArrayList(Iterables.transform(allMethods, new MethodToSettableFunction(clazz)));
       }
    }
 
@@ -225,23 +232,6 @@ public class EntityClass
       public Settable apply(Method input)
       {
          return SettableProperty.from(ownerType, input);
-      }
-   }
-
-   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-   static class HasAnnotationPredicate<A extends AnnotatedElement> implements Predicate<A>
-   {
-      private final Class<? extends Annotation> annotationClass;
-
-      public static <A extends AnnotatedElement> Predicate<A> has(Class<? extends Annotation> annotationClass)
-      {
-         return new HasAnnotationPredicate<A>(annotationClass);
-      }
-
-      @Override
-      public boolean apply(A input)
-      {
-         return input.isAnnotationPresent(annotationClass);
       }
    }
 

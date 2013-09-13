@@ -15,10 +15,10 @@ import org.jodah.typetools.TypeResolver;
 import com.github.huangp.makeit.holder.BeanValueHolder;
 import com.github.huangp.makeit.maker.BeanMaker;
 import com.github.huangp.makeit.util.ClassUtil;
+import com.github.huangp.makeit.util.HasAnnotationPredicate;
 import com.github.huangp.makeit.util.Settable;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableSet;
@@ -119,7 +119,14 @@ class EntityPersistServiceImpl implements EntityPersistService
       entityManager.getTransaction().begin();
       for (Object entity : queue)
       {
-         entityManager.persist(entity);
+         if (ClassUtil.isUnsaved(entity))
+         {
+            entityManager.persist(entity);
+         }
+         else
+         {
+            entityManager.merge(entity);
+         }
       }
       entityManager.getTransaction().commit();
    }
@@ -173,7 +180,7 @@ class EntityPersistServiceImpl implements EntityPersistService
          EntityClass entityClass = EntityClass.from(entityType);
          Iterable<String> manyToManyTables = entityClass.getManyToManyTables();
 
-         Settable idSettable = Iterables.find(entityClass.getElements(), EntityClass.HasAnnotationPredicate.has(Id.class));
+         Settable idSettable = Iterables.find(entityClass.getElements(), HasAnnotationPredicate.has(Id.class));
          List<Serializable> ids = getIds(exclusion.get(entityType), idSettable);
 
          for (String table : manyToManyTables)

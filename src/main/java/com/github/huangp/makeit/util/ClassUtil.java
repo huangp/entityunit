@@ -3,15 +3,14 @@ package com.github.huangp.makeit.util;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
-import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,7 +19,9 @@ import java.util.Map;
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 
+import com.github.huangp.makeit.entity.EntityClass;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -50,13 +51,6 @@ public final class ClassUtil
    public static List<Field> getAllInstanceFields(Class type)
    {
       List<Field> fields = Lists.newArrayList(type.getDeclaredFields());
-
-      Class<?> superClass = type.getSuperclass();
-      while (superClass != null)
-      {
-         fields.addAll(Lists.newArrayList(superClass.getDeclaredFields()));
-         superClass = superClass.getSuperclass();
-      }
       return ImmutableList.copyOf(Iterables.filter(fields, new Predicate<Field>()
       {
          @Override
@@ -66,6 +60,22 @@ public final class ClassUtil
             return !Modifier.isStatic(mod) && !Modifier.isTransient(mod);
          }
       }));
+
+//      Class<?> superClass = type.getSuperclass();
+//      while (superClass != null)
+//      {
+//         fields.addAll(Lists.newArrayList(superClass.getDeclaredFields()));
+//         superClass = superClass.getSuperclass();
+//      }
+//      return ImmutableList.copyOf(Iterables.filter(fields, new Predicate<Field>()
+//      {
+//         @Override
+//         public boolean apply(Field input)
+//         {
+//            int mod = input.getModifiers();
+//            return !Modifier.isStatic(mod) && !Modifier.isTransient(mod);
+//         }
+//      }));
    }
 
    public static Iterable<Method> getAllPropertyReadMethods(Class clazz)
@@ -73,7 +83,7 @@ public final class ClassUtil
       try
       {
          List<PropertyDescriptor> propertyDescriptors = Lists.newArrayList(
-               Introspector.getBeanInfo(clazz, Object.class).getPropertyDescriptors());
+               Introspector.getBeanInfo(clazz, clazz.getSuperclass()).getPropertyDescriptors());
          List<Method> methods = Lists.transform(propertyDescriptors, new Function<PropertyDescriptor, Method>()
          {
             @Override
@@ -201,5 +211,18 @@ public final class ClassUtil
          throw Throwables.propagate(e);
       }
       throw new RuntimeException("not found");
+   }
+
+   public static boolean isUnsaved(Object entity)
+   {
+      Settable idSettable = Iterables.find(EntityClass.from(entity.getClass()).getElements(), HasAnnotationPredicate.has(Id.class));
+      try
+      {
+         return idSettable.getterMethod().invoke(entity) == null;
+      }
+      catch (Exception e)
+      {
+         throw Throwables.propagate(e);
+      }
    }
 }
