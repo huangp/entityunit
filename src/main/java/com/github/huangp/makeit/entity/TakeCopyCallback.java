@@ -11,7 +11,7 @@ import lombok.Getter;
 /**
 * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
 */
-public class TakeCopyCallback implements EntityPersistService.Callback
+public class TakeCopyCallback implements EntityPersister.Callback
 {
    @Getter
    private List<Object> copy;

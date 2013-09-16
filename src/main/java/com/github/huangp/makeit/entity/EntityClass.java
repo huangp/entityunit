@@ -115,31 +115,32 @@ public class EntityClass
       }
    }
 
-   private static EntityClass createEntityClass(Class clazz, ScanOption scanOption)
+   private static EntityClass createEntityClass(Class rootClass, ScanOption scanOption)
    {
-      List<Settable> settables = Lists.newArrayList(getSettables(clazz));
-      Class<?> superClass = clazz.getSuperclass();
+      List<Settable> settables = Lists.newArrayList(getSettables(rootClass, rootClass));
+      Class<?> superClass = rootClass.getSuperclass();
       while (superClass != null && superClass != Object.class)
       {
-         settables.addAll(getSettables(superClass));
+         settables.addAll(getSettables(rootClass, superClass));
          superClass = superClass.getSuperclass();
       }
-      return new EntityClass(clazz, settables, scanOption);
+      return new EntityClass(rootClass, settables, scanOption);
    }
 
-   private static List<Settable> getSettables(Class clazz)
+   private static List<Settable> getSettables(Class rootClass, Class targetClass)
    {
-      if (ClassUtil.isAccessTypeIsField(clazz))
+      if (ClassUtil.isAccessTypeIsField(targetClass))
       {
          // field based annotation
-         List<Field> allInstanceFields = ClassUtil.getAllInstanceFields(clazz);
-         return Lists.transform(allInstanceFields, new FieldToSettableFunction(clazz));
+         List<Field> allInstanceFields = ClassUtil.getAllInstanceFields(targetClass);
+         return Lists.transform(allInstanceFields, new FieldToSettableFunction(rootClass));
       }
       else
       {
          // property based annotation
-         Iterable<Method> allMethods = ClassUtil.getAllPropertyReadMethods(clazz);
-         return newArrayList(transform(allMethods, new MethodToSettableFunction(clazz)));
+         // TODO for super class of entity the property based annotation assumption may not hold true. Need to scan all and find which one has annotation
+         Iterable<Method> allMethods = ClassUtil.getAllPropertyReadMethods(targetClass);
+         return newArrayList(transform(allMethods, new MethodToSettableFunction(rootClass)));
       }
    }
 

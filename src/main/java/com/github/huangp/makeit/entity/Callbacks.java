@@ -4,7 +4,7 @@ import javax.persistence.EntityManager;
 
 import com.google.common.collect.ImmutableList;
 
-import static com.github.huangp.makeit.entity.EntityPersistService.*;
+import static com.github.huangp.makeit.entity.EntityPersister.*;
 
 /**
  * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
@@ -29,7 +29,7 @@ public class Callbacks
 
    private static class ChainedCallback implements Callback
    {
-      private final ImmutableList<EntityPersistService.Callback> callbacks;
+      private final ImmutableList<EntityPersister.Callback> callbacks;
 
       public ChainedCallback(Callback one, Callback... rest)
       {

@@ -21,7 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 /**
  * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
  */
-public class EntityPersistServiceBuilderTest
+public class EntityPersisterBuilderTest
 {
    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
    private EntityManager em;
@@ -36,7 +36,7 @@ public class EntityPersistServiceBuilderTest
    public void canReuseEntity()
    {
       Category existEntity = new Category();
-      EntityPersistService service = EntityPersistServiceBuilder.builder()
+      EntityPersister service = EntityPersisterBuilder.builder()
             .reuseEntity(existEntity)
             .build();
 
@@ -49,7 +49,7 @@ public class EntityPersistServiceBuilderTest
    public void canReuseMakeContext()
    {
 
-      EntityPersistService service = EntityPersistServiceBuilder.builder()
+      EntityPersister service = EntityPersisterBuilder.builder()
             .includeOptionalOneToOne()
             .addConstructorParameterMaker(HLocale.class, 0, new FixedValueMaker<LocaleId>(LocaleId.DE))
             .build();
@@ -59,7 +59,7 @@ public class EntityPersistServiceBuilderTest
       assertThat(hLocale.getLocaleId(), Matchers.equalTo(LocaleId.DE));
       BeanValueHolder beans = service.exportCopyOfBeans();
 
-      service = EntityPersistServiceBuilder.builder()
+      service = EntityPersisterBuilder.builder()
             .reuseObjects(beans)
             .build();
 

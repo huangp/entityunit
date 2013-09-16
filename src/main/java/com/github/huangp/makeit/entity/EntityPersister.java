@@ -7,15 +7,11 @@ import com.github.huangp.makeit.holder.BeanValueHolder;
 /**
  * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
  */
-public interface EntityPersistService
+public interface EntityPersister
 {
    <T> T makeAndPersist(EntityManager entityManager, Class<T> entityType);
 
    <T> T makeAndPersist(EntityManager entityManager, Class<T> entityType, Callback callback);
-
-   void deleteAll(EntityManager entityManager, Iterable<Class> entityClasses);
-
-   void deleteAllExcept(EntityManager entityManager, Iterable<Class> entityClasses, Object... excludedEntities);
 
    // TODO do we need this anymore? TakeCopyCallback should handle it
    BeanValueHolder exportCopyOfBeans();
