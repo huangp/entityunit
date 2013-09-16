@@ -7,8 +7,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import javax.persistence.ElementCollection;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
+import javax.persistence.JoinTable;
 import javax.persistence.Query;
 
 import org.jodah.typetools.TypeResolver;
@@ -32,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * TODO separate delete into its own class
  * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
  */
 @Slf4j
@@ -124,10 +127,11 @@ class EntityPersistServiceImpl implements EntityPersistService
          {
             entityManager.persist(entity);
          }
-//         else
-//         {
+         else
+         {
+//            entityManager.refresh(entity);
 //            entityManager.merge(entity);
-//         }
+         }
       }
       entityManager.getTransaction().commit();
    }
@@ -148,11 +152,23 @@ class EntityPersistServiceImpl implements EntityPersistService
       for (Class entityType : entityClasses)
       {
          EntityClass entityClass = EntityClass.from(entityType);
+
+         // TODO combine these two
+         // delete many to many tables
          Iterable<String> manyToManyTables = entityClass.getManyToManyTables();
          for (String table : manyToManyTables)
          {
             deleteTable(entityManager, table);
          }
+         
+         // delete element collection
+         Iterable<Settable> elementCollection = Iterables.filter(entityClass.getElements(), HasAnnotationPredicate.has(ElementCollection.class));
+         for (Settable settable : elementCollection)
+         {
+            String table = settable.getAnnotation(JoinTable.class).name();
+            deleteTable(entityManager, table);
+         }
+
          deleteEntity(entityManager, entityType.getSimpleName());
       }
 
@@ -189,6 +205,7 @@ class EntityPersistServiceImpl implements EntityPersistService
             // TODO need to consider exclusion as well
             deleteTable(entityManager, table);
          }
+         // TODO element collection
          deleteEntityExcept(entityManager, entityType.getSimpleName(), exclusion.get(entityType), idSettable, ids);
       }
 
