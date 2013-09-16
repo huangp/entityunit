@@ -6,6 +6,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Query;
 
 import com.github.huangp.makeit.util.ClassUtil;
@@ -19,6 +20,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimaps;
 
 import lombok.extern.slf4j.Slf4j;
+import static com.github.huangp.makeit.util.HasAnnotationPredicate.has;
+import static com.google.common.base.Predicates.*;
+import static com.google.common.collect.Iterables.filter;
+import static com.google.common.collect.Iterables.transform;
 
 /**
  * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
@@ -37,19 +42,10 @@ public final class EntityCleaner
       {
          EntityClass entityClass = EntityClass.from(entityType);
 
-         // TODO combine these two
-         // delete many to many tables
-         Iterable<String> manyToManyTables = entityClass.getManyToManyTables();
-         for (String table : manyToManyTables)
+         // delete many to many and element collection tables
+         Iterable<String> associationTables = getAssociationTables(entityClass);
+         for (String table : associationTables)
          {
-            deleteTable(entityManager, table);
-         }
-         
-         // delete element collection
-         Iterable<Settable> elementCollection = Iterables.filter(entityClass.getElements(), HasAnnotationPredicate.has(ElementCollection.class));
-         for (Settable settable : elementCollection)
-         {
-            String table = settable.getAnnotation(JoinTable.class).name();
             deleteTable(entityManager, table);
          }
 
@@ -78,7 +74,7 @@ public final class EntityCleaner
       for (Class entityType : entityClasses)
       {
          EntityClass entityClass = EntityClass.from(entityType);
-         Iterable<String> manyToManyTables = entityClass.getManyToManyTables();
+         Iterable<String> manyToManyTables = getAssociationTables(entityClass);
 
          Settable idSettable = Iterables.find(entityClass.getElements(), HasAnnotationPredicate.has(Id.class));
          List<Serializable> ids = getIds(exclusion.get(entityType), idSettable);
@@ -120,6 +116,24 @@ public final class EntityCleaner
       String queryString = String.format("delete %s e where e.%s not in (:excludedIds)", name, idSettable.getSimpleName());
       int result = entityManager.createQuery(queryString).setParameter("excludedIds", ids).executeUpdate();
       log.debug("executed [{}], affected row: {}", queryString, result);
+   }
+
+   /**
+    * This will find all ManyToMany and ElementCollection annotated tables.
+    */
+   private static Iterable<String> getAssociationTables(EntityClass entityClass)
+   {
+      Iterable<Settable> association = filter(entityClass.getElements(),
+            and(or(has(ManyToMany.class), has(ElementCollection.class)), has(JoinTable.class)));
+      return transform(association, new Function<Settable, String>()
+      {
+         @Override
+         public String apply(Settable input)
+         {
+            JoinTable annotation = input.getAnnotation(JoinTable.class);
+            return annotation.name();
+         }
+      });
    }
 
    private static List<Serializable> getIds(List<Object> entities, final Settable idSettable)

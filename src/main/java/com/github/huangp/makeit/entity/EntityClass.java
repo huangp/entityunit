@@ -64,7 +64,6 @@ public class EntityClass
 
    private transient Iterable<EntityClass> requiredEntityTypes;
    private transient Iterable<Method> associationGetters;
-   private transient Iterable<String> manyToManyTables;
    private transient Iterable<Method> manyToManyGetters;
 
    private EntityClass(Class type, Iterable<Settable> elements, ScanOption scanOption)
@@ -165,30 +164,11 @@ public class EntityClass
       return associationGetters;
    }
 
-   public Iterable<String> getManyToManyTables()
-   {
-      if (manyToManyTables == null)
-      {
-         Iterable<Settable> manyToMany = filter(elements, Predicates.and(has(ManyToMany.class), has(JoinTable.class)));
-         manyToManyTables = transform(manyToMany, new Function<Settable, String>()
-         {
-            @Override
-            public String apply(Settable input)
-            {
-               JoinTable annotation = input.getAnnotation(JoinTable.class);
-               return annotation.name();
-            }
-         });
-
-      }
-      return manyToManyTables;
-   }
-
    public Iterable<Method> getManyToManyMethods()
    {
       if (manyToManyGetters == null)
       {
-         Iterable<Settable> manyToMany = filter(elements, Predicates.and(has(ManyToMany.class), has(JoinTable.class)));
+         Iterable<Settable> manyToMany = filter(getElements(), Predicates.and(has(ManyToMany.class), has(JoinTable.class)));
          manyToManyGetters = transform(manyToMany, SettableGetterMethodFunction.FUNCTION);
       }
       return manyToManyGetters;
