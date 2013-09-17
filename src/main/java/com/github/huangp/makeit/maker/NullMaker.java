@@ -1,7 +1,7 @@
 package com.github.huangp.makeit.maker;
 
 /**
- * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+ * @author Patrick Huang
  */
 class NullMaker<T> implements Maker<T>
 {

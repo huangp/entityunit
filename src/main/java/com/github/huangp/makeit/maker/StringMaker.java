@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+ * @author Patrick Huang
  */
 @Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -38,7 +38,7 @@ class StringMaker implements Maker<String>
       Settable settable = optionalElement.get();
       for (Annotation annotation : settable.getAnnotations())
       {
-         if (annotation instanceof Email)
+         if (annotation instanceof Email || settable.getSimpleName().equals("email"))
          {
             isEmail = true;
          }

@@ -22,7 +22,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
 /**
- * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+ * @author Patrick Huang
  */
 @Slf4j
 public class EntityClassScannerTest

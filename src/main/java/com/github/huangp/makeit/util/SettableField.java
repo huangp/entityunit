@@ -6,11 +6,10 @@ import java.lang.reflect.Method;
 import lombok.Delegate;
 
 /**
- * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+ * @author Patrick Huang
  */
 public class SettableField implements Settable
 {
-   private final Class ownerType;
    @Delegate
    private final Field field;
    private final Method getterMethod;
@@ -18,7 +17,6 @@ public class SettableField implements Settable
 
    private SettableField(Class ownerType, Field field)
    {
-      this.ownerType = ownerType;
       this.field = field;
       getterMethod = ClassUtil.getterMethod(ownerType, field.getName());
       fullName = String.format(FULL_NAME_FORMAT, ownerType.getName(), field.getName());
@@ -50,6 +48,6 @@ public class SettableField implements Settable
    @Override
    public String toString()
    {
-      return ownerType.getSimpleName() + "." + getSimpleName();
+      return fullName;
    }
 }

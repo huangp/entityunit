@@ -1,7 +1,7 @@
 package com.github.huangp.beans;
 
 /**
-* @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+* @author Patrick Huang
 */
 public enum Language
 {

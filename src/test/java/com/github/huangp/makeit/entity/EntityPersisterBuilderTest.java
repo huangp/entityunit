@@ -19,7 +19,7 @@ import com.github.huangp.makeit.maker.FixedValueMaker;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
- * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+ * @author Patrick Huang
  */
 public class EntityPersisterBuilderTest
 {

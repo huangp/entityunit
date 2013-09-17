@@ -43,7 +43,7 @@ import com.github.huangp.makeit.maker.RangeValuesMaker;
 import com.google.common.collect.Lists;
 
 /**
- * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+ * @author Patrick Huang
  */
 @Slf4j
 public class EntityPersisterImplTest
@@ -116,8 +116,6 @@ public class EntityPersisterImplTest
       assertThat(numOfProject, Matchers.equalTo(1L));
       assertThat(hProjectIteration.getId(), Matchers.notNullValue());
       assertThat(hProjectIteration.getProject().getId(), Matchers.notNullValue());
-
-      EntityCleaner.deleteAll(entityManager, Lists.<Class> newArrayList(HProjectIteration.class, HProject.class));
    }
 
    @Test

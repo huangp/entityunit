@@ -3,14 +3,13 @@ package com.github.huangp.makeit.util;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 
-import com.github.huangp.makeit.entity.EntityClass;
 import com.google.common.base.Predicate;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 /**
-* @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+* @author Patrick Huang
 */
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class HasAnnotationPredicate<A extends AnnotatedElement> implements Predicate<A>

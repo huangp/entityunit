@@ -7,7 +7,6 @@ import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -22,7 +21,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 import com.github.huangp.makeit.entity.EntityClass;
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
@@ -34,7 +32,7 @@ import com.google.common.reflect.Invokable;
 import com.google.common.reflect.TypeToken;
 
 /**
- * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+ * @author Patrick Huang
  */
 public final class ClassUtil
 {
@@ -48,51 +46,38 @@ public final class ClassUtil
     * @param type class to work with
     * @return list of fields
     */
-   public static List<Field> getAllInstanceFields(Class type)
+   public static List<Field> getInstanceFields(Class type)
    {
       List<Field> fields = Lists.newArrayList(type.getDeclaredFields());
-      return ImmutableList.copyOf(Iterables.filter(fields, new Predicate<Field>()
-      {
-         @Override
-         public boolean apply(Field input)
-         {
-            int mod = input.getModifiers();
-            return !Modifier.isStatic(mod) && !Modifier.isTransient(mod);
-         }
-      }));
-
-//      Class<?> superClass = type.getSuperclass();
-//      while (superClass != null)
-//      {
-//         fields.addAll(Lists.newArrayList(superClass.getDeclaredFields()));
-//         superClass = superClass.getSuperclass();
-//      }
-//      return ImmutableList.copyOf(Iterables.filter(fields, new Predicate<Field>()
-//      {
-//         @Override
-//         public boolean apply(Field input)
-//         {
-//            int mod = input.getModifiers();
-//            return !Modifier.isStatic(mod) && !Modifier.isTransient(mod);
-//         }
-//      }));
+      return ImmutableList.copyOf(Iterables.filter(fields, InstanceFieldPredicate.PREDICATE));
    }
 
-   public static Iterable<Method> getAllPropertyReadMethods(Class clazz)
+   public static List<Field> getAllDeclaredFields(Class clazz)
+   {
+      List<Field> fields = Lists.newArrayList(clazz.getDeclaredFields());
+      Class<?> superClass = clazz.getSuperclass();
+      while (superClass != null)
+      {
+         fields.addAll(Lists.newArrayList(superClass.getDeclaredFields()));
+         superClass = superClass.getSuperclass();
+      }
+      return ImmutableList.copyOf(Iterables.filter(fields, InstanceFieldPredicate.PREDICATE));
+   }
+
+   public static Iterable<PropertyDescriptor> getReadablePropertyDescriptors(Class clazz)
    {
       try
       {
-         List<PropertyDescriptor> propertyDescriptors = Lists.newArrayList(
+         List<PropertyDescriptor> descriptors = Lists.newArrayList(
                Introspector.getBeanInfo(clazz, clazz.getSuperclass()).getPropertyDescriptors());
-         List<Method> methods = Lists.transform(propertyDescriptors, new Function<PropertyDescriptor, Method>()
+         return Iterables.filter(descriptors, new Predicate<PropertyDescriptor>()
          {
             @Override
-            public Method apply(PropertyDescriptor input)
+            public boolean apply(PropertyDescriptor input)
             {
-               return input.getReadMethod();
+               return input.getReadMethod() != null;
             }
          });
-         return Iterables.filter(methods, Predicates.notNull());
       }
       catch (IntrospectionException e)
       {
@@ -223,6 +208,17 @@ public final class ClassUtil
       catch (Exception e)
       {
          throw Throwables.propagate(e);
+      }
+   }
+
+   private static enum InstanceFieldPredicate implements Predicate<Field>
+   {
+      PREDICATE;
+      @Override
+      public boolean apply(Field input)
+      {
+         int mod = input.getModifiers();
+         return !Modifier.isStatic(mod) && !Modifier.isTransient(mod);
       }
    }
 }

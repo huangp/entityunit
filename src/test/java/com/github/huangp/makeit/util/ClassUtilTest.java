@@ -11,7 +11,7 @@ import lombok.Setter;
 import static org.hamcrest.MatcherAssert.*;
 
 /**
- * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+ * @author Patrick Huang
  */
 public class ClassUtilTest
 {

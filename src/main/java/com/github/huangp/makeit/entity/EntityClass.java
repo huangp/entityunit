@@ -1,5 +1,6 @@
 package com.github.huangp.makeit.entity;
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -41,7 +42,7 @@ import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 
 /**
- * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+ * @author Patrick Huang
  */
 @ToString(of = "type")
 @EqualsAndHashCode(of = {"type", "scanOption"})
@@ -131,15 +132,14 @@ public class EntityClass
       if (ClassUtil.isAccessTypeIsField(targetClass))
       {
          // field based annotation
-         List<Field> allInstanceFields = ClassUtil.getAllInstanceFields(targetClass);
-         return Lists.transform(allInstanceFields, new FieldToSettableFunction(rootClass));
+         List<Field> fields = ClassUtil.getInstanceFields(targetClass);
+         return Lists.transform(fields, new FieldToSettableFunction(rootClass));
       }
       else
       {
          // property based annotation
-         // TODO for super class of entity the property based annotation assumption may not hold true. Need to scan all and find which one has annotation
-         Iterable<Method> allMethods = ClassUtil.getAllPropertyReadMethods(targetClass);
-         return newArrayList(transform(allMethods, new MethodToSettableFunction(rootClass)));
+         Iterable<PropertyDescriptor> descriptors = ClassUtil.getReadablePropertyDescriptors(targetClass);
+         return Lists.newArrayList(Iterables.transform(descriptors, new PropertyToSettableFunction(rootClass)));
       }
    }
 
@@ -222,12 +222,12 @@ public class EntityClass
    }
 
    @RequiredArgsConstructor
-   private static class MethodToSettableFunction implements Function<Method, Settable>
+   private static class PropertyToSettableFunction implements Function<PropertyDescriptor, Settable>
    {
       private final Class ownerType;
 
       @Override
-      public Settable apply(Method input)
+      public Settable apply(PropertyDescriptor input)
       {
          return SettableProperty.from(ownerType, input);
       }

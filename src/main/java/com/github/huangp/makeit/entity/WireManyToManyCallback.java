@@ -13,7 +13,7 @@ import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 
 /**
- * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+ * @author Patrick Huang
  */
 @RequiredArgsConstructor
 public class WireManyToManyCallback implements EntityPersister.Callback

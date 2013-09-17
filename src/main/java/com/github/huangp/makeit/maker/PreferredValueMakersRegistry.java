@@ -2,7 +2,6 @@ package com.github.huangp.makeit.maker;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
@@ -11,11 +10,12 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 import lombok.NoArgsConstructor;
 
 /**
- * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+ * @author Patrick Huang
  */
 @NoArgsConstructor
 public class PreferredValueMakersRegistry

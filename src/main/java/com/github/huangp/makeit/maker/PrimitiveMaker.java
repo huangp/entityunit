@@ -3,7 +3,7 @@ package com.github.huangp.makeit.maker;
 import com.google.common.base.Defaults;
 
 /**
- * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+ * @author Patrick Huang
  */
 class PrimitiveMaker implements Maker
 {

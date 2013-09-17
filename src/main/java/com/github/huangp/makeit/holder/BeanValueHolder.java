@@ -4,14 +4,13 @@ import java.util.Map;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.ImmutableTypeToInstanceMap;
 import com.google.common.reflect.MutableTypeToInstanceMap;
 import com.google.common.reflect.TypeToInstanceMap;
 import com.google.common.reflect.TypeToken;
 
 /**
- * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+ * @author Patrick Huang
  */
 public class BeanValueHolder
 {

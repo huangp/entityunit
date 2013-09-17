@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+ * @author Patrick Huang 
  */
 
 @NoArgsConstructor(staticName = "builder")
@@ -93,8 +93,8 @@ public class EntityPersisterBuilder
    public EntityPersister build()
    {
 
-      EntityPersisterBuilder.log.debug("registry: {}", registry);
-      EntityPersisterBuilder.log.debug("bean value holder: {}", valueHolder);
+      log.debug("registry: {}", registry);
+      log.debug("bean value holder: {}", valueHolder);
       EntityClassScanner scanner = new EntityClassScanner(scanOption);
       MakeContext context = new MakeContext(valueHolder, registry);
       return new EntityPersisterImpl(scanner, context);

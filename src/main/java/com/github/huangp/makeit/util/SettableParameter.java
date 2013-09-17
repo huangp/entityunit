@@ -9,7 +9,7 @@ import com.google.common.reflect.Parameter;
 import lombok.Delegate;
 
 /**
- * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+ * @author Patrick Huang
  */
 public class SettableParameter implements Settable
 {

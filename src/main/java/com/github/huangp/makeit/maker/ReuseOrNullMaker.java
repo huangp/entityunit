@@ -7,7 +7,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 /**
- * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+ * @author Patrick Huang
  */
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 class ReuseOrNullMaker implements Maker<Object>

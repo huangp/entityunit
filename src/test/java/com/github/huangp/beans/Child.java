@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.Setter;
 
 /**
-* @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+* @author Patrick Huang
 */
 @Data
 public class Child

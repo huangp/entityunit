@@ -9,7 +9,7 @@ import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 
 /**
-* @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+* @author Patrick Huang
 */
 public class TakeCopyCallback implements EntityPersister.Callback
 {

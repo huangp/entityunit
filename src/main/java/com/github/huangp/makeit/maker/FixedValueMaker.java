@@ -5,7 +5,7 @@ import com.google.common.base.Objects;
 import lombok.RequiredArgsConstructor;
 
 /**
- * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+ * @author Patrick Huang
  */
 @RequiredArgsConstructor
 public class FixedValueMaker<V> implements Maker<V>

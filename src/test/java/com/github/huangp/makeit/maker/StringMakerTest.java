@@ -12,7 +12,7 @@ import org.zanata.model.HPerson;
 import com.google.common.base.Optional;
 
 /**
- * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+ * @author Patrick Huang
  */
 public class StringMakerTest
 {

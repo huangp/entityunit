@@ -21,18 +21,30 @@ import com.google.common.collect.Multimaps;
 
 import lombok.extern.slf4j.Slf4j;
 import static com.github.huangp.makeit.util.HasAnnotationPredicate.has;
-import static com.google.common.base.Predicates.*;
+import static com.google.common.base.Predicates.and;
+import static com.google.common.base.Predicates.or;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.transform;
 
 /**
- * @author Patrick Huang <a href="mailto:pahuang@redhat.com">pahuang@redhat.com</a>
+ * @author Patrick Huang
  */
 @Slf4j
 public final class EntityCleaner
 {
    private EntityCleaner()
    {
+   }
+
+   public static void deleteAll(EntityManager entityManager, Class... entityClasses)
+   {
+      for (Class clazz : entityClasses)
+      {
+         EntityClass entityClass = EntityClass.from(clazz, ScanOption.IncludeOneToOne);
+
+      }
+      //TODO implement
+      //throw new UnsupportedOperationException("Implement me!");
    }
 
    public static void deleteAll(final EntityManager entityManager, Iterable<Class> entityClasses)
