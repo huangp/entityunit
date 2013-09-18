@@ -29,7 +29,7 @@ public class FixedValueMaker<V> implements Maker<V>
             .toString();
    }
 
-   public static <T> FixedValueMaker<T> fix(T value)
+   public static <T> Maker<T> fix(T value)
    {
       return new FixedValueMaker<T>(value);
    }

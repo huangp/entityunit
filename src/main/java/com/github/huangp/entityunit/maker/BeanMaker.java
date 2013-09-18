@@ -125,6 +125,10 @@ public class BeanMaker<T> implements Maker<T>
       try
       {
          BeanUtils.setProperty(result, settable.getSimpleName(), fieldValue);
+         if (log.isDebugEnabled())
+         {
+            log.debug("value after set: {}", settable.getterMethod().invoke(result));
+         }
       }
       catch (Exception e)
       {

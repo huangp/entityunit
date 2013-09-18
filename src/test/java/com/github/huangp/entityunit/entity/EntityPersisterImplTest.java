@@ -2,7 +2,9 @@ package com.github.huangp.entityunit.entity;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -39,7 +41,9 @@ import com.github.huangp.entities.Category;
 import com.github.huangp.entities.LineItem;
 import com.github.huangp.entities.Person;
 import com.github.huangp.entityunit.maker.FixedValueMaker;
+import com.github.huangp.entityunit.maker.IntervalValuesMaker;
 import com.github.huangp.entityunit.maker.RangeValuesMaker;
+import com.github.huangp.entityunit.util.ClassUtil;
 import com.google.common.collect.Lists;
 
 /**
@@ -263,7 +267,9 @@ public class EntityPersisterImplTest
             .addConstructorParameterMaker(Activity.class, 3,
                   RangeValuesMaker.cycle(ActivityType.UPLOAD_SOURCE_DOCUMENT, ActivityType.UPDATE_TRANSLATION,
                         ActivityType.UPLOAD_TRANSLATION_DOCUMENT, ActivityType.REVIEWED_TRANSLATION))
-            .build();
+            .addFieldOrPropertyMaker(Activity.class, "creationDate", IntervalValuesMaker.startFrom(new Date(), -TimeUnit.DAYS.toMillis(1)))
+      .build();
+
       activityPersistService.makeAndPersist(entityManager, Activity.class);
       activityPersistService.makeAndPersist(entityManager, Activity.class);
       activityPersistService.makeAndPersist(entityManager, Activity.class);
