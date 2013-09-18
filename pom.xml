@@ -1,14 +1,45 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
 
   <groupId>com.github.huangp</groupId>
-  <artifactId>makeit</artifactId>
+  <artifactId>entityunit</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>makeit</name>
-  <url>http://maven.apache.org</url>
+  <name>entityunit</name>
+  <description>Simple tool to make JPA entity for testing</description>
+  <url>http://com.github.huangp/entityunit</url>
+
+  <licenses>
+    <license>
+      <name>GNU Lesser General Public License v2.1</name>
+      <url>http://www.gnu.org/licenses/lgpl-2.1.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:git://github.com/huangp/entityunit.git</connection>
+    <developerConnection>scm:git:git@github.com:huangp/entityunit.git</developerConnection>
+    <url>https://github.com/huangp/entityunit</url>
+  </scm>
+
+  <developers>
+    <developer>
+      <id>pahuang@redhat.com</id>
+      <name>Patrick Huang</name>
+      <email>pahuang@redhat.com</email>
+      <organization>Red Hat</organization>
+      <organizationUrl>http://www.redhat.com/</organizationUrl>
+      <timezone>10</timezone>
+    </developer>
+  </developers>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
