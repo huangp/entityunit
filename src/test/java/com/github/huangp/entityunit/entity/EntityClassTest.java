@@ -2,6 +2,8 @@ package com.github.huangp.entityunit.entity;
 
 import java.lang.reflect.Method;
 
+import javax.persistence.OneToOne;
+
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.zanata.model.HProjectIteration;
@@ -21,6 +23,7 @@ public class EntityClassTest
    {
       EntityClass entityClass = EntityClass.from(HTextFlowTargetReviewComment.class);
 
+      OneToOne annotation = HProjectIteration.class.getAnnotation(OneToOne.class);
       Iterable<EntityClass> elements = entityClass.getDependingEntityTypes();
 
       assertThat(elements, Matchers.<EntityClass> iterableWithSize(2));

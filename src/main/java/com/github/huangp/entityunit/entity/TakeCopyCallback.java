@@ -11,7 +11,7 @@ import lombok.Getter;
 /**
 * @author Patrick Huang
 */
-public class TakeCopyCallback implements EntityPersister.Callback
+public class TakeCopyCallback implements EntityMaker.Callback
 {
    @Getter
    private List<Object> copy;

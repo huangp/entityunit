@@ -7,7 +7,7 @@ import com.github.huangp.entityunit.holder.BeanValueHolder;
 /**
  * @author Patrick Huang
  */
-public interface EntityPersister
+public interface EntityMaker
 {
    <T> T makeAndPersist(EntityManager entityManager, Class<T> entityType);
 

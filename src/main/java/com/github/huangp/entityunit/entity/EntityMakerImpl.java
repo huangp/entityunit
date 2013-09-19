@@ -25,13 +25,13 @@ import lombok.extern.slf4j.Slf4j;
  * @author Patrick Huang
  */
 @Slf4j
-class EntityPersisterImpl implements EntityPersister
+class EntityMakerImpl implements EntityMaker
 {
    private final EntityClassScanner scanner;
    private final MakeContext context;
    private final BeanValueHolder valueHolder;
 
-   EntityPersisterImpl(EntityClassScanner scanner, MakeContext context)
+   EntityMakerImpl(EntityClassScanner scanner, MakeContext context)
    {
       this.scanner = scanner;
       this.context = context;
@@ -203,5 +203,4 @@ class EntityPersisterImpl implements EntityPersister
          return builder.toString();
       }
    }
-
 }

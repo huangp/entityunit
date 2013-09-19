@@ -94,7 +94,8 @@ public class BeanMaker<T> implements Maker<T>
       catch (Exception e)
       {
          log.warn("fail calling constructor method: {}. Will fall back to default constructor", constructor);
-         log.warn("exception", e);
+         log.warn("exception {}", e.getMessage());
+         log.debug("exception", e);
          Invokable<T, T> noArgConstructor = ClassUtil.getNoArgConstructor(type);
          noArgConstructor.setAccessible(true);
          return noArgConstructor.invoke(result);
@@ -133,7 +134,8 @@ public class BeanMaker<T> implements Maker<T>
       catch (Exception e)
       {
          log.warn("can not set property: {}={}", settable, fieldValue);
-         log.warn("exception", e);
+         log.warn("exception {}", e.getMessage());
+         log.debug("exception", e);
       }
    }
 
@@ -164,7 +166,7 @@ public class BeanMaker<T> implements Maker<T>
          }
          catch (IllegalAccessException e)
          {
-            log.warn("can not determine field {} has default value or not", input);
+            log.warn("can not determine field [{}] has default value or not", input);
             return false;
          }
          catch (InvocationTargetException e)

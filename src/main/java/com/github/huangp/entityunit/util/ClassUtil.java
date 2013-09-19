@@ -200,10 +200,38 @@ public final class ClassUtil
 
    public static boolean isUnsaved(Object entity)
    {
-      Settable idSettable = Iterables.find(EntityClass.from(entity.getClass()).getElements(), HasAnnotationPredicate.has(Id.class));
+      Settable idSettable = getIdentityField(entity);
       try
       {
          return idSettable.getterMethod().invoke(entity) == null;
+      }
+      catch (Exception e)
+      {
+         throw Throwables.propagate(e);
+      }
+   }
+
+   public static Settable getIdentityField(Object entity)
+   {
+      return Iterables.find(EntityClass.from(entity.getClass()).getElements(), HasAnnotationPredicate.has(Id.class));
+   }
+
+   public static void setValue(Settable settable, Object owner, Object value)
+   {
+      final String simpleName = settable.getSimpleName();
+
+      try
+      {
+         Field field = Iterables.find(getAllDeclaredFields(owner.getClass()), new Predicate<Field>()
+         {
+            @Override
+            public boolean apply(Field input)
+            {
+               return input.getName().equals(simpleName);
+            }
+         });
+         field.setAccessible(true);
+         field.set(owner, value);
       }
       catch (Exception e)
       {

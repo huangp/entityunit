@@ -18,31 +18,31 @@ import lombok.extern.slf4j.Slf4j;
 
 @NoArgsConstructor(staticName = "builder")
 @Slf4j
-public class EntityPersisterBuilder
+public class EntityMakerBuilder
 {
    private ScanOption scanOption = ScanOption.IgnoreOptionalOneToOne;
    private BeanValueHolder valueHolder = new BeanValueHolder();
    private PreferredValueMakersRegistry registry = new PreferredValueMakersRegistry();
 
-   public EntityPersisterBuilder ignoreOptionalOneToOne()
+   public EntityMakerBuilder ignoreOptionalOneToOne()
    {
       scanOption = ScanOption.IgnoreOptionalOneToOne;
       return this;
    }
 
-   public EntityPersisterBuilder includeOptionalOneToOne()
+   public EntityMakerBuilder includeOptionalOneToOne()
    {
       scanOption = ScanOption.IncludeOneToOne;
       return this;
    }
 
-   public EntityPersisterBuilder reuseObjects(BeanValueHolder beanValueHolder)
+   public EntityMakerBuilder reuseObjects(BeanValueHolder beanValueHolder)
    {
       valueHolder.merge(beanValueHolder);
       return this;
    }
    
-   public EntityPersisterBuilder reuseEntities(Collection<Object> entities)
+   public EntityMakerBuilder reuseEntities(Collection<Object> entities)
    {
       for (Object entity : entities)
       {
@@ -52,51 +52,51 @@ public class EntityPersisterBuilder
       return this;
    }
 
-   public EntityPersisterBuilder reuseEntity(Serializable entity)
+   public EntityMakerBuilder reuseEntity(Serializable entity)
    {
       Class aClass = entity.getClass();
       valueHolder.putIfNotNull(aClass, entity);
       return this;
    }
 
-   public EntityPersisterBuilder reuseEntities(Object first, Object second, Object... rest)
+   public EntityMakerBuilder reuseEntities(Object first, Object second, Object... rest)
    {
       List<Object> objects = ImmutableList.builder().add(first).add(second).add(rest).build();
       return reuseEntities(objects);
    }
 
-   public EntityPersisterBuilder addFieldOrPropertyMaker(Class<?> ownerType, String fieldName, Maker<?> maker)
+   public EntityMakerBuilder addFieldOrPropertyMaker(Class<?> ownerType, String fieldName, Maker<?> maker)
    {
       registry.addFieldOrPropertyMaker(ownerType, fieldName, maker);
       return this;
    }
 
-   public EntityPersisterBuilder addConstructorParameterMaker(Class<?> ownerType, int argIndex, Maker<?> maker)
+   public EntityMakerBuilder addConstructorParameterMaker(Class<?> ownerType, int argIndex, Maker<?> maker)
    {
       registry.addConstructorParameterMaker(ownerType, argIndex, maker);
       return this;
    }
 
-   public EntityPersisterBuilder reusePreferredValueMakers(PreferredValueMakersRegistry other)
+   public EntityMakerBuilder reusePreferredValueMakers(PreferredValueMakersRegistry other)
    {
       registry.merge(other);
       return this;
    }
 
-   public EntityPersisterBuilder mergeContext(MakeContext context)
+   public EntityMakerBuilder mergeContext(MakeContext context)
    {
       valueHolder.merge(context.getBeanValueHolder());
       registry.merge(context.getPreferredValueMakers());
       return this;
    }
 
-   public EntityPersister build()
+   public EntityMaker build()
    {
 
       log.debug("registry: {}", registry);
       log.debug("bean value holder: {}", valueHolder);
       EntityClassScanner scanner = new EntityClassScanner(scanOption);
       MakeContext context = new MakeContext(valueHolder, registry);
-      return new EntityPersisterImpl(scanner, context);
+      return new EntityMakerImpl(scanner, context);
    }
 }

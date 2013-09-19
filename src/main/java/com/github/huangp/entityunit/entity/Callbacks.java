@@ -4,7 +4,7 @@ import javax.persistence.EntityManager;
 
 import com.google.common.collect.ImmutableList;
 
-import static com.github.huangp.entityunit.entity.EntityPersister.Callback;
+import static com.github.huangp.entityunit.entity.EntityMaker.Callback;
 
 /**
  * @author Patrick Huang
@@ -29,7 +29,7 @@ public class Callbacks
 
    private static class ChainedCallback implements Callback
    {
-      private final ImmutableList<EntityPersister.Callback> callbacks;
+      private final ImmutableList<EntityMaker.Callback> callbacks;
 
       public ChainedCallback(Callback one, Callback... rest)
       {

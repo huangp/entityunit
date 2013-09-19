@@ -16,6 +16,7 @@ import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Answers;
 import org.mockito.Mock;
@@ -43,17 +44,16 @@ import com.github.huangp.entities.Person;
 import com.github.huangp.entityunit.maker.FixedValueMaker;
 import com.github.huangp.entityunit.maker.IntervalValuesMaker;
 import com.github.huangp.entityunit.maker.RangeValuesMaker;
-import com.github.huangp.entityunit.util.ClassUtil;
 import com.google.common.collect.Lists;
 
 /**
  * @author Patrick Huang
  */
 @Slf4j
-public class EntityPersisterImplTest
+public class EntityMakerImplTest
 {
    private static EntityManagerFactory emFactory;
-   private EntityPersister service;
+   private EntityMaker service;
    private EntityManager entityManager;
    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
    private EntityManager mockEntityManager;
@@ -69,7 +69,7 @@ public class EntityPersisterImplTest
    public void setUp()
    {
       MockitoAnnotations.initMocks(this);
-      service = EntityPersisterBuilder.builder().build();
+      service = EntityMakerBuilder.builder().build();
       entityManager = emFactory.createEntityManager();
       EntityCleaner.deleteAll(entityManager, Lists.<Class> newArrayList(
             // simple test entities
@@ -115,7 +115,7 @@ public class EntityPersisterImplTest
       Long numOfIteration = entityManager.createQuery("select count(*) from HProjectIteration", Long.class).getSingleResult();
       Long numOfProject = entityManager.createQuery("select count(*) from HProject", Long.class).getSingleResult();
 
-      EntityPersisterImplTest.log.info("result {}, {}", numOfIteration, numOfProject);
+      log.info("result {}, {}", numOfIteration, numOfProject);
       assertThat(numOfIteration, Matchers.equalTo(1L));
       assertThat(numOfProject, Matchers.equalTo(1L));
       assertThat(hProjectIteration.getId(), Matchers.notNullValue());
@@ -125,7 +125,7 @@ public class EntityPersisterImplTest
    @Test
    public void canSetPreferredValue()
    {
-      service = EntityPersisterBuilder.builder()
+      service = EntityMakerBuilder.builder()
             .addConstructorParameterMaker(HLocale.class, 0, new FixedValueMaker<LocaleId>(LocaleId.DE))
             .addFieldOrPropertyMaker(HLocale.class, "enabledByDefault", FixedValueMaker.ALWAYS_TRUE_MAKER)
             .addFieldOrPropertyMaker(HLocale.class, "active", FixedValueMaker.ALWAYS_TRUE_MAKER)
@@ -146,7 +146,7 @@ public class EntityPersisterImplTest
       service.makeAndPersist(entityManager, HTextFlowTarget.class, copyCallback);
 
       HTextFlowTarget textFlowTarget = entityManager.createQuery("from HTextFlowTarget", HTextFlowTarget.class).getSingleResult();
-      EntityPersisterImplTest.log.info("persisted text flow target {}", textFlowTarget);
+      log.info("persisted text flow target {}", textFlowTarget);
       assertThat(textFlowTarget.getId(), Matchers.notNullValue());
 
       textFlowTarget.setContents("new content"); // so that it will insert a history entry
@@ -185,7 +185,7 @@ public class EntityPersisterImplTest
    @Test
    public void willNotInheritContext()
    {
-      service = EntityPersisterBuilder.builder()
+      service = EntityMakerBuilder.builder()
             .addConstructorParameterMaker(HLocale.class, 0, new FixedValueMaker<LocaleId>(LocaleId.DE))
             .build();
 
@@ -194,7 +194,7 @@ public class EntityPersisterImplTest
       assertThat(copyCallback.getByType(HLocale.class).getLocaleId(), Matchers.equalTo(LocaleId.DE));
 
       // re-create service will override previous set up
-      service = EntityPersisterBuilder.builder()
+      service = EntityMakerBuilder.builder()
             .addConstructorParameterMaker(HLocale.class, 0, new FixedValueMaker<LocaleId>(LocaleId.FR))
             .build();
 
@@ -205,11 +205,11 @@ public class EntityPersisterImplTest
    @Test
    public void canWireManyToManyRelationship()
    {
-      service = EntityPersisterBuilder.builder().build();
+      service = EntityMakerBuilder.builder().build();
 
       HAccountRole hAccountRole = service.makeAndPersist(mockEntityManager, HAccountRole.class);
 
-      HPerson hPerson = EntityPersisterBuilder.builder()
+      HPerson hPerson = EntityMakerBuilder.builder()
             .includeOptionalOneToOne()
             .build().makeAndPersist(mockEntityManager, HPerson.class, new WireManyToManyCallback(HAccount.class, hAccountRole));
 
@@ -222,42 +222,44 @@ public class EntityPersisterImplTest
       Category one = service.makeAndPersist(entityManager, Category.class);
       Category two = service.makeAndPersist(entityManager, Category.class);
 
-      EntityPersisterImplTest.log.info("category 1: {}", one);
-      EntityPersisterImplTest.log.info("category 2: {}", two);
+      log.info("category 1: {}", one);
+      log.info("category 2: {}", two);
 
       EntityCleaner.deleteAllExcept(entityManager, Lists.<Class> newArrayList(Category.class), two);
 
       List<Category> result = entityManager.createQuery("from Category", Category.class).getResultList();
-      EntityPersisterImplTest.log.info("result: {}", result);
+      log.info("result: {}", result);
 
       assertThat(result, Matchers.hasSize(1));
       assertThat(result.get(0), Matchers.equalTo(two));
    }
 
-   //   @Test
-   //   public void canNotReuseId()
-   //   {
-   //      HProject one = service.makeAndPersist(entityManager, HProject.class);
-   //
-   //      log.info("1: {}", one);
-   //
-   //      service.deleteAllExcept(entityManager, Lists.<Class>newArrayList(HProject.class));
-   //
-   //      HProject two = service.makeAndPersist(entityManager, HProject.class);
-   //      List<HProject> result = entityManager.createQuery("from HProject", HProject.class).getResultList();
-   //      log.info("result: {}", result);
-   //      log.info("2: {}", two);
-   //
-   //      assertThat(result, Matchers.hasSize(1));
-   //      assertThat(result.get(0).getId(), Matchers.equalTo(2L));
-   //   }
+   @Test
+   @Ignore("doesn't work")
+   public void canFixId()
+   {
+      HProject one = service.makeAndPersist(entityManager, HProject.class, new FixIdCallback(HProject.class, 100L));
+
+      log.info("1: {}", one.getId());
+
+      EntityCleaner.deleteAllExcept(entityManager, Lists.<Class>newArrayList(HProject.class));
+
+      HProject two = service.makeAndPersist(entityManager, HProject.class, new FixIdCallback(HProject.class, 200L));
+      List<HProject> result = entityManager.createQuery("from HProject order by id", HProject.class).getResultList();
+      log.info("result: {}", result);
+      log.info("2: {}", two.getId());
+
+      assertThat(result, Matchers.hasSize(1));
+      assertThat(result.get(0).getId(), Matchers.equalTo(100L));
+      assertThat(result.get(1).getId(), Matchers.equalTo(200L));
+   }
 
    @Test
    public void canMakeEntityUsesInterfaceAsParameterType()
    {
       service.makeAndPersist(entityManager, HTextFlowTarget.class, copyCallback);
 
-      EntityPersister activityPersistService = EntityPersisterBuilder.builder()
+      EntityMaker activityPersistService = EntityMakerBuilder.builder()
             .reuseEntities(copyCallback.getCopy())
             //   public Activity(HPerson actor, IsEntityWithType context, IsEntityWithType target, ActivityType activityType,
             .addConstructorParameterMaker(Activity.class, 1,
@@ -291,22 +293,22 @@ public class EntityPersisterImplTest
       HDocument document3 = service.makeAndPersist(entityManager, HDocument.class);
 
       // 4 targets
-      EntityPersisterBuilder.builder()
+      EntityMakerBuilder.builder()
             .reuseEntity(document1)
             .build().makeAndPersist(entityManager, HTextFlowTarget.class);
-      EntityPersisterBuilder.builder()
+      EntityMakerBuilder.builder()
             .reuseEntity(document2)
             .build().makeAndPersist(entityManager, HTextFlowTarget.class);
-      EntityPersisterBuilder.builder()
+      EntityMakerBuilder.builder()
             .reuseEntity(document3)
             .build().makeAndPersist(entityManager, HTextFlowTarget.class);
-      EntityPersisterBuilder.builder()
+      EntityMakerBuilder.builder()
             .reuseEntity(document1)
             .build().makeAndPersist(entityManager, HTextFlowTarget.class);
 
       List<HTextFlowTarget> result = entityManager.createQuery("from HTextFlowTarget order by id", HTextFlowTarget.class).getResultList();
 
-      EntityPersisterImplTest.log.info("result {}", result);
+      log.info("result {}", result);
       assertThat(result, Matchers.hasSize(4));
       assertThat(result.get(0).getTextFlow().getDocument(), Matchers.equalTo(document1));
       assertThat(result.get(1).getTextFlow().getDocument(), Matchers.equalTo(document2));
@@ -324,7 +326,7 @@ public class EntityPersisterImplTest
       List<LineItem> result = entityManager.createQuery("from LineItem it order by it.number", LineItem.class).getResultList();
 
       assertThat(result, Matchers.hasSize(2));
-      EntityPersisterImplTest.log.info("result {}", result);
+      log.info("result {}", result);
       assertThat(result.get(0).getNumber(), Matchers.equalTo(0));
       assertThat(result.get(1).getNumber(), Matchers.equalTo(1));
    }
@@ -332,7 +334,7 @@ public class EntityPersisterImplTest
    @Test
    public void testFixNameAndSlug() 
    {
-      EntityPersister service = EntityPersisterBuilder.builder()
+      EntityMaker service = EntityMakerBuilder.builder()
             // project
             .addFieldOrPropertyMaker(HProject.class, "slug", FixedValueMaker.fix("about-fedora"))
             .addFieldOrPropertyMaker(HProject.class, "name", FixedValueMaker.fix("about fedora"))

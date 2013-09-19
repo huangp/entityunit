@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
  * @author Patrick Huang
  */
 @RequiredArgsConstructor
-public class WireManyToManyCallback implements EntityPersister.Callback
+public class WireManyToManyCallback implements EntityMaker.Callback
 {
    private final Class typeToFind;
    private final Object objectToWire;
