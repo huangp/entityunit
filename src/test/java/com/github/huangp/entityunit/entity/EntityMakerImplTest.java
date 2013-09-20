@@ -14,8 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.hamcrest.Matchers;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Answers;
 import org.mockito.Mock;
@@ -257,12 +259,47 @@ public class EntityMakerImplTest
    }
 
    @Test
+   public void fixIdShouldOnlyWorkWithNoAssociation()
+   {
+      HAccountRole role = new HAccountRole();
+      role.setRoleType(HAccountRole.RoleType.MANUAL);
+      role.setName("admin");
+      entityManager.getTransaction().begin();
+      entityManager.persist(role);
+      entityManager.getTransaction().commit();
+
+      maker.makeAndPersist(entityManager, HAccount.class, Callbacks.chain(new FixIdCallback(HAccount.class, 10L)));
+
+      HAccount result = entityManager.find(HAccount.class, 10L);
+      result.getRoles().add(role);
+      entityManager.getTransaction().begin();
+      entityManager.flush();
+      entityManager.getTransaction().commit();
+
+      result = entityManager.find(HAccount.class, 10L);
+
+      assertThat(result.getRoles(), Matchers.hasSize(1));
+
+      try
+      {
+         maker.makeAndPersist(entityManager, HAccount.class, Callbacks.chain(new WireManyToManyCallback(HAccount.class, role), new FixIdCallback(HAccount.class, 11L)));
+         Assert.fail("should fail");
+      }
+      catch (Exception e)
+      {
+
+      }
+   }
+
+   @Test
+   @Ignore("include optional one to one will bypass reuse entity. Without it, it will work but BeanMaker is actually reusing oneToOne entity which is not good")
    public void canFixIdAndCascadeUpdateToReferencedEntity()
    {
       HAccount hAccount = maker.makeAndPersist(entityManager, HAccount.class, new FixIdCallback(HAccount.class, 100L));
 
       // TODO this has to be manually sort out. can we automate this?
       HPerson hPerson = EntityMakerBuilder.builder()
+            .includeOptionalOneToOne()
             .reuseEntity(hAccount).build()
             .makeAndPersist(entityManager, HPerson.class, new WireManyToManyCallback(HPerson.class, hAccount));
 

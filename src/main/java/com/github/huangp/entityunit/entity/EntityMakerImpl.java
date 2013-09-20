@@ -53,10 +53,10 @@ class EntityMakerImpl implements EntityMaker
 
       Iterable<Object> toPersist = callback.beforePersist(entityManager, allObjects);
       persistInOrder(entityManager, toPersist);
-      callback.afterPersist(entityManager, toPersist);
+      Iterable<Object> toReturn = callback.afterPersist(entityManager, toPersist);
 
       entityManager.getTransaction().commit();
-      return ClassUtil.findEntity(toPersist, entityType);
+      return ClassUtil.findEntity(toReturn, entityType);
    }
 
    private Iterable<Object> getRequiredEntitiesFor(Class askingClass)

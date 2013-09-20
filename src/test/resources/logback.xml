@@ -19,7 +19,7 @@
     <appender-ref ref="STDOUT"/>
   </logger>
 
-<!--  <logger name="org.hibernate.SQL" level="TRACE" additivity="false">
+  <!--<logger name="org.hibernate.SQL" level="TRACE" additivity="false">
     <appender-ref ref="STDOUT"/>
   </logger>
 
