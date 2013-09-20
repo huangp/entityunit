@@ -41,9 +41,22 @@ class EntityMakerImpl implements EntityMaker
    @Override
    public <T> T makeAndPersist(EntityManager entityManager, Class<T> entityType)
    {
-      Iterable<Object> entities = getRequiredEntitiesFor(entityType);
-      persistInOrder(entityManager, entities);
-      return ClassUtil.findEntity(entities, entityType);
+      return makeAndPersist(entityManager, entityType, AbstractNoOpCallback.NO_OP_CALLBACK);
+   }
+
+   @Override
+   public <T> T makeAndPersist(EntityManager entityManager, Class<T> entityType, Callback callback)
+   {
+      Iterable<Object> allObjects = getRequiredEntitiesFor(entityType);
+
+      entityManager.getTransaction().begin();
+
+      Iterable<Object> toPersist = callback.beforePersist(entityManager, allObjects);
+      persistInOrder(entityManager, toPersist);
+      callback.afterPersist(entityManager, toPersist);
+
+      entityManager.getTransaction().commit();
+      return ClassUtil.findEntity(toPersist, entityType);
    }
 
    private Iterable<Object> getRequiredEntitiesFor(Class askingClass)
@@ -106,7 +119,6 @@ class EntityMakerImpl implements EntityMaker
 
    private static void persistInOrder(EntityManager entityManager, Iterable<Object> queue)
    {
-      entityManager.getTransaction().begin();
       for (Object entity : queue)
       {
          if (ClassUtil.isUnsaved(entity))
@@ -120,16 +132,6 @@ class EntityMakerImpl implements EntityMaker
 //            entityManager.merge(entity);
          }
       }
-      entityManager.getTransaction().commit();
-   }
-
-   @Override
-   public <T> T makeAndPersist(EntityManager entityManager, Class<T> entityType, Callback callback)
-   {
-      Iterable<Object> allObjects = getRequiredEntitiesFor(entityType);
-      Iterable<Object> toPersist = callback.beforePersist(entityManager, allObjects);
-      persistInOrder(entityManager, toPersist);
-      return ClassUtil.findEntity(toPersist, entityType);
    }
 
    @Override

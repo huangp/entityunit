@@ -20,7 +20,6 @@ import lombok.Setter;
  */
 @Entity
 @Getter
-@Setter
 @Access(AccessType.FIELD)
 public class Category extends Identifier
 {

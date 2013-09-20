@@ -4,10 +4,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import javax.persistence.Id;
+import javax.persistence.Version;
+
 import org.apache.commons.beanutils.BeanUtils;
 import com.github.huangp.entityunit.entity.EntityClass;
 import com.github.huangp.entityunit.entity.MakeContext;
 import com.github.huangp.entityunit.util.ClassUtil;
+import com.github.huangp.entityunit.util.HasAnnotationPredicate;
 import com.github.huangp.entityunit.util.Settable;
 import com.github.huangp.entityunit.util.SettableParameter;
 import com.google.common.base.Function;
@@ -23,6 +27,7 @@ import com.google.common.reflect.Parameter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import static com.github.huangp.entityunit.util.HasAnnotationPredicate.has;
 
 /**
  * @author Patrick Huang
@@ -107,25 +112,35 @@ public class BeanMaker<T> implements Maker<T>
       Iterable<Settable> elements = EntityClass.from(type).getElements();
 
       Predicate<Settable> settablePredicate = Predicates.not(
-            Predicates.or(new SameTypePredicate(result.getClass()), new HasDefaultValuePredicate<T>(result)));
+            Predicates.or(
+                  new SameTypePredicate(result.getClass()),
+                  new HasDefaultValuePredicate<T>(result),
+                  IdOrVersionPredicate.PREDICATE));
 
       Iterable<Settable> fieldsToSet = Iterables.filter(elements, settablePredicate);
       for (Settable settable : fieldsToSet)
       {
-         tryPopulatePropertyValue(result, settable);
+         trySetValue(result, settable);
       }
       return result;
 
    }
 
-   private void tryPopulatePropertyValue(T result, Settable settable)
+   private void trySetValue(T result, Settable settable)
    {
       log.debug("about to make {}", settable);
       Object fieldValue = factory.from(settable).value();
       log.debug("value {}", fieldValue);
       try
       {
-         BeanUtils.setProperty(result, settable.getSimpleName(), fieldValue);
+         if (ClassUtil.isAccessTypeIsField(type))
+         {
+            ClassUtil.setValue(settable, result, fieldValue);
+         }
+         else
+         {
+            BeanUtils.setProperty(result, settable.getSimpleName(), fieldValue);
+         }
          if (log.isDebugEnabled())
          {
             log.debug("value after set: {}", settable.getterMethod().invoke(result));
@@ -179,6 +194,16 @@ public class BeanMaker<T> implements Maker<T>
       private static boolean notPrimitive(Method getter)
       {
          return !getter.getReturnType().isPrimitive();
+      }
+   }
+
+   private static enum IdOrVersionPredicate implements Predicate<Settable>
+   {
+      PREDICATE;
+      @Override
+      public boolean apply(Settable input)
+      {
+         return has(Id.class).apply(input) || has(Version.class).apply(input);
       }
    }
 }

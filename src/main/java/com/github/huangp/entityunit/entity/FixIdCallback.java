@@ -2,93 +2,83 @@ package com.github.huangp.entityunit.entity;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import javax.persistence.EntityManager;
 
-import org.hibernate.engine.spi.IdentifierValue;
-import org.hibernate.engine.spi.SessionImplementor;
-import org.hibernate.persister.entity.EntityPersister;
-import org.hibernate.tuple.IdentifierProperty;
 import com.github.huangp.entityunit.util.ClassUtil;
 import com.github.huangp.entityunit.util.Settable;
-import com.github.huangp.entityunit.util.SettableField;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Patrick Huang
  */
 @RequiredArgsConstructor
-public class FixIdCallback implements EntityMaker.Callback
+@Slf4j
+public class FixIdCallback extends AbstractNoOpCallback
 {
    private final Class<?> entityType;
-   private final Serializable id;
+   private final Serializable wantedIdValue;
 
    @Override
-   public Iterable<Object> beforePersist(EntityManager entityManager, Iterable<Object> toBePersisted)
+   public Iterable<Object> afterPersist(EntityManager entityManager, Iterable<Object> persisted)
    {
-      Object entity = ClassUtil.findEntity(toBePersisted, entityType);
-//      ClassUtil.setValue(ClassUtil.getIdentityField(entity), entity, id);
-//      persist(id, entityManager, entity);
-      entityManager.persist(entity);
+      Object entity = ClassUtil.findEntity(persisted, entityType);
+      final Settable identityField = ClassUtil.getIdentityField(entity);
+      Serializable generatedIdValue = getGeneratedId(entity, identityField);
+
+      // TODO consider entity name mapping and id column mapping
+      String tableName = entityType.getSimpleName();
+      String idColumnName = identityField.getSimpleName();
+      String sqlString = String.format("update %s set %s=%s where %s=%s", tableName, idColumnName, wantedIdValue, idColumnName, generatedIdValue);
+      log.info("query to update generated id: {}", sqlString);
+
+      int affectedRow = entityManager.createNativeQuery(sqlString).executeUpdate();
+      log.debug("update generated id affected row: {}", affectedRow);
+
+      // set the updated value back to entity
+      entityManager.detach(entity); // otherwise it won't allow us  to modify id field
+      Field idField = Iterables.find(ClassUtil.getAllDeclaredFields(entityType), new Predicate<Field>()
+      {
+         @Override
+         public boolean apply(Field input)
+         {
+            return input.getName().equals(identityField.getSimpleName());
+         }
+      });
+      idField.setAccessible(true);
       try
       {
-         System.out.println(ClassUtil.getIdentityField(entity).getterMethod().invoke(entity));
-      } catch (IllegalAccessException e)
-      {
-         e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-      } catch (InvocationTargetException e)
-      {
-         e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+         idField.set(entity, wantedIdValue);
       }
-      return toBePersisted;
-   }
-
-   private static <T> void persist(final Serializable id, EntityManager entityManager, T entity)
-   {
-      SessionImplementor session = (SessionImplementor) entityManager.getDelegate();
-      EntityPersister persister = session.getEntityPersister(entity.getClass().getName(), entity);
-      IdentifierProperty ip = persister.getEntityMetamodel().getIdentifierProperty();
-
-      Settable identifierAssignedByInsert = getIdentifierPropertySettable();
-      ClassUtil.setValue(identifierAssignedByInsert, ip, false);
-
-      IdentifierValue backupUnsavedValue = setUnsavedValue(ip, IdentifierValue.ANY);
-
-//      entityManager.getTransaction().begin();
-      entityManager.persist(entity);
-//      entityManager.getTransaction().commit();
-
-      // restore the backuped unsavedValue
-      setUnsavedValue(ip, backupUnsavedValue);
-   }
-
-   private static Settable getIdentifierPropertySettable()
-   {
-      try
-      {
-         return SettableField.from(IdentifierProperty.class, IdentifierProperty.class.getDeclaredField("identifierAssignedByInsert"));
-      }
-      catch (NoSuchFieldException e)
+      catch (IllegalAccessException e)
       {
          throw Throwables.propagate(e);
       }
+      // regain the entity back
+      Object updated = entityManager.find(entityType, wantedIdValue);
+      List<Object> toReturn = Lists.newArrayList(persisted);
+      int index = Iterables.indexOf(persisted, Predicates.instanceOf(entityType));
+      toReturn.set(index, updated);
+      return toReturn;
    }
 
-   private static IdentifierValue setUnsavedValue(IdentifierProperty ip, IdentifierValue newUnsavedValue)
+   private static Serializable getGeneratedId(Object entity, Settable identityField)
    {
       try
       {
-         IdentifierValue backup = ip.getUnsavedValue();
-         Field f = ip.getClass().getDeclaredField("unsavedValue");
-         f.setAccessible(true);
-         f.set(ip, newUnsavedValue);
-         return backup;
+         return (Serializable) identityField.getterMethod().invoke(entity);
       }
       catch (Exception e)
       {
          throw Throwables.propagate(e);
       }
    }
+
 }

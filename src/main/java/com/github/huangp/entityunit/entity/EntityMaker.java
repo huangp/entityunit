@@ -19,5 +19,7 @@ public interface EntityMaker
    public interface Callback
    {
       Iterable<Object> beforePersist(EntityManager entityManager, Iterable<Object> toBePersisted);
+
+      Iterable<Object> afterPersist(EntityManager entityManager, Iterable<Object> persisted);
    }
 }

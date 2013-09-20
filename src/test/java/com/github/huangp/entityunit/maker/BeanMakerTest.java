@@ -52,7 +52,7 @@ public class BeanMakerTest
       log.info("result {}", locale);
 
       assertThat(locale.getId(), Matchers.nullValue()); // skip read only properties
-      assertThat(locale.getVersionNum(), Matchers.notNullValue());
+      assertThat(locale.getVersionNum(), Matchers.nullValue());
       assertThat(locale.getCreationDate(), Matchers.notNullValue());
       assertThat(locale.getCreationDate(), Matchers.notNullValue());
       assertThat(locale.getLocaleId(), Matchers.equalTo(LocaleId.EN));
@@ -72,7 +72,7 @@ public class BeanMakerTest
       assertThat(hProject.getDescription(), Matchers.notNullValue());
       assertThat(hProject.getHomeContent(), Matchers.notNullValue());
       assertThat(hProject.getName(), Matchers.notNullValue());
-      assertThat(hProject.getVersionNum(), Matchers.notNullValue());
+      assertThat(hProject.getVersionNum(), Matchers.nullValue());
       assertThat(hProject.getSourceCheckoutURL(), Matchers.notNullValue());
       assertThat(hProject.getCreationDate(), Matchers.notNullValue());
       assertThat(hProject.getStatus(), Matchers.equalTo(EntityStatus.ACTIVE)); // won't touch default value

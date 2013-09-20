@@ -142,7 +142,8 @@ public final class ClassUtil
          AccessType accessType = ((Access) access).value();
          return accessType == AccessType.FIELD;
       }
-      return false;
+      Optional<Field> fieldAnnotatedById = Iterables.tryFind(getAllDeclaredFields(clazz), HasAnnotationPredicate.has(Id.class));
+      return fieldAnnotatedById.isPresent();
    }
 
    public static boolean isCollection(Type type)

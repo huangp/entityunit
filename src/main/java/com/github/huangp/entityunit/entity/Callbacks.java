@@ -46,5 +46,16 @@ public class Callbacks
          }
          return toReturn;
       }
+
+      @Override
+      public Iterable<Object> afterPersist(EntityManager entityManager, Iterable<Object> persisted)
+      {
+         Iterable<Object> toReturn = persisted;
+         for (Callback callback : callbacks)
+         {
+            toReturn = callback.afterPersist(entityManager, persisted);
+         }
+         return toReturn;
+      }
    }
 }

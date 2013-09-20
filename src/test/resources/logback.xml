@@ -11,7 +11,7 @@
     </encoder>
   </appender>
 
-  <logger name="com.github.huangp" level="WARN" additivity="false">
+  <logger name="com.github.huangp" level="DEBUG" additivity="false">
     <appender-ref ref="STDOUT"/>
   </logger>
 
@@ -19,13 +19,13 @@
     <appender-ref ref="STDOUT"/>
   </logger>
 
-  <logger name="org.hibernate.SQL" level="TRACE" additivity="false">
+<!--  <logger name="org.hibernate.SQL" level="TRACE" additivity="false">
     <appender-ref ref="STDOUT"/>
   </logger>
 
   <logger name="org.hibernate.type" level="TRACE" additivity="false">
     <appender-ref ref="STDOUT"/>
-  </logger>
+  </logger>-->
 
   <logger name="org.hibernate.type.BasicTypeRegistry" level="OFF" />
 
