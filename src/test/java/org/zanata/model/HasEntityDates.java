@@ -25,12 +25,13 @@ import java.util.Date;
 
 /**
  * @author Sean Flanigan <a href="mailto:sflaniga@redhat.com">sflaniga@redhat.com</a>
- *
  */
-public interface HasEntityDates
-{
-   public Date getCreationDate();
-   public void setCreationDate(Date creationDate);
-   public Date getLastChanged();
-   public void setLastChanged(Date lastChanged);
+public interface HasEntityDates {
+    public Date getCreationDate();
+
+    public void setCreationDate(Date creationDate);
+
+    public Date getLastChanged();
+
+    public void setLastChanged(Date lastChanged);
 }

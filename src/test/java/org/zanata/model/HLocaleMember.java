@@ -20,7 +20,12 @@
  */
 package org.zanata.model;
 
-import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
@@ -30,135 +35,109 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.io.Serializable;
 
 /**
  * @author camunoz@redhat.com
- *
  */
 @Entity
-@Table(name="HLocale_Member")
+@Table(name = "HLocale_Member")
 @Setter
 @NoArgsConstructor
-public class HLocaleMember implements Serializable
-{
-   private static final long serialVersionUID = 1L;
+public class HLocaleMember implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-   private HLocaleMemberPk id = new HLocaleMemberPk();
+    private HLocaleMemberPk id = new HLocaleMemberPk();
 
-   private boolean isCoordinator;
-   private boolean isReviewer;
-   private boolean isTranslator;
+    private boolean isCoordinator;
+    private boolean isReviewer;
+    private boolean isTranslator;
 
-   public HLocaleMember( HPerson person, HLocale supportedLanguage, boolean isTranslator, boolean isReviewer, boolean isCoordinator)
-   {
-      id.setPerson(person);
-      id.setSupportedLanguage(supportedLanguage);
-      setTranslator(isTranslator);
-      setReviewer(isReviewer);
-      setCoordinator(isCoordinator);
-   }
+    public HLocaleMember(HPerson person, HLocale supportedLanguage, boolean isTranslator, boolean isReviewer, boolean isCoordinator) {
+        id.setPerson(person);
+        id.setSupportedLanguage(supportedLanguage);
+        setTranslator(isTranslator);
+        setReviewer(isReviewer);
+        setCoordinator(isCoordinator);
+    }
 
-   @EmbeddedId
-   protected HLocaleMemberPk getId()
-   {
-      return id;
-   }
+    @EmbeddedId
+    protected HLocaleMemberPk getId() {
+        return id;
+    }
 
-   protected void setId(HLocaleMemberPk id)
-   {
-      this.id = id;
-   }
+    protected void setId(HLocaleMemberPk id) {
+        this.id = id;
+    }
 
-   @Column(name="isCoordinator")
-   public boolean isCoordinator()
-   {
-      return isCoordinator;
-   }
+    @Column(name = "isCoordinator")
+    public boolean isCoordinator() {
+        return isCoordinator;
+    }
 
-   @Column(name="isReviewer")
-   public boolean isReviewer()
-   {
-      return isReviewer;
-   }
+    @Column(name = "isReviewer")
+    public boolean isReviewer() {
+        return isReviewer;
+    }
 
-   @Column(name="isTranslator")
-   public boolean isTranslator()
-   {
-      return isTranslator;
-   }
+    @Column(name = "isTranslator")
+    public boolean isTranslator() {
+        return isTranslator;
+    }
 
-   @Transient
-   public HPerson getPerson()
-   {
-      return id.getPerson();
-   }
+    @Transient
+    public HPerson getPerson() {
+        return id.getPerson();
+    }
 
-   @Transient
-   public HLocale getSupportedLanguage()
-   {
-      return id.getSupportedLanguage();
-   }
+    @Transient
+    public HLocale getSupportedLanguage() {
+        return id.getSupportedLanguage();
+    }
 
-   @Embeddable
-   @Setter
-   @AllArgsConstructor
-   @NoArgsConstructor
-   public static class HLocaleMemberPk implements Serializable
-   {
-      private static final long serialVersionUID = 1L;
+    @Embeddable
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class HLocaleMemberPk implements Serializable {
+        private static final long serialVersionUID = 1L;
 
-      private HPerson person;
-      private HLocale supportedLanguage;
+        private HPerson person;
+        private HLocale supportedLanguage;
 
-      @ManyToOne(fetch=FetchType.EAGER, optional=false)
-      @JoinColumn(name="personId", nullable=false)
-      public HPerson getPerson()
-      {
-         return person;
-      }
+        @ManyToOne(fetch = FetchType.EAGER, optional = false)
+        @JoinColumn(name = "personId", nullable = false)
+        public HPerson getPerson() {
+            return person;
+        }
 
-      @ManyToOne(fetch=FetchType.EAGER, optional=false)
-      @JoinColumn(name="supportedLanguageId")
-      public HLocale getSupportedLanguage()
-      {
-         return supportedLanguage;
-      }
+        @ManyToOne(fetch = FetchType.EAGER, optional = false)
+        @JoinColumn(name = "supportedLanguageId")
+        public HLocale getSupportedLanguage() {
+            return supportedLanguage;
+        }
 
-      @Override
-      public boolean equals(Object obj)
-      {
-         if(obj == null)
-         {
-            return false;
-         }
-         else if( !(obj instanceof HLocaleMemberPk) )
-         {
-            return false;
-         }
-         else
-         {
-            final HLocaleMemberPk other = (HLocaleMemberPk)obj;
-            return new EqualsBuilder()
-                  .append(this.person.getId(), other.getPerson().getId())
-                  .append(this.supportedLanguage.getId(), other.getSupportedLanguage().getId())
-                  .isEquals();
-         }
-      }
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            } else if (!(obj instanceof HLocaleMemberPk)) {
+                return false;
+            } else {
+                final HLocaleMemberPk other = (HLocaleMemberPk) obj;
+                return new EqualsBuilder()
+                        .append(this.person.getId(), other.getPerson().getId())
+                        .append(this.supportedLanguage.getId(), other.getSupportedLanguage().getId())
+                        .isEquals();
+            }
+        }
 
-      @Override
-      public int hashCode()
-      {
-         return new HashCodeBuilder()
-               .append(this.person.getId())
-               .append(this.supportedLanguage.getId())
-               .toHashCode();
-      }
-   }
+        @Override
+        public int hashCode() {
+            return new HashCodeBuilder()
+                    .append(this.person.getId())
+                    .append(this.supportedLanguage.getId())
+                    .toHashCode();
+        }
+    }
 }

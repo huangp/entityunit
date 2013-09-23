@@ -20,9 +20,13 @@
  */
 package org.zanata.model;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.base.Objects;
+import org.hibernate.annotations.AccessType;
+import org.hibernate.annotations.IndexColumn;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.Type;
+import org.hibernate.validator.constraints.NotEmpty;
+
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -32,132 +36,113 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
-
-import org.hibernate.annotations.AccessType;
-import org.hibernate.annotations.IndexColumn;
-import org.hibernate.annotations.NaturalId;
-import org.hibernate.annotations.Type;
-import org.hibernate.validator.constraints.NotEmpty;
-import com.google.common.base.Objects;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-public class HTextFlowHistory extends org.zanata.model.HTextContainer implements Serializable, ITextFlowHistory
-{
+public class HTextFlowHistory extends org.zanata.model.HTextContainer implements Serializable, ITextFlowHistory {
 
-   private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-   private Long id;
-   private Integer revision;
-   private HTextFlow textFlow;
-   private List<String> contents;
-   private boolean obsolete;
+    private Long id;
+    private Integer revision;
+    private HTextFlow textFlow;
+    private List<String> contents;
+    private boolean obsolete;
 
-   private Integer pos;
+    private Integer pos;
 
-   public HTextFlowHistory()
-   {
-   }
+    public HTextFlowHistory() {
+    }
 
-   public HTextFlowHistory(HTextFlow textFlow)
-   {
-      this.revision = textFlow.getRevision();
-      this.textFlow = textFlow;
-      this.setContents(textFlow.getContents());
-   }
+    public HTextFlowHistory(HTextFlow textFlow) {
+        this.revision = textFlow.getRevision();
+        this.textFlow = textFlow;
+        this.setContents(textFlow.getContents());
+    }
 
-   @Id
-   @GeneratedValue
-   public Long getId()
-   {
-      return id;
-   }
+    @Id
+    @GeneratedValue
+    public Long getId() {
+        return id;
+    }
 
-   protected void setId(Long id)
-   {
-      this.id = id;
-   }
+    protected void setId(Long id) {
+        this.id = id;
+    }
 
-   // TODO PERF @NaturalId(mutable=false) for better criteria caching
-   @NaturalId
-   @Override
-   public Integer getRevision()
-   {
-      return revision;
-   }
+    // TODO PERF @NaturalId(mutable=false) for better criteria caching
+    @NaturalId
+    @Override
+    public Integer getRevision() {
+        return revision;
+    }
 
-   public void setRevision(Integer revision)
-   {
-      this.revision = revision;
-   }
+    public void setRevision(Integer revision) {
+        this.revision = revision;
+    }
 
-   // TODO PERF @NaturalId(mutable=false) for better criteria caching
-   @NaturalId
-   @ManyToOne(fetch = FetchType.LAZY)
-   @JoinColumn(name = "tf_id")
-   public HTextFlow getTextFlow()
-   {
-      return textFlow;
-   }
+    // TODO PERF @NaturalId(mutable=false) for better criteria caching
+    @NaturalId
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tf_id")
+    public HTextFlow getTextFlow() {
+        return textFlow;
+    }
 
-   public void setTextFlow(HTextFlow textFlow)
-   {
-      this.textFlow = textFlow;
-   }
+    public void setTextFlow(HTextFlow textFlow) {
+        this.textFlow = textFlow;
+    }
 
-   @NotEmpty
-   @Type(type = "text")
-   @AccessType("field")
-   @ElementCollection(fetch = FetchType.EAGER)
-   @JoinTable(name = "HTextFlowContentHistory", 
-      joinColumns = @JoinColumn(name = "text_flow_history_id")
-   )
-   @IndexColumn(name = "pos", nullable = false)
-   @Column(name = "content", nullable = false)
-   @Override
-   public List<String> getContents()
-   {
-      return contents;
-   }
+    @NotEmpty
+    @Type(type = "text")
+    @AccessType("field")
+    @ElementCollection(fetch = FetchType.EAGER)
+    @JoinTable(name = "HTextFlowContentHistory",
+            joinColumns = @JoinColumn(name = "text_flow_history_id")
+    )
+    @IndexColumn(name = "pos", nullable = false)
+    @Column(name = "content", nullable = false)
+    @Override
+    public List<String> getContents() {
+        return contents;
+    }
 
-   public void setContents(List<String> contents)
-   {
-      this.contents = new ArrayList<String>(contents);
-   }
+    public void setContents(List<String> contents) {
+        this.contents = new ArrayList<String>(contents);
+    }
 
-   @Override
-   public Integer getPos()
-   {
-      return pos;
-   }
+    @Override
+    public Integer getPos() {
+        return pos;
+    }
 
-   public void setPos(Integer pos)
-   {
-      this.pos = pos;
-   }
+    public void setPos(Integer pos) {
+        this.pos = pos;
+    }
 
-   @Override
-   public boolean isObsolete()
-   {
-      return obsolete;
-   }
+    @Override
+    public boolean isObsolete() {
+        return obsolete;
+    }
 
-   public void setObsolete(boolean obsolete)
-   {
-      this.obsolete = obsolete;
-   }
-   
-   /**
-    * Determines whether a Text Flow has changed when compared to this
-    * history object.
-    * Currently, this method only checks for changes in the revision number.
-    * 
-    * @param current The current Text Flow state. 
-    * @return True, if the revision number in the Text Flow has changed.
-    * False, otherwise.
-    */
-   public boolean hasChanged(HTextFlow current)
-   {
-      return !Objects.equal(current.getRevision(), this.getRevision());
-   }
+    public void setObsolete(boolean obsolete) {
+        this.obsolete = obsolete;
+    }
+
+    /**
+     * Determines whether a Text Flow has changed when compared to this
+     * history object.
+     * Currently, this method only checks for changes in the revision number.
+     *
+     * @param current
+     *         The current Text Flow state.
+     * @return True, if the revision number in the Text Flow has changed.
+     *         False, otherwise.
+     */
+    public boolean hasChanged(HTextFlow current) {
+        return !Objects.equal(current.getRevision(), this.getRevision());
+    }
 
 }

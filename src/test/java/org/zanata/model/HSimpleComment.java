@@ -20,75 +20,65 @@
  */
 package org.zanata.model;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.Serializable;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Type;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.Type;
-
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * @see org.zanata.rest.dto.extensions.comment.SimpleComment
- * 
  */
 @Entity
 @BatchSize(size = 20)
 @Setter
 @NoArgsConstructor
-public class HSimpleComment implements HashableState, Serializable
-{
-   private static final long serialVersionUID = 5684831285769022524L;
-   private Long id;
+public class HSimpleComment implements HashableState, Serializable {
+    private static final long serialVersionUID = 5684831285769022524L;
+    private Long id;
 
-   private String comment;
+    private String comment;
 
-   public HSimpleComment(String comment)
-   {
-      this.comment = comment;
-   }
+    public HSimpleComment(String comment) {
+        this.comment = comment;
+    }
 
-   @Id
-   @GeneratedValue
-   public Long getId()
-   {
-      return id;
-   }
+    @Id
+    @GeneratedValue
+    public Long getId() {
+        return id;
+    }
 
-   protected void setId(Long id)
-   {
-      this.id = id;
-   }
+    protected void setId(Long id) {
+        this.id = id;
+    }
 
-   @NotNull
-   @Type(type = "text")
-   public String getComment()
-   {
-      return comment;
-   }
+    @NotNull
+    @Type(type = "text")
+    public String getComment() {
+        return comment;
+    }
 
-   public static String toString(org.zanata.model.HSimpleComment comment)
-   {
-      return comment != null ? comment.getComment() : null;
-   }
+    public static String toString(org.zanata.model.HSimpleComment comment) {
+        return comment != null ? comment.getComment() : null;
+    }
 
-   @Override
-   public void writeHashState(ByteArrayOutputStream buff) throws IOException
-   {
-      buff.write( comment.getBytes() );
-   }
+    @Override
+    public void writeHashState(ByteArrayOutputStream buff) throws IOException {
+        buff.write(comment.getBytes());
+    }
 
-   /**
-    * Used for debugging
-    */
-   public String toString()
-   {
-      return "HSimpleComment(" + toString(this) + ")";
-   }
+    /**
+     * Used for debugging
+     */
+    public String toString() {
+        return "HSimpleComment(" + toString(this) + ")";
+    }
 }

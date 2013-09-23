@@ -20,29 +20,25 @@
  */
 package org.zanata.model.validator;
 
-import java.io.Serializable;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import java.io.Serializable;
 
-public class SlugValidator implements ConstraintValidator<org.zanata.model.validator.Slug, String>, Serializable
-{
+public class SlugValidator implements ConstraintValidator<org.zanata.model.validator.Slug, String>, Serializable {
 
-   private static final long serialVersionUID = 1L;
-   public static final String PATTERN = "[a-zA-Z0-9]+([a-zA-Z0-9_\\-{.}]*[a-zA-Z0-9]+)?";
+    private static final long serialVersionUID = 1L;
+    public static final String PATTERN = "[a-zA-Z0-9]+([a-zA-Z0-9_\\-{.}]*[a-zA-Z0-9]+)?";
 
-   @Override
-   public void initialize(Slug parameters)
-   {
-   }
+    @Override
+    public void initialize(Slug parameters) {
+    }
 
-   @Override
-   public boolean isValid(String string, ConstraintValidatorContext context)
-   {
-      if (string == null)
-      {
-         return true;
-      }
-      return string.isEmpty() || string.matches(PATTERN);
-   }
+    @Override
+    public boolean isValid(String string, ConstraintValidatorContext context) {
+        if (string == null) {
+            return true;
+        }
+        return string.isEmpty() || string.matches(PATTERN);
+    }
 
 }

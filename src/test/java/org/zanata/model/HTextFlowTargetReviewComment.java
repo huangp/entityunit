@@ -21,6 +21,15 @@
 
 package org.zanata.model;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Type;
+import org.hibernate.validator.constraints.NotEmpty;
+
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Entity;
@@ -29,16 +38,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.Type;
-import org.hibernate.validator.constraints.NotEmpty;
-
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /**
  * @author Patrick Huang <a
@@ -49,50 +48,46 @@ import lombok.Setter;
 @BatchSize(size = 20)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Access(AccessType.FIELD)
-public class HTextFlowTargetReviewComment extends ModelEntityBase
-{
-   private static final long serialVersionUID = 1413384329431214946L;
+public class HTextFlowTargetReviewComment extends ModelEntityBase {
+    private static final long serialVersionUID = 1413384329431214946L;
 
-   @Getter
-   @ManyToOne(fetch = FetchType.LAZY)
-   @JoinColumn(name = "commenter_id", nullable = false)
-   private HPerson commenter;
+    @Getter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "commenter_id", nullable = false)
+    private HPerson commenter;
 
-   @NotNull
-   @ManyToOne(fetch = FetchType.LAZY)
-   @JoinColumn(name = "target_id")
-   @Getter
-   private HTextFlowTarget textFlowTarget;
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "target_id")
+    @Getter
+    private HTextFlowTarget textFlowTarget;
 
-   @NotEmpty
-   @Type(type = "text")
-   @Getter
-   private String comment;
+    @NotEmpty
+    @Type(type = "text")
+    @Getter
+    private String comment;
 
-   @Setter(AccessLevel.PROTECTED)
-   @Getter
-   @NotNull
-   private Integer targetVersion;
+    @Setter(AccessLevel.PROTECTED)
+    @Getter
+    @NotNull
+    private Integer targetVersion;
 
-   private transient String commenterName;
+    private transient String commenterName;
 
-   public HTextFlowTargetReviewComment(HTextFlowTarget target, String comment, HPerson commenter)
-   {
-      this.textFlowTarget = target;
-      this.comment = comment;
-      this.commenter = commenter;
-      commenterName = commenter.getName();
-      targetVersion = target.getVersionNum();
-   }
+    public HTextFlowTargetReviewComment(HTextFlowTarget target, String comment, HPerson commenter) {
+        this.textFlowTarget = target;
+        this.comment = comment;
+        this.commenter = commenter;
+        commenterName = commenter.getName();
+        targetVersion = target.getVersionNum();
+    }
 
-   @Transient
-   public String getCommenterName()
-   {
-      if (commenterName == null)
-      {
-         commenterName = getCommenter().getName();
-      }
-      return commenterName;
-   }
+    @Transient
+    public String getCommenterName() {
+        if (commenterName == null) {
+            commenterName = getCommenter().getName();
+        }
+        return commenterName;
+    }
 
 }

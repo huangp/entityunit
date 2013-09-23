@@ -20,24 +20,21 @@
  */
 package org.zanata.model.type;
 
-import org.zanata.model.HTextFlowTarget;
-
 import lombok.Getter;
+import org.zanata.model.HTextFlowTarget;
 
 /**
  * @author Alex Eng <a href="mailto:aeng@redhat.com">aeng@redhat.com</a>
  */
-public enum EntityType
-{
-   HTexFlowTarget(HTextFlowTarget.class),
-   HProjectIteration(org.zanata.model.HProjectIteration.class),
-   HDocument(org.zanata.model.HDocument.class);
+public enum EntityType {
+    HTexFlowTarget(HTextFlowTarget.class),
+    HProjectIteration(org.zanata.model.HProjectIteration.class),
+    HDocument(org.zanata.model.HDocument.class);
 
-   @Getter
-   private final Class<?> entityClass;
+    @Getter
+    private final Class<?> entityClass;
 
-   EntityType(Class<?> entityClass)
-   {
-      this.entityClass = entityClass;
-   }
+    EntityType(Class<?> entityClass) {
+        this.entityClass = entityClass;
+    }
 }

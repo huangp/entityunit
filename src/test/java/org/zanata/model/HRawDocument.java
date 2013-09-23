@@ -20,81 +20,71 @@
  */
 package org.zanata.model;
 
-import java.io.Serializable;
+import com.google.common.base.Objects;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.validator.constraints.NotEmpty;
+import org.zanata.common.DocumentType;
+
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.OneToOne;
-
-import org.hibernate.validator.constraints.NotEmpty;
-import org.zanata.common.DocumentType;
-import com.google.common.base.Objects;
-
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.io.Serializable;
 
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor // is this necessary?
-public class HRawDocument extends ModelEntityBase implements Serializable
-{
+@NoArgsConstructor
+// is this necessary?
+public class HRawDocument extends ModelEntityBase implements Serializable {
 
-   private static final long serialVersionUID = 5129552589912687504L;
+    private static final long serialVersionUID = 5129552589912687504L;
 
-   // TODO ensure any document deletion cascades to remove associated HRawDocument
-   private HDocument document;
+    // TODO ensure any document deletion cascades to remove associated HRawDocument
+    private HDocument document;
 
-   // TODO none of these should allow null
-   private String contentHash;
-   private String fileId;
-   private DocumentType type;
-   private String uploadedBy;
+    // TODO none of these should allow null
+    private String contentHash;
+    private String fileId;
+    private DocumentType type;
+    private String uploadedBy;
 
-   private String adapterParameters;
+    private String adapterParameters;
 
+    @OneToOne(mappedBy = "rawDocument")
+    public HDocument getDocument() {
+        return document;
+    }
 
-   @OneToOne(mappedBy = "rawDocument")
-   public HDocument getDocument()
-   {
-      return document;
-   }
+    public void setDocument(HDocument document) {
+        if (!Objects.equal(this.document, document)) {
+            this.document = document;
+        }
+    }
 
-   public void setDocument(HDocument document)
-   {
-      if (!Objects.equal(this.document, document))
-      {
-         this.document = document;
-      }
-   }
+    @NotEmpty
+    public String getContentHash() {
+        return contentHash;
+    }
 
-   @NotEmpty
-   public String getContentHash()
-   {
-      return contentHash;
-   }
+    @Enumerated(EnumType.STRING)
+    public DocumentType getType() {
+        return type;
+    }
 
-   @Enumerated(EnumType.STRING)
-   public DocumentType getType()
-   {
-      return type;
-   }
+    public String getUploadedBy() {
+        return uploadedBy;
+    }
 
-   public String getUploadedBy()
-   {
-      return uploadedBy;
-   }
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "@" + Integer.toHexString(hashCode())
+                + "[id=" + id + ",versionNum=" + versionNum
+                + ",contentHash=" + contentHash + "]";
+    }
 
-
-   @Override
-   public String toString()
-   {
-      return getClass().getSimpleName() + "@" + Integer.toHexString(hashCode())
-            + "[id=" + id + ",versionNum=" + versionNum
-            + ",contentHash=" + contentHash + "]";
-   }
-
-   // TODO override equals to use contentHash, type, parameters, etc.
+    // TODO override equals to use contentHash, type, parameters, etc.
 
 }

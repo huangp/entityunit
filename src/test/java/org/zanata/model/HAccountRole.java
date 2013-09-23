@@ -20,8 +20,11 @@
  */
 package org.zanata.model;
 
-import java.io.Serializable;
-import java.util.Set;
+import lombok.Setter;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.zanata.model.type.RoleTypeType;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -29,82 +32,67 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.zanata.model.type.RoleTypeType;
-
-import lombok.Setter;
+import java.io.Serializable;
+import java.util.Set;
 
 @Entity
 @Setter
 @TypeDef(name = "roleType", typeClass = RoleTypeType.class)
-public class HAccountRole implements Serializable
-{
-   private static final long serialVersionUID = 9177366120789064801L;
+public class HAccountRole implements Serializable {
+    private static final long serialVersionUID = 9177366120789064801L;
 
-   private Integer id;
-   private String name;
-   private boolean conditional;
-   private RoleType roleType = RoleType.MANUAL;
+    private Integer id;
+    private String name;
+    private boolean conditional;
+    private RoleType roleType = RoleType.MANUAL;
 
-   private Set<org.zanata.model.HAccountRole> groups;
+    private Set<org.zanata.model.HAccountRole> groups;
 
-   @Id
-   @GeneratedValue
-   public Integer getId()
-   {
-      return id;
-   }
+    @Id
+    @GeneratedValue
+    public Integer getId() {
+        return id;
+    }
 
-   // TODO PERF @NaturalId(mutable=false) for better criteria caching
-   public String getName()
-   {
-      return name;
-   }
+    // TODO PERF @NaturalId(mutable=false) for better criteria caching
+    public String getName() {
+        return name;
+    }
 
-   @ManyToMany(targetEntity = org.zanata.model.HAccountRole.class)
-   @JoinTable(name = "HAccountRoleGroup", joinColumns = @JoinColumn(name = "roleId"), inverseJoinColumns = @JoinColumn(name = "memberOf"))
-   public Set<org.zanata.model.HAccountRole> getGroups()
-   {
-      return groups;
-   }
+    @ManyToMany(targetEntity = org.zanata.model.HAccountRole.class)
+    @JoinTable(name = "HAccountRoleGroup", joinColumns = @JoinColumn(name = "roleId"), inverseJoinColumns = @JoinColumn(name = "memberOf"))
+    public Set<org.zanata.model.HAccountRole> getGroups() {
+        return groups;
+    }
 
-   public boolean isConditional()
-   {
-      return conditional;
-   }
+    public boolean isConditional() {
+        return conditional;
+    }
 
-   @Type(type = "roleType")
-   @NotNull
-   public RoleType getRoleType()
-   {
-      return roleType;
-   }
+    @Type(type = "roleType")
+    @NotNull
+    public RoleType getRoleType() {
+        return roleType;
+    }
 
+    public enum RoleType {
+        AUTO,
+        MANUAL;
 
-   public enum RoleType
-   {
-      AUTO,
-      MANUAL;
+        public char getInitial() {
+            return name().charAt(0);
+        }
 
-      public char getInitial()
-      {
-         return name().charAt(0);
-      }
-
-      public static RoleType valueOf(char initial)
-      {
-         switch (initial)
-         {
-            case 'A':
-               return AUTO;
-            case 'M':
-               return MANUAL;
-            default:
-               throw new IllegalArgumentException(String.valueOf(initial));
-         }
-      }
-   }
+        public static RoleType valueOf(char initial) {
+            switch (initial) {
+                case 'A':
+                    return AUTO;
+                case 'M':
+                    return MANUAL;
+                default:
+                    throw new IllegalArgumentException(String.valueOf(initial));
+            }
+        }
+    }
 
 }

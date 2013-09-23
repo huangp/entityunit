@@ -20,13 +20,12 @@
  */
 package org.zanata.model;
 
-import java.io.Serializable;
 import javax.persistence.Entity;
+import java.io.Serializable;
 
 @Entity
-public class HAccountResetPasswordKey extends AccountKeyBase implements Serializable
-{
+public class HAccountResetPasswordKey extends AccountKeyBase implements Serializable {
 
-   private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
 }

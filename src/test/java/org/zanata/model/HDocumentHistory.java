@@ -20,15 +20,8 @@
  */
 package org.zanata.model;
 
-import java.util.Date;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -36,86 +29,83 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.zanata.common.ContentType;
 import org.zanata.model.type.ContentTypeType;
 
-import lombok.Getter;
-import lombok.Setter;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.Date;
 
 @Entity
 @TypeDef(name = "contentType", typeClass = ContentTypeType.class)
 @Setter
-public class HDocumentHistory implements IDocumentHistory
-{
+public class HDocumentHistory implements IDocumentHistory {
 
-   private String docId;
-   @Getter
-   private String name;
-   @Getter
-   private String path;
-   private ContentType contentType;
-   private Integer revision;
-   private HLocale locale;
-   private HPerson lastModifiedBy;
-   protected Long id;
-   @Getter
-   protected Date lastChanged;
-   @Getter
-   private boolean obsolete;
-   private HDocument document;
+    private String docId;
+    @Getter
+    private String name;
+    @Getter
+    private String path;
+    private ContentType contentType;
+    private Integer revision;
+    private HLocale locale;
+    private HPerson lastModifiedBy;
+    protected Long id;
+    @Getter
+    protected Date lastChanged;
+    @Getter
+    private boolean obsolete;
+    private HDocument document;
 
-   @Id
-   @GeneratedValue
-   public Long getId()
-   {
-      return id;
-   }
+    @Id
+    @GeneratedValue
+    public Long getId() {
+        return id;
+    }
 
-   protected void setId(Long id)
-   {
-      this.id = id;
-   }
+    protected void setId(Long id) {
+        this.id = id;
+    }
 
-   // TODO PERF @NaturalId(mutable=false) for better criteria caching
-   @NaturalId
-   @ManyToOne
-   @JoinColumn(name = "document_id")
-   public HDocument getDocument()
-   {
-      return document;
-   }
+    // TODO PERF @NaturalId(mutable=false) for better criteria caching
+    @NaturalId
+    @ManyToOne
+    @JoinColumn(name = "document_id")
+    public HDocument getDocument() {
+        return document;
+    }
 
-   // TODO PERF @NaturalId(mutable=false) for better criteria caching
-   @NaturalId
-   public Integer getRevision()
-   {
-      return revision;
-   }
+    // TODO PERF @NaturalId(mutable=false) for better criteria caching
+    @NaturalId
+    public Integer getRevision() {
+        return revision;
+    }
 
-   @Size(max = 255)
-   @NotEmpty
-   public String getDocId()
-   {
-      return docId;
-   }
+    @Size(max = 255)
+    @NotEmpty
+    public String getDocId() {
+        return docId;
+    }
 
-   @ManyToOne
-   @JoinColumn(name = "locale", nullable = false)
-   public HLocale getLocale()
-   {
-      return locale;
-   }
+    @ManyToOne
+    @JoinColumn(name = "locale", nullable = false)
+    public HLocale getLocale() {
+        return locale;
+    }
 
-   @ManyToOne
-   @JoinColumn(name = "last_modified_by_id", nullable = true)
-   @Override
-   public HPerson getLastModifiedBy()
-   {
-      return lastModifiedBy;
-   }
+    @ManyToOne
+    @JoinColumn(name = "last_modified_by_id", nullable = true)
+    @Override
+    public HPerson getLastModifiedBy() {
+        return lastModifiedBy;
+    }
 
-   @Type(type = "contentType")
-   @NotNull
-   public ContentType getContentType()
-   {
-      return contentType;
-   }
+    @Type(type = "contentType")
+    @NotNull
+    public ContentType getContentType() {
+        return contentType;
+    }
 
 }

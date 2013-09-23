@@ -1,17 +1,8 @@
 package com.github.huangp.entityunit.maker;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.List;
-
-import javax.persistence.Id;
-import javax.persistence.Version;
-
-import org.apache.commons.beanutils.BeanUtils;
 import com.github.huangp.entityunit.entity.EntityClass;
 import com.github.huangp.entityunit.entity.MakeContext;
 import com.github.huangp.entityunit.util.ClassUtil;
-import com.github.huangp.entityunit.util.HasAnnotationPredicate;
 import com.github.huangp.entityunit.util.Settable;
 import com.github.huangp.entityunit.util.SettableParameter;
 import com.google.common.base.Function;
@@ -24,186 +15,157 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.Invokable;
 import com.google.common.reflect.Parameter;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.beanutils.BeanUtils;
+
+import javax.persistence.Id;
+import javax.persistence.Version;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
+
 import static com.github.huangp.entityunit.util.HasAnnotationPredicate.has;
 
 /**
  * @author Patrick Huang
  */
 @Slf4j
-public class BeanMaker<T> implements Maker<T>
-{
-   private final Class<T> type;
-   private final MakeContext context;
-   private final ScalarValueMakerFactory factory;
+public class BeanMaker<T> implements Maker<T> {
+    private final Class<T> type;
+    private final MakeContext context;
+    private final ScalarValueMakerFactory factory;
 
-   public BeanMaker(Class<T> type, MakeContext context)
-   {
-      this.type = type;
-      this.context = context;
-      factory = new ScalarValueMakerFactory(context);
-   }
+    public BeanMaker(Class<T> type, MakeContext context) {
+        this.type = type;
+        this.context = context;
+        factory = new ScalarValueMakerFactory(context);
+    }
 
-   @Override
-   public T value()
-   {
-      T result = null;
-      try
-      {
-         Invokable<T, T> constructor = ClassUtil.findMostArgsConstructor(type);
-         result = constructBean(result, constructor);
+    @Override
+    public T value() {
+        T result = null;
+        try {
+            Invokable<T, T> constructor = ClassUtil.findMostArgsConstructor(type);
+            result = constructBean(result, constructor);
 
-         // if we can find public static constants defined in the class, we will use that as value
-         Optional<T> constants = ClassUtil.tryFindPublicConstants(type, result);
-         if (constants.isPresent())
-         {
-            return constants.get();
-         }
+            // if we can find public static constants defined in the class, we will use that as value
+            Optional<T> constants = ClassUtil.tryFindPublicConstants(type, result);
+            if (constants.isPresent()) {
+                return constants.get();
+            }
 
-         // populate all fields
-         return setApplicableFields(result);
-      }
-      catch (Exception e)
-      {
-         throw Throwables.propagate(e);
-      }
-      finally
-      {
-         log.debug("bean of type {} made: {}", type, result);
-         context.getBeanValueHolder().putIfNotNull(type, result);
-      }
-   }
+            // populate all fields
+            return setApplicableFields(result);
+        } catch (Exception e) {
+            throw Throwables.propagate(e);
+        } finally {
+            log.debug("bean of type {} made: {}", type, result);
+            context.getBeanValueHolder().putIfNotNull(type, result);
+        }
+    }
 
-   private T constructBean(T result, Invokable<T, T> constructor)
-         throws InvocationTargetException, IllegalAccessException, InstantiationException
-   {
-      ImmutableList<Parameter> parameters = constructor.getParameters();
-      // TODO this may override some default values provided at field declaration. See HCopyTransOptions
-      List<Object> paramValues = Lists.transform(parameters, new Function<Parameter, Object>()
-      {
-         @Override
-         public Object apply(Parameter input)
-         {
-            Settable settableParameter = SettableParameter.from(type, input);
-            return factory.from(settableParameter).value();
-         }
-      });
-      try
-      {
-         log.debug("invoke args {} constructor with parameters {}", type, parameters);
-         constructor.setAccessible(true);
-         return constructor.invoke(result, paramValues.toArray());
-      }
-      catch (Exception e)
-      {
-         log.warn("fail calling constructor method: {}. Will fall back to default constructor", constructor);
-         log.warn("exception {}", e.getMessage());
-         log.debug("exception", e);
-         Invokable<T, T> noArgConstructor = ClassUtil.getNoArgConstructor(type);
-         noArgConstructor.setAccessible(true);
-         return noArgConstructor.invoke(result);
-      }
-   }
+    private T constructBean(T result, Invokable<T, T> constructor)
+            throws InvocationTargetException, IllegalAccessException, InstantiationException {
+        ImmutableList<Parameter> parameters = constructor.getParameters();
+        // TODO this may override some default values provided at field declaration. See HCopyTransOptions
+        List<Object> paramValues = Lists.transform(parameters, new Function<Parameter, Object>() {
+            @Override
+            public Object apply(Parameter input) {
+                Settable settableParameter = SettableParameter.from(type, input);
+                return factory.from(settableParameter).value();
+            }
+        });
+        try {
+            log.debug("invoke args {} constructor with parameters {}", type, parameters);
+            constructor.setAccessible(true);
+            return constructor.invoke(result, paramValues.toArray());
+        } catch (Exception e) {
+            log.warn("fail calling constructor method: {}. Will fall back to default constructor", constructor);
+            log.warn("exception {}", e.getMessage());
+            log.debug("exception", e);
+            Invokable<T, T> noArgConstructor = ClassUtil.getNoArgConstructor(type);
+            noArgConstructor.setAccessible(true);
+            return noArgConstructor.invoke(result);
+        }
+    }
 
-   private T setApplicableFields(T result) throws InvocationTargetException, IllegalAccessException
-   {
-      Iterable<Settable> elements = EntityClass.from(type).getElements();
+    private T setApplicableFields(T result) throws InvocationTargetException, IllegalAccessException {
+        Iterable<Settable> elements = EntityClass.from(type).getElements();
 
-      Predicate<Settable> settablePredicate = Predicates.not(
-            Predicates.or(
-                  new SameTypePredicate(result.getClass()),
-                  new HasDefaultValuePredicate<T>(result),
-                  IdOrVersionPredicate.PREDICATE));
+        Predicate<Settable> settablePredicate = Predicates.not(
+                Predicates.or(
+                        new SameTypePredicate(result.getClass()),
+                        new HasDefaultValuePredicate<T>(result),
+                        IdOrVersionPredicate.PREDICATE));
 
-      Iterable<Settable> fieldsToSet = Iterables.filter(elements, settablePredicate);
-      for (Settable settable : fieldsToSet)
-      {
-         trySetValue(result, settable);
-      }
-      return result;
+        Iterable<Settable> fieldsToSet = Iterables.filter(elements, settablePredicate);
+        for (Settable settable : fieldsToSet) {
+            trySetValue(result, settable);
+        }
+        return result;
 
-   }
+    }
 
-   private void trySetValue(T result, Settable settable)
-   {
-      log.debug("about to make {}", settable);
-      Object fieldValue = factory.from(settable).value();
-      log.debug("value {}", fieldValue);
-      try
-      {
-         if (ClassUtil.isAccessTypeIsField(type))
-         {
-            ClassUtil.setValue(settable, result, fieldValue);
-         }
-         else
-         {
-            BeanUtils.setProperty(result, settable.getSimpleName(), fieldValue);
-         }
-         if (log.isDebugEnabled())
-         {
-            log.debug("value after set: {}", settable.getterMethod().invoke(result));
-         }
-      }
-      catch (Exception e)
-      {
-         log.warn("can not set property: {}={}", settable, fieldValue);
-         log.warn("exception {}", e.getMessage());
-         log.debug("exception", e);
-      }
-   }
+    private void trySetValue(T result, Settable settable) {
+        log.debug("about to make {}", settable);
+        Object fieldValue = factory.from(settable).value();
+        log.debug("value {}", fieldValue);
+        try {
+            if (ClassUtil.isAccessTypeIsField(type)) {
+                ClassUtil.setValue(settable, result, fieldValue);
+            } else {
+                BeanUtils.setProperty(result, settable.getSimpleName(), fieldValue);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("value after set: {}", settable.getterMethod().invoke(result));
+            }
+        } catch (Exception e) {
+            log.warn("can not set property: {}={}", settable, fieldValue);
+            log.warn("exception {}", e.getMessage());
+            log.debug("exception", e);
+        }
+    }
 
-   @RequiredArgsConstructor
-   private static class SameTypePredicate implements Predicate<Settable>
-   {
-      private final Class type;
+    @RequiredArgsConstructor
+    private static class SameTypePredicate implements Predicate<Settable> {
+        private final Class type;
 
-      @Override
-      public boolean apply(Settable input)
-      {
-         return input.getType().equals(type);
-      }
-   }
+        @Override
+        public boolean apply(Settable input) {
+            return input.getType().equals(type);
+        }
+    }
 
-   @RequiredArgsConstructor
-   private static class HasDefaultValuePredicate<T> implements Predicate<Settable>
-   {
-      private final T object;
+    @RequiredArgsConstructor
+    private static class HasDefaultValuePredicate<T> implements Predicate<Settable> {
+        private final T object;
 
-      @Override
-      public boolean apply(Settable input)
-      {
-         try
-         {
-            Method getter = input.getterMethod();
-            return notPrimitive(getter) && getter.invoke(object) != null;
-         }
-         catch (IllegalAccessException e)
-         {
-            log.warn("can not determine field [{}] has default value or not", input);
-            return false;
-         }
-         catch (InvocationTargetException e)
-         {
-            log.warn("can not invoke getter method {}", e.getMessage());
-            return false;
-         }
-      }
+        @Override
+        public boolean apply(Settable input) {
+            try {
+                Method getter = input.getterMethod();
+                return notPrimitive(getter) && getter.invoke(object) != null;
+            } catch (IllegalAccessException e) {
+                log.warn("can not determine field [{}] has default value or not", input);
+                return false;
+            } catch (InvocationTargetException e) {
+                log.warn("can not invoke getter method {}", e.getMessage());
+                return false;
+            }
+        }
 
-      private static boolean notPrimitive(Method getter)
-      {
-         return !getter.getReturnType().isPrimitive();
-      }
-   }
+        private static boolean notPrimitive(Method getter) {
+            return !getter.getReturnType().isPrimitive();
+        }
+    }
 
-   private static enum IdOrVersionPredicate implements Predicate<Settable>
-   {
-      PREDICATE;
-      @Override
-      public boolean apply(Settable input)
-      {
-         return has(Id.class).apply(input) || has(Version.class).apply(input);
-      }
-   }
+    private static enum IdOrVersionPredicate implements Predicate<Settable> {
+        PREDICATE;
+
+        @Override
+        public boolean apply(Settable input) {
+            return has(Id.class).apply(input) || has(Version.class).apply(input);
+        }
+    }
 }

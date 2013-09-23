@@ -21,18 +21,19 @@
 
 package org.zanata.model;
 
-import javax.annotation.Nonnull;
-
 import org.zanata.common.HasContents;
+
+import javax.annotation.Nonnull;
 
 /**
  * @author Sean Flanigan <a href="mailto:sflaniga@redhat.com">sflaniga@redhat.com</a>
- *
  */
-public interface ITextFlowTarget extends HasContents
-{
-   public @Nonnull
-   org.zanata.common.LocaleId getLocaleId();
-   public @Nonnull
-   org.zanata.common.ContentState getState();
+public interface ITextFlowTarget extends HasContents {
+    public
+    @Nonnull
+    org.zanata.common.LocaleId getLocaleId();
+
+    public
+    @Nonnull
+    org.zanata.common.ContentState getState();
 }

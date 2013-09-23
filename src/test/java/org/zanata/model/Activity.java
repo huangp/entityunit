@@ -20,9 +20,12 @@
  */
 package org.zanata.model;
 
-import java.io.Serializable;
-import java.util.Calendar;
-import java.util.Date;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.apache.commons.lang.time.DateUtils;
+import org.zanata.common.ActivityType;
+import org.zanata.model.type.EntityType;
+
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
@@ -36,13 +39,9 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
-
-import org.apache.commons.lang.time.DateUtils;
-import org.zanata.common.ActivityType;
-import org.zanata.model.type.EntityType;
-
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import java.io.Serializable;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * @author Alex Eng <a href="mailto:aeng@redhat.com">aeng@redhat.com</a>
@@ -51,81 +50,76 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Access(AccessType.FIELD)
 @Getter
-public class Activity extends ModelEntityBase implements Serializable
-{
-   private static final long serialVersionUID = 1L;
+public class Activity extends ModelEntityBase implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-   @NotNull
-   @JoinColumn(name = "actor_id", nullable = false)
-   @ManyToOne
-   private HPerson actor;
+    @NotNull
+    @JoinColumn(name = "actor_id", nullable = false)
+    @ManyToOne
+    private HPerson actor;
 
-   @Temporal(TemporalType.TIMESTAMP)
-   @NotNull
-   private Date approxTime;
+    @Temporal(TemporalType.TIMESTAMP)
+    @NotNull
+    private Date approxTime;
 
-   @NotNull
-   private long startOffsetMillis;
+    @NotNull
+    private long startOffsetMillis;
 
-   @NotNull
-   private long endOffsetMillis;
+    @NotNull
+    private long endOffsetMillis;
 
-   @Getter
-   @NotNull
-   @Enumerated(EnumType.STRING)
-   private EntityType contextType;
+    @Getter
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private EntityType contextType;
 
-   @NotNull
-   @Column(name = "context_id")
-   private long contextId;
+    @NotNull
+    @Column(name = "context_id")
+    private long contextId;
 
-   @Enumerated(EnumType.STRING)
-   private EntityType lastTargetType;
+    @Enumerated(EnumType.STRING)
+    private EntityType lastTargetType;
 
-   @NotNull
-   @Column(name = "last_target_id")
-   private long lastTargetId;
+    @NotNull
+    @Column(name = "last_target_id")
+    private long lastTargetId;
 
-   @Enumerated(EnumType.STRING)
-   private ActivityType activityType;
+    @Enumerated(EnumType.STRING)
+    private ActivityType activityType;
 
-   //Event count starts with 1 because there is a single event when new activity created
-   private int eventCount = 1;
+    //Event count starts with 1 because there is a single event when new activity created
+    private int eventCount = 1;
 
-   private int wordCount;
+    private int wordCount;
 
-   public Activity(HPerson actor, IsEntityWithType context, IsEntityWithType target, ActivityType activityType,
-         int wordCount)
-   {
-      this.actor = actor;
-      this.contextType = context.getEntityType();
-      this.contextId = context.getId();
-      this.lastTargetType = target.getEntityType();
-      this.lastTargetId = target.getId();
-      this.activityType = activityType;
-      this.wordCount = wordCount;
-   }
+    public Activity(HPerson actor, IsEntityWithType context, IsEntityWithType target, ActivityType activityType,
+                    int wordCount) {
+        this.actor = actor;
+        this.contextType = context.getEntityType();
+        this.contextId = context.getId();
+        this.lastTargetType = target.getEntityType();
+        this.lastTargetId = target.getId();
+        this.activityType = activityType;
+        this.wordCount = wordCount;
+    }
 
-   @PrePersist
-   private void onPrePersist()
-   {
-      approxTime = DateUtils.truncate(getCreationDate(), Calendar.HOUR);
-      startOffsetMillis = getCreationDate().getTime() - approxTime.getTime();
-      endOffsetMillis = startOffsetMillis;
-   }
+    @PrePersist
+    private void onPrePersist() {
+        approxTime = DateUtils.truncate(getCreationDate(), Calendar.HOUR);
+        startOffsetMillis = getCreationDate().getTime() - approxTime.getTime();
+        endOffsetMillis = startOffsetMillis;
+    }
 
-   public void updateActivity(Date currentTime, IsEntityWithType target, int wordCount)
-   {
-      this.endOffsetMillis = currentTime.getTime() - approxTime.getTime();
-      this.wordCount += wordCount;
-      this.eventCount++;
-      this.lastTargetType = target.getEntityType();
-      this.lastTargetId = target.getId();
-   }
+    public void updateActivity(Date currentTime, IsEntityWithType target, int wordCount) {
+        this.endOffsetMillis = currentTime.getTime() - approxTime.getTime();
+        this.wordCount += wordCount;
+        this.eventCount++;
+        this.lastTargetType = target.getEntityType();
+        this.lastTargetId = target.getId();
+    }
 
-   @Transient
-   public Date getEndDate()
-   {
-      return DateUtils.addMilliseconds(approxTime, (int) endOffsetMillis);
-   }
+    @Transient
+    public Date getEndDate() {
+        return DateUtils.addMilliseconds(approxTime, (int) endOffsetMillis);
+    }
 }

@@ -10,16 +10,14 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Toy
-{
-   private final String ownerName;
-   private String name;
-   private double price;
-   private final Child owner;
+public class Toy {
+    private final String ownerName;
+    private String name;
+    private double price;
+    private final Child owner;
 
-   public Toy(Child owner)
-   {
-      this.owner = owner;
-      ownerName = owner.getName();
-   }
+    public Toy(Child owner) {
+        this.owner = owner;
+        ownerName = owner.getName();
+    }
 }

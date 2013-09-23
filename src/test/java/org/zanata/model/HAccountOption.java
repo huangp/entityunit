@@ -20,14 +20,14 @@
  */
 package org.zanata.model;
 
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
-
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 /**
  * @author Carlos Munoz <a href="mailto:camunoz@redhat.com">camunoz@redhat.com</a>
@@ -36,49 +36,41 @@ import lombok.ToString;
 @Setter
 @ToString
 @NoArgsConstructor
-public class HAccountOption extends ModelEntityBase
-{
-   private static final long serialVersionUID = 1L;
+public class HAccountOption extends ModelEntityBase {
+    private static final long serialVersionUID = 1L;
 
-   private String name;
+    private String name;
 
-   private String value;
+    private String value;
 
-   private HAccount account;
+    private HAccount account;
 
+    public HAccountOption(String name, String value) {
+        this.name = name;
+        this.value = value;
+    }
 
-   public HAccountOption(String name, String value)
-   {
-      this.name = name;
-      this.value = value;
-   }
+    public String getName() {
+        return name;
+    }
 
-   public String getName()
-   {
-      return name;
-   }
+    public String getValue() {
+        return value;
+    }
 
-   public String getValue()
-   {
-      return value;
-   }
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "account_id")
+    public HAccount getAccount() {
+        return account;
+    }
 
-   @ManyToOne(optional = false)
-   @JoinColumn(name = "account_id")
-   public HAccount getAccount()
-   {
-      return account;
-   }
-   
-   @Transient
-   public Boolean getValueAsBoolean()
-   {
-      return Boolean.parseBoolean(getValue());
-   }
+    @Transient
+    public Boolean getValueAsBoolean() {
+        return Boolean.parseBoolean(getValue());
+    }
 
-   @Transient
-   public Integer getValueAsInt()
-   {
-      return Integer.parseInt(getValue());
-   }
+    @Transient
+    public Integer getValueAsInt() {
+        return Integer.parseInt(getValue());
+    }
 }

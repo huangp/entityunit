@@ -20,45 +20,40 @@
  */
 package org.zanata.model.po;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.NaturalId;
 import org.zanata.model.HDocument;
 import org.zanata.model.HLocale;
 
-import lombok.Setter;
-import lombok.ToString;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 /**
- * 
  * @author sflaniga@redhat.com
  * @see org.zanata.rest.dto.extensions.gettext.PoTargetHeader
  */
 @Entity
 @Setter
 @ToString(callSuper = true, of = "targetLanguage")
-public class HPoTargetHeader extends PoHeaderBase
-{
-   private static final long serialVersionUID = 1L;
+public class HPoTargetHeader extends PoHeaderBase {
+    private static final long serialVersionUID = 1L;
 
-   private HLocale targetLanguage;
-   private HDocument document;
+    private HLocale targetLanguage;
+    private HDocument document;
 
-   @NaturalId
-   @ManyToOne
-   @JoinColumn(name = "targetLanguage", nullable = false)
-   public HLocale getTargetLanguage()
-   {
-      return targetLanguage;
-   }
+    @NaturalId
+    @ManyToOne
+    @JoinColumn(name = "targetLanguage", nullable = false)
+    public HLocale getTargetLanguage() {
+        return targetLanguage;
+    }
 
-   @NaturalId
-   @ManyToOne
-   @JoinColumn(name = "document_id")
-   public HDocument getDocument()
-   {
-      return document;
-   }
+    @NaturalId
+    @ManyToOne
+    @JoinColumn(name = "document_id")
+    public HDocument getDocument() {
+        return document;
+    }
 }

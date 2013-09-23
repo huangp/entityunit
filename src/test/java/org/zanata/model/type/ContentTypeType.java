@@ -26,26 +26,22 @@ import org.hibernate.type.LiteralType;
 import org.hibernate.type.StringType;
 import org.zanata.common.ContentType;
 
-public class ContentTypeType extends AbstractSingleColumnStandardBasicType<ContentType> implements LiteralType<ContentType>
-{
+public class ContentTypeType extends AbstractSingleColumnStandardBasicType<ContentType> implements LiteralType<ContentType> {
 
-   private static final long serialVersionUID = 1251881884197592346L;
+    private static final long serialVersionUID = 1251881884197592346L;
 
-   public ContentTypeType()
-   {
-      super(StringType.INSTANCE.getSqlTypeDescriptor(), ContentTypeTypeDescriptor.INSTANCE);
-   }
+    public ContentTypeType() {
+        super(StringType.INSTANCE.getSqlTypeDescriptor(), ContentTypeTypeDescriptor.INSTANCE);
+    }
 
-   @Override
-   public String getName()
-   {
-      return "contentType";
-   }
+    @Override
+    public String getName() {
+        return "contentType";
+    }
 
-   @Override
-   public String objectToSQLString(ContentType value, Dialect dialect) throws Exception
-   {
-      return "\'" + toString(value) + "\'";
-   }
+    @Override
+    public String objectToSQLString(ContentType value, Dialect dialect) throws Exception {
+        return "\'" + toString(value) + "\'";
+    }
 
 }

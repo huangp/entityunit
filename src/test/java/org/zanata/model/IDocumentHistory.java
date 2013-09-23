@@ -20,30 +20,28 @@
  */
 package org.zanata.model;
 
-import java.util.Date;
-import javax.annotation.Nonnull;
-
 import org.zanata.common.ContentType;
 
+import javax.annotation.Nonnull;
+import java.util.Date;
 
-public interface IDocumentHistory
-{
+public interface IDocumentHistory {
 
-   HPerson getLastModifiedBy();
+    HPerson getLastModifiedBy();
 
-   Date getLastChanged();
+    Date getLastChanged();
 
-   Integer getRevision();
+    Integer getRevision();
 
-   boolean isObsolete();
+    boolean isObsolete();
 
-   @Nonnull
-   org.zanata.model.HLocale getLocale();
+    @Nonnull
+    org.zanata.model.HLocale getLocale();
 
-   ContentType getContentType();
+    ContentType getContentType();
 
-   String getName();
+    String getName();
 
-   String getPath();
+    String getPath();
 
 }

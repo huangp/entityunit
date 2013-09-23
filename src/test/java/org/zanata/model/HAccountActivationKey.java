@@ -20,40 +20,37 @@
  */
 package org.zanata.model;
 
-import java.io.Serializable;
-import java.util.Date;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.PrePersist;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import java.io.Serializable;
+import java.util.Date;
 
 @Entity
 @Setter
 @ToString
 @NoArgsConstructor
-public class HAccountActivationKey extends AccountKeyBase implements Serializable
-{
-   private static final long serialVersionUID = 1L;
+public class HAccountActivationKey extends AccountKeyBase implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-   private Date creationDate;
+    private Date creationDate;
 
-   @Temporal(TemporalType.TIMESTAMP)
-   @Column(nullable = false)
-   public Date getCreationDate()
-   {
-      return creationDate;
-   }
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(nullable = false)
+    public Date getCreationDate() {
+        return creationDate;
+    }
 
-   @SuppressWarnings("unused")
-   @PrePersist
-   private void onPersist()
-   {
-      creationDate = new Date();
-   }
+    @SuppressWarnings("unused")
+    @PrePersist
+    private void onPersist() {
+        creationDate = new Date();
+    }
 
 }

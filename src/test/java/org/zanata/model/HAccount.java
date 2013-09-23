@@ -20,10 +20,14 @@
  */
 package org.zanata.model;
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import lombok.EqualsAndHashCode;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.NaturalId;
+import org.zanata.model.security.HCredentials;
+import org.zanata.model.type.UserApiKey;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -38,124 +42,102 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Size;
-
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.NaturalId;
-import org.zanata.model.security.HCredentials;
-import org.zanata.model.type.UserApiKey;
-
-import lombok.EqualsAndHashCode;
-import lombok.Setter;
-import lombok.ToString;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @see org.zanata.rest.dto.Account
- *
  */
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "username"))
 @Setter
 @ToString(callSuper = true, of = "username")
 @EqualsAndHashCode(callSuper = true, of = {"enabled", "passwordHash", "username", "apiKey"})
-public class HAccount extends ModelEntityBase implements Serializable
-{
-   private static final long serialVersionUID = 1L;
+public class HAccount extends ModelEntityBase implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-   private String username;
-   private String passwordHash;
-   private boolean enabled;
-   private String apiKey;
-   private HPerson person;
-   private Set<HAccountRole> roles;
-   private HAccountActivationKey accountActivationKey;
-   private HAccountResetPasswordKey accountResetPasswordKey;
-   private Set<HCredentials> credentials;
-   private org.zanata.model.HAccount mergedInto;
-   private Map<String, HAccountOption> editorOptions;
+    private String username;
+    private String passwordHash;
+    private boolean enabled;
+    private String apiKey;
+    private HPerson person;
+    private Set<HAccountRole> roles;
+    private HAccountActivationKey accountActivationKey;
+    private HAccountResetPasswordKey accountResetPasswordKey;
+    private Set<HCredentials> credentials;
+    private org.zanata.model.HAccount mergedInto;
+    private Map<String, HAccountOption> editorOptions;
 
+    @OneToOne(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "account")
+    public HAccountActivationKey getAccountActivationKey() {
+        return accountActivationKey;
+    }
 
-   @OneToOne(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "account")
-   public HAccountActivationKey getAccountActivationKey()
-   {
-      return accountActivationKey;
-   }
+    @OneToOne(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "account")
+    public HAccountResetPasswordKey getAccountResetPasswordKey() {
+        return accountResetPasswordKey;
+    }
 
-   @OneToOne(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "account")
-   public HAccountResetPasswordKey getAccountResetPasswordKey()
-   {
-      return accountResetPasswordKey;
-   }
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
+    public HPerson getPerson() {
+        return person;
+    }
 
-   @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
-   public HPerson getPerson()
-   {
-      return person;
-   }
+    @NaturalId
+    public String getUsername() {
+        return username;
+    }
 
-   @NaturalId
-   public String getUsername()
-   {
-      return username;
-   }
+    @Transient
+    public boolean isPersonAccount() {
+        return person != null;
+    }
 
-   @Transient
-   public boolean isPersonAccount()
-   {
-      return person != null;
-   }
+    public String getPasswordHash() {
+        return passwordHash;
+    }
 
-   public String getPasswordHash()
-   {
-      return passwordHash;
-   }
+    public boolean isEnabled() {
+        return enabled;
+    }
 
-   public boolean isEnabled()
-   {
-      return enabled;
-   }
+    @UserApiKey
+    @Size(min = 32, max = 32)
+    public String getApiKey() {
+        return apiKey;
+    }
 
-   @UserApiKey
-   @Size(min = 32, max = 32)
-   public String getApiKey()
-   {
-      return apiKey;
-   }
+    @ManyToMany(targetEntity = HAccountRole.class)
+    @JoinTable(name = "HAccountMembership", joinColumns = @JoinColumn(name = "accountId"), inverseJoinColumns = @JoinColumn(name = "memberOf"))
+    public Set<HAccountRole> getRoles() {
+        if (roles == null) {
+            roles = new HashSet<HAccountRole>();
+            setRoles(roles);
+        }
+        return roles;
+    }
 
-   @ManyToMany(targetEntity = HAccountRole.class)
-   @JoinTable(name = "HAccountMembership", joinColumns = @JoinColumn(name = "accountId"), inverseJoinColumns = @JoinColumn(name = "memberOf"))
-   public Set<HAccountRole> getRoles()
-   {
-      if (roles == null)
-      {
-         roles = new HashSet<HAccountRole>();
-         setRoles(roles);
-      }
-      return roles;
-   }
+    @OneToMany(mappedBy = "account", cascade = {CascadeType.ALL})
+    @Cascade(value = org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
+    public Set<HCredentials> getCredentials() {
+        if (credentials == null) {
+            credentials = new HashSet<HCredentials>();
+        }
+        return credentials;
+    }
 
-   @OneToMany(mappedBy = "account", cascade = {CascadeType.ALL})
-   @Cascade(value = org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
-   public Set<HCredentials> getCredentials()
-   {
-      if(credentials == null)
-      {
-         credentials = new HashSet<HCredentials>();
-      }
-      return credentials;
-   }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mergedInto")
+    public org.zanata.model.HAccount getMergedInto() {
+        return mergedInto;
+    }
 
-   @ManyToOne(fetch = FetchType.LAZY)
-   @JoinColumn(name = "mergedInto")
-   public org.zanata.model.HAccount getMergedInto()
-   {
-      return mergedInto;
-   }
-
-   @OneToMany(mappedBy = "account", cascade = {CascadeType.ALL})
-   @Cascade(value = org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
-   @MapKey(name = "name")
-   public Map<String, HAccountOption> getEditorOptions()
-   {
-      return editorOptions;
-   }
+    @OneToMany(mappedBy = "account", cascade = {CascadeType.ALL})
+    @Cascade(value = org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
+    @MapKey(name = "name")
+    public Map<String, HAccountOption> getEditorOptions() {
+        return editorOptions;
+    }
 }

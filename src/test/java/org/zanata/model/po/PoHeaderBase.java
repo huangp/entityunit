@@ -20,22 +20,20 @@
  */
 package org.zanata.model.po;
 
-import javax.persistence.CascadeType;
-import javax.persistence.JoinColumn;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToOne;
-
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.Type;
 import org.zanata.model.HSimpleComment;
 import org.zanata.model.HashableState;
 import org.zanata.model.ModelEntityBase;
 
-import lombok.Setter;
-import lombok.ToString;
+import javax.persistence.CascadeType;
+import javax.persistence.JoinColumn;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToOne;
 
 /**
- * 
  * @author sflaniga@redhat.com
  * @see org.zanata.rest.dto.extensions.gettext.PoHeader
  * @see org.zanata.rest.dto.extensions.gettext.PoTargetHeader
@@ -43,28 +41,25 @@ import lombok.ToString;
 @MappedSuperclass
 @Setter
 @ToString
-public abstract class PoHeaderBase extends ModelEntityBase implements HashableState
-{
+public abstract class PoHeaderBase extends ModelEntityBase implements HashableState {
 
-   private static final long serialVersionUID = 4675225923343857779L;
-   private HSimpleComment comment;
-   // stored in the format used by java.util.Properties.store(Writer)
-   // see PoUtility.headerEntriesToString
-   private String entries;
+    private static final long serialVersionUID = 4675225923343857779L;
+    private HSimpleComment comment;
+    // stored in the format used by java.util.Properties.store(Writer)
+    // see PoUtility.headerEntriesToString
+    private String entries;
 
-   // TODO use orphanRemoval=true: requires JPA 2.0
-   @OneToOne(optional = true, cascade = CascadeType.ALL)
-   @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
-   @JoinColumn(name = "comment_id")
-   public HSimpleComment getComment()
-   {
-      return comment;
-   }
+    // TODO use orphanRemoval=true: requires JPA 2.0
+    @OneToOne(optional = true, cascade = CascadeType.ALL)
+    @Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
+    @JoinColumn(name = "comment_id")
+    public HSimpleComment getComment() {
+        return comment;
+    }
 
-   // see PoUtility.stringToHeaderEntries
-   @Type(type = "text")
-   public String getEntries()
-   {
-      return entries;
-   }
+    // see PoUtility.stringToHeaderEntries
+    @Type(type = "text")
+    public String getEntries() {
+        return entries;
+    }
 }

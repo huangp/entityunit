@@ -20,12 +20,12 @@
  */
 package org.zanata.model.validator;
 
+import javax.validation.Constraint;
+import javax.validation.Payload;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import javax.validation.Constraint;
-import javax.validation.Payload;
 
 /**
  * Implements unique validation on JPA entities when it's not possible to do so at the database level.
@@ -35,13 +35,17 @@ import javax.validation.Payload;
  * @author Carlos Munoz <a href="mailto:camunoz@redhat.com">camunoz@redhat.com</a>
  */
 @Constraint(validatedBy = {UniqueValidator.class})
-@Target( { ElementType.TYPE })
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Unique
-{
-   Class<?>[] groups() default {};
-   String message() default "{validator.unique}";
-   Class<? extends Payload>[] payload() default {};
-   /** JPA / Hibernate fields that should be unique (all together) for an entity */
-   String[] properties();
+public @interface Unique {
+    Class<?>[] groups() default {};
+
+    String message() default "{validator.unique}";
+
+    Class<? extends Payload>[] payload() default {};
+
+    /**
+     * JPA / Hibernate fields that should be unique (all together) for an entity
+     */
+    String[] properties();
 }

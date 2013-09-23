@@ -28,7 +28,6 @@ import java.io.IOException;
  *
  * @author Carlos Munoz <a href="mailto:camunoz@redhat.com">camunoz@redhat.com</a>
  */
-public interface HashableState
-{
-   public void writeHashState(ByteArrayOutputStream buff) throws IOException;
+public interface HashableState {
+    public void writeHashState(ByteArrayOutputStream buff) throws IOException;
 }

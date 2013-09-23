@@ -1,61 +1,54 @@
 package com.github.huangp.entityunit.entity;
 
-import javax.persistence.EntityManager;
-
 import com.google.common.collect.ImmutableList;
+
+import javax.persistence.EntityManager;
 
 import static com.github.huangp.entityunit.entity.EntityMaker.Callback;
 
 /**
  * @author Patrick Huang
  */
-public class Callbacks
-{
-   public static TakeCopyCallback takeCopy()
-   {
-      return new TakeCopyCallback();
-   }
+public final class Callbacks {
 
-   public static WireManyToManyCallback wireManyToMany(Class typeToFind, Object objectToWire)
-   {
-      return new WireManyToManyCallback(typeToFind, objectToWire);
-   }
+    private Callbacks() {
+    }
 
-   public static Callback chain(Callback one, Callback... others)
-   {
-      return new ChainedCallback(one, others);
-   }
+    public static TakeCopyCallback takeCopy() {
+        return new TakeCopyCallback();
+    }
 
+    public static WireManyToManyCallback wireManyToMany(Class typeToFind, Object objectToWire) {
+        return new WireManyToManyCallback(typeToFind, objectToWire);
+    }
 
-   private static class ChainedCallback implements Callback
-   {
-      private final ImmutableList<EntityMaker.Callback> callbacks;
+    public static Callback chain(Callback one, Callback... others) {
+        return new ChainedCallback(one, others);
+    }
 
-      public ChainedCallback(Callback one, Callback... rest)
-      {
-         callbacks = ImmutableList.<Callback>builder().add(one).add(rest).build();
-      }
+    private static class ChainedCallback implements Callback {
+        private final ImmutableList<EntityMaker.Callback> callbacks;
 
-      @Override
-      public Iterable<Object> beforePersist(EntityManager entityManager, Iterable<Object> toBePersisted)
-      {
-         Iterable<Object> toReturn = toBePersisted;
-         for (Callback callback : callbacks)
-         {
-            toReturn = callback.beforePersist(entityManager, toBePersisted);
-         }
-         return toReturn;
-      }
+        public ChainedCallback(Callback one, Callback... rest) {
+            callbacks = ImmutableList.<Callback>builder().add(one).add(rest).build();
+        }
 
-      @Override
-      public Iterable<Object> afterPersist(EntityManager entityManager, Iterable<Object> persisted)
-      {
-         Iterable<Object> toReturn = persisted;
-         for (Callback callback : callbacks)
-         {
-            toReturn = callback.afterPersist(entityManager, persisted);
-         }
-         return toReturn;
-      }
-   }
+        @Override
+        public Iterable<Object> beforePersist(EntityManager entityManager, Iterable<Object> toBePersisted) {
+            Iterable<Object> toReturn = toBePersisted;
+            for (Callback callback : callbacks) {
+                toReturn = callback.beforePersist(entityManager, toBePersisted);
+            }
+            return toReturn;
+        }
+
+        @Override
+        public Iterable<Object> afterPersist(EntityManager entityManager, Iterable<Object> persisted) {
+            Iterable<Object> toReturn = persisted;
+            for (Callback callback : callbacks) {
+                toReturn = callback.afterPersist(entityManager, persisted);
+            }
+            return toReturn;
+        }
+    }
 }

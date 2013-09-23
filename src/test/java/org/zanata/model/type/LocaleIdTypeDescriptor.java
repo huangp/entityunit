@@ -24,60 +24,47 @@ import org.hibernate.type.descriptor.WrapperOptions;
 import org.hibernate.type.descriptor.java.AbstractTypeDescriptor;
 import org.zanata.common.LocaleId;
 
-public class LocaleIdTypeDescriptor extends AbstractTypeDescriptor<LocaleId>
-{
-   private static final long serialVersionUID = 1L;
-   public static final org.zanata.model.type.LocaleIdTypeDescriptor INSTANCE = new org.zanata.model.type.LocaleIdTypeDescriptor();
+public class LocaleIdTypeDescriptor extends AbstractTypeDescriptor<LocaleId> {
+    private static final long serialVersionUID = 1L;
+    public static final org.zanata.model.type.LocaleIdTypeDescriptor INSTANCE = new org.zanata.model.type.LocaleIdTypeDescriptor();
 
-   protected LocaleIdTypeDescriptor()
-   {
-      super(LocaleId.class);
-   }
+    protected LocaleIdTypeDescriptor() {
+        super(LocaleId.class);
+    }
 
-   @Override
-   public LocaleId fromString(String string)
-   {
-      if (string == null)
-      {
-         return null;
-      }
-      else
-      {
-         return new LocaleId(string);
-      }
-   }
+    @Override
+    public LocaleId fromString(String string) {
+        if (string == null) {
+            return null;
+        } else {
+            return new LocaleId(string);
+        }
+    }
 
-   @Override
-   public String toString(LocaleId value)
-   {
-      return value.toString();
-   }
+    @Override
+    public String toString(LocaleId value) {
+        return value.toString();
+    }
 
-   @Override
-   public <X> X unwrap(LocaleId value, Class<X> type, WrapperOptions options)
-   {
-      if (value == null)
-      {
-         return null;
-      }
-      if (String.class.isAssignableFrom(type))
-      {
-         return (X) value.toString();
-      }
-      throw unknownUnwrap(type);
-   }
+    @Override
+    public <X> X unwrap(LocaleId value, Class<X> type, WrapperOptions options) {
+        if (value == null) {
+            return null;
+        }
+        if (String.class.isAssignableFrom(type)) {
+            return (X) value.toString();
+        }
+        throw unknownUnwrap(type);
+    }
 
-   @Override
-   public <X> LocaleId wrap(X value, WrapperOptions options)
-   {
-      if (value == null)
-      {
-         return null;
-      }
-      if (String.class.isInstance(value))
-      {
-         return new LocaleId((String) value);
-      }
-      throw unknownWrap(value.getClass());
-   }
+    @Override
+    public <X> LocaleId wrap(X value, WrapperOptions options) {
+        if (value == null) {
+            return null;
+        }
+        if (String.class.isInstance(value)) {
+            return new LocaleId((String) value);
+        }
+        throw unknownWrap(value.getClass());
+    }
 }

@@ -21,33 +21,40 @@
 
 package org.zanata.model;
 
+import org.zanata.common.HasContents;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.zanata.common.HasContents;
-
 /**
  * @author Sean Flanigan <a href="mailto:sflaniga@redhat.com">sflaniga@redhat.com</a>
- *
  */
-public interface ITextFlow extends HasContents
-{
-   public @Nonnull
-   org.zanata.common.LocaleId getLocale();
-   public @Nonnull
-   java.lang.String getQualifiedId();
-   /**
-    * Gets the associated TargetContents for a single locale for this SourceContents.
-    * Note that default implementation in HTextFlow requires a lot of database I/O
-    * @param localeId
-    * @return
-    */
-   public @Nullable
-   org.zanata.model.ITextFlowTarget getTargetContents(@Nonnull org.zanata.common.LocaleId localeId);
-   /**
-    * Gets the associated TargetContents for all available locales for this SourceContents.
-    * @return
-    */
-   public @Nonnull
-   java.lang.Iterable<ITextFlowTarget> getAllTargetContents();
+public interface ITextFlow extends HasContents {
+    public
+    @Nonnull
+    org.zanata.common.LocaleId getLocale();
+
+    public
+    @Nonnull
+    java.lang.String getQualifiedId();
+
+    /**
+     * Gets the associated TargetContents for a single locale for this SourceContents.
+     * Note that default implementation in HTextFlow requires a lot of database I/O
+     *
+     * @param localeId
+     * @return
+     */
+    public
+    @Nullable
+    org.zanata.model.ITextFlowTarget getTargetContents(@Nonnull org.zanata.common.LocaleId localeId);
+
+    /**
+     * Gets the associated TargetContents for all available locales for this SourceContents.
+     *
+     * @return
+     */
+    public
+    @Nonnull
+    java.lang.Iterable<ITextFlowTarget> getAllTargetContents();
 }

@@ -20,7 +20,13 @@
  */
 package org.zanata.model.tm;
 
-import java.util.Map;
+import com.google.common.collect.Maps;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.zanata.model.ModelEntityBase;
+
 import javax.annotation.Nonnull;
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -35,14 +41,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
-
-import org.zanata.model.ModelEntityBase;
-import com.google.common.collect.Maps;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import java.util.Map;
 
 /**
  * A single translation memory unit belonging to a Translation Memory.
@@ -55,86 +54,77 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @Access(AccessType.FIELD)
-public class TransMemoryUnit extends ModelEntityBase implements HasTMMetadata
-{
-   private static final long serialVersionUID = 1L;
+public class TransMemoryUnit extends ModelEntityBase implements HasTMMetadata {
+    private static final long serialVersionUID = 1L;
 
-   public static org.zanata.model.tm.TransMemoryUnit tu(org.zanata.model.tm.TransMemory tm, String uniqueId, String transUnitId, String sourceLanguage,
-         String sourceContent, TransMemoryUnitVariant... transUnitVariants)
-   {
-      return new org.zanata.model.tm.TransMemoryUnit(tm, uniqueId, transUnitId, sourceLanguage, sourceContent,
-            TransMemoryUnitVariant.newMap(transUnitVariants));
-   }
+    public static org.zanata.model.tm.TransMemoryUnit tu(org.zanata.model.tm.TransMemory tm, String uniqueId, String transUnitId, String sourceLanguage,
+                                                         String sourceContent, TransMemoryUnitVariant... transUnitVariants) {
+        return new org.zanata.model.tm.TransMemoryUnit(tm, uniqueId, transUnitId, sourceLanguage, sourceContent,
+                TransMemoryUnitVariant.newMap(transUnitVariants));
+    }
 
-   public TransMemoryUnit(org.zanata.model.tm.TransMemory tm, String uniqueId, String transUnitId, String sourceLanguage,
-         String sourceContent, Map<String, TransMemoryUnitVariant> transUnitVariants)
-   {
-      this.translationMemory = tm;
-      this.uniqueId = uniqueId;
-      this.transUnitId = transUnitId;
-      this.transUnitVariants = transUnitVariants;
-      this.sourceLanguage = sourceLanguage;
-      this.transUnitVariants.put(sourceLanguage, new TransMemoryUnitVariant(sourceLanguage, sourceContent));
-   }
+    public TransMemoryUnit(org.zanata.model.tm.TransMemory tm, String uniqueId, String transUnitId, String sourceLanguage,
+                           String sourceContent, Map<String, TransMemoryUnitVariant> transUnitVariants) {
+        this.translationMemory = tm;
+        this.uniqueId = uniqueId;
+        this.transUnitId = transUnitId;
+        this.transUnitVariants = transUnitVariants;
+        this.sourceLanguage = sourceLanguage;
+        this.transUnitVariants.put(sourceLanguage, new TransMemoryUnitVariant(sourceLanguage, sourceContent));
+    }
 
-   @Column(name = "trans_unit_id", nullable = true)
-   private String transUnitId;
+    @Column(name = "trans_unit_id", nullable = true)
+    private String transUnitId;
 
-   // This is the BCP-47 language code, or null iff the TU supports all source languages (*all* in TMX)
-   @Column(name = "source_language", nullable = true)
-   private String sourceLanguage;
+    // This is the BCP-47 language code, or null iff the TU supports all source languages (*all* in TMX)
+    @Column(name = "source_language", nullable = true)
+    private String sourceLanguage;
 
-   @ManyToOne(optional = false, fetch = FetchType.LAZY)
-   @JoinColumn(name = "tm_id", nullable = false)
-   private TransMemory translationMemory;
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "tm_id", nullable = false)
+    private TransMemory translationMemory;
 
-   @Column(name = "unique_id", nullable = false)
-   private String uniqueId;
+    @Column(name = "unique_id", nullable = false)
+    private String uniqueId;
 
-   @Column(nullable = true)
-   private Integer position;
+    @Column(nullable = true)
+    private Integer position;
 
-   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-   @JoinColumn(name = "trans_unit_id", nullable = false)
-   @MapKey(name = "language")
-   private Map<String, TransMemoryUnitVariant> transUnitVariants = Maps.newHashMap();
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "trans_unit_id", nullable = false)
+    @MapKey(name = "language")
+    private Map<String, TransMemoryUnitVariant> transUnitVariants = Maps.newHashMap();
 
-   @Enumerated(EnumType.STRING)
-   @Column(name = "metadata_type", nullable = true)
-   private org.zanata.model.tm.TMMetadataType metadataType;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "metadata_type", nullable = true)
+    private org.zanata.model.tm.TMMetadataType metadataType;
 
-   @Column(nullable = true)
-   @Basic(fetch = FetchType.LAZY)
-   private String metadata;
+    @Column(nullable = true)
+    @Basic(fetch = FetchType.LAZY)
+    private String metadata;
 
-   public TransMemoryUnit(String uniqueId)
-   {
-      this.uniqueId = uniqueId;
-   }
+    public TransMemoryUnit(String uniqueId) {
+        this.uniqueId = uniqueId;
+    }
 
-   @Override
-   protected boolean logPersistence()
-   {
-      return false;
-   }
+    @Override
+    protected boolean logPersistence() {
+        return false;
+    }
 
-   @Override
-   public String getMetadata(org.zanata.model.tm.TMMetadataType tmType)
-   {
-      if (this.metadataType == tmType)
-      {
-         return this.metadata;
-      }
-      return null;
-   }
+    @Override
+    public String getMetadata(org.zanata.model.tm.TMMetadataType tmType) {
+        if (this.metadataType == tmType) {
+            return this.metadata;
+        }
+        return null;
+    }
 
-   @Override
-   public void setMetadata(@Nonnull org.zanata.model.tm.TMMetadataType tmType, String metadata)
-   {
-      assert this.metadataType == null || this.metadataType == tmType :
-         "Only one type of metadata is supported for this entity";
-      setMetadataType(tmType);
-      setMetadata(metadata);
-   }
+    @Override
+    public void setMetadata(@Nonnull org.zanata.model.tm.TMMetadataType tmType, String metadata) {
+        assert this.metadataType == null || this.metadataType == tmType : "Only one type of metadata is supported for this entity";
+        setMetadataType(tmType);
+        setMetadata(metadata);
+    }
 
 }

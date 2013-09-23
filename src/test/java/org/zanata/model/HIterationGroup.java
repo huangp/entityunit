@@ -20,20 +20,19 @@
  */
 package org.zanata.model;
 
-import java.util.HashSet;
-import java.util.Set;
+import lombok.Setter;
+import org.hibernate.annotations.Type;
+import org.hibernate.validator.constraints.NotEmpty;
+import org.zanata.common.EntityStatus;
+
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-
-import org.hibernate.annotations.Type;
-import org.hibernate.validator.constraints.NotEmpty;
-import org.zanata.common.EntityStatus;
-
-import lombok.Setter;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Alex Eng <a href="mailto:aeng@redhat.com">aeng@redhat.com</a>
@@ -41,71 +40,61 @@ import lombok.Setter;
 @Entity
 @Setter
 // @EqualsAndHashCode(callSuper = true)
-public class HIterationGroup extends SlugEntityBase implements HasEntityStatus
-{
-   private static final long serialVersionUID = 5682522115222479842L;
-   private String name;
+public class HIterationGroup extends SlugEntityBase implements HasEntityStatus {
+    private static final long serialVersionUID = 5682522115222479842L;
+    private String name;
 
-   private String description;
+    private String description;
 
-   private Set<HPerson> maintainers;
+    private Set<HPerson> maintainers;
 
-   private Set<HProjectIteration> projectIterations;
+    private Set<HProjectIteration> projectIterations;
 
-   private EntityStatus status = EntityStatus.ACTIVE;
+    private EntityStatus status = EntityStatus.ACTIVE;
 
-   @Size(max = 80)
-   @NotEmpty
-   public String getName()
-   {
-      return name;
-   }
+    @Size(max = 80)
+    @NotEmpty
+    public String getName() {
+        return name;
+    }
 
-   @Size(max = 100)
-   public String getDescription()
-   {
-      return description;
-   }
+    @Size(max = 100)
+    public String getDescription() {
+        return description;
+    }
 
-   @ManyToMany
-   @JoinTable(name = "HIterationGroup_Maintainer", joinColumns = @JoinColumn(name = "iterationGroupId"), inverseJoinColumns = @JoinColumn(name = "personId"))
-   public Set<HPerson> getMaintainers()
-   {
-      if (maintainers == null)
-      {
-         maintainers = new HashSet<HPerson>();
-      }
-      return maintainers;
-   }
+    @ManyToMany
+    @JoinTable(name = "HIterationGroup_Maintainer", joinColumns = @JoinColumn(name = "iterationGroupId"), inverseJoinColumns = @JoinColumn(name = "personId"))
+    public Set<HPerson> getMaintainers() {
+        if (maintainers == null) {
+            maintainers = new HashSet<HPerson>();
+        }
+        return maintainers;
+    }
 
-   public void addMaintainer(HPerson maintainer)
-   {
-      this.getMaintainers().add(maintainer);
-      maintainer.getMaintainerVersionGroups().add(this);
-   }
+    public void addMaintainer(HPerson maintainer) {
+        this.getMaintainers().add(maintainer);
+        maintainer.getMaintainerVersionGroups().add(this);
+    }
 
-   @ManyToMany
-   @JoinTable(name = "HIterationGroup_ProjectIteration", joinColumns = @JoinColumn(name = "iterationGroupId"), inverseJoinColumns = @JoinColumn(name = "projectIterationId"))
-   public Set<HProjectIteration> getProjectIterations()
-   {
-      if (projectIterations == null)
-      {
-         projectIterations = new HashSet<HProjectIteration>();
-      }
-      return projectIterations;
-   }
+    @ManyToMany
+    @JoinTable(name = "HIterationGroup_ProjectIteration", joinColumns = @JoinColumn(name = "iterationGroupId"), inverseJoinColumns = @JoinColumn(name = "projectIterationId"))
+    public Set<HProjectIteration> getProjectIterations() {
+        if (projectIterations == null) {
+            projectIterations = new HashSet<HProjectIteration>();
+        }
+        return projectIterations;
+    }
 
-   public void addProjectIteration(HProjectIteration iteration)
-   {
-      this.getProjectIterations().add(iteration);
-   }
+    public void addProjectIteration(HProjectIteration iteration) {
+        this.getProjectIterations().add(iteration);
+    }
 
-   @Type(type = "entityStatus")
-   @NotNull
-   @Override
-   public EntityStatus getStatus()
-   {
-      return status;
-   }
+    @Type(type = "entityStatus")
+    @NotNull
+    @Override
+    public EntityStatus getStatus() {
+        return status;
+    }
 
 }

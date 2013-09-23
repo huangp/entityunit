@@ -4,25 +4,26 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
              version="2.0">
 
-  <persistence-unit name="zanataTestDatasourcePU"
-                    transaction-type="RESOURCE_LOCAL">
-    <provider>org.hibernate.ejb.HibernatePersistence</provider>
+    <persistence-unit name="zanataTestDatasourcePU"
+                      transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.ejb.HibernatePersistence</provider>
 
-    <properties>
-      <property name="hibernate.show_sql" value="false"/>
-      <!-- Use test version of hibernate cache -->
-      <!--<property name="hibernate.cache.region.factory_class" value="org.hibernate.testing.cache.CachingRegionFactory" />-->
-      <property name="hibernate.hbm2ddl.auto" value="create"/>
+        <properties>
+            <property name="hibernate.show_sql" value="false"/>
+            <!-- Use test version of hibernate cache -->
+            <!--<property name="hibernate.cache.region.factory_class" value="org.hibernate.testing.cache.CachingRegionFactory" />-->
+            <property name="hibernate.hbm2ddl.auto" value="create"/>
 
-      <property name="hibernate.connection.driver_class" value="org.h2.Driver"/>
-      <!-- Configure the in-memory database to be shared, and so that it
-         doesn't disappear after it has been set up by Hibernate: -->
-      <property name="hibernate.connection.url" value="jdbc:h2:file:${project.build.directory}/h2/db;AUTO_SERVER=TRUE;MVCC=true"/>
-      <property name="hibernate.connection.username" value="sa"/>
-      <property name="hibernate.connection.password" value=""/>
-      <!--hibernate3-maven-plugin:hbm2ddl needs this  -->
-      <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+            <property name="hibernate.connection.driver_class" value="org.h2.Driver"/>
+            <!-- Configure the in-memory database to be shared, and so that it
+               doesn't disappear after it has been set up by Hibernate: -->
+            <property name="hibernate.connection.url"
+                      value="jdbc:h2:file:${project.build.directory}/h2/db;AUTO_SERVER=TRUE;MVCC=true"/>
+            <property name="hibernate.connection.username" value="sa"/>
+            <property name="hibernate.connection.password" value=""/>
+            <!--hibernate3-maven-plugin:hbm2ddl needs this  -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
 
-    </properties>
-  </persistence-unit>
+        </properties>
+    </persistence-unit>
 </persistence>

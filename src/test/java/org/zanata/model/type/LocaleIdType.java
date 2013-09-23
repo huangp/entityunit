@@ -26,26 +26,22 @@ import org.hibernate.type.LiteralType;
 import org.hibernate.type.StringType;
 import org.zanata.common.LocaleId;
 
-public class LocaleIdType extends AbstractSingleColumnStandardBasicType<LocaleId> implements LiteralType<LocaleId>
-{
+public class LocaleIdType extends AbstractSingleColumnStandardBasicType<LocaleId> implements LiteralType<LocaleId> {
 
-   private static final long serialVersionUID = 1251881884197592346L;
+    private static final long serialVersionUID = 1251881884197592346L;
 
-   public LocaleIdType()
-   {
-      super(StringType.INSTANCE.getSqlTypeDescriptor(), LocaleIdTypeDescriptor.INSTANCE);
-   }
+    public LocaleIdType() {
+        super(StringType.INSTANCE.getSqlTypeDescriptor(), LocaleIdTypeDescriptor.INSTANCE);
+    }
 
-   @Override
-   public String getName()
-   {
-      return "localeId";
-   }
+    @Override
+    public String getName() {
+        return "localeId";
+    }
 
-   @Override
-   public String objectToSQLString(LocaleId value, Dialect dialect) throws Exception
-   {
-      return "\'" + toString(value) + "\'";
-   }
+    @Override
+    public String objectToSQLString(LocaleId value, Dialect dialect) throws Exception {
+        return "\'" + toString(value) + "\'";
+    }
 
 }

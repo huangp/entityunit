@@ -2,7 +2,6 @@ package com.github.huangp.entityunit.entity;
 
 import com.github.huangp.entityunit.holder.BeanValueHolder;
 import com.github.huangp.entityunit.maker.PreferredValueMakersRegistry;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -11,9 +10,8 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor
 @Getter
-public class MakeContext
-{
-   private final BeanValueHolder beanValueHolder;
-   private final PreferredValueMakersRegistry preferredValueMakers;
+public class MakeContext {
+    private final BeanValueHolder beanValueHolder;
+    private final PreferredValueMakersRegistry preferredValueMakers;
 
 }

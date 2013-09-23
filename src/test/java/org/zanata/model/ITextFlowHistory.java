@@ -22,15 +22,14 @@ package org.zanata.model;
 
 import java.util.List;
 
-public interface ITextFlowHistory
-{
+public interface ITextFlowHistory {
 
-   Integer getPos();
+    Integer getPos();
 
-   Integer getRevision();
+    Integer getRevision();
 
-   boolean isObsolete();
+    boolean isObsolete();
 
-   List<String> getContents();
+    List<String> getContents();
 
 }

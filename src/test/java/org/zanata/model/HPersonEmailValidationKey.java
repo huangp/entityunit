@@ -20,8 +20,12 @@
  */
 package org.zanata.model;
 
-import java.io.Serializable;
-import java.util.Date;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotEmpty;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -31,79 +35,65 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
-import org.hibernate.validator.constraints.Email;
-import org.hibernate.validator.constraints.NotEmpty;
-
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import java.io.Serializable;
+import java.util.Date;
 
 @Entity
 @Setter
 @ToString
 @NoArgsConstructor
-public class HPersonEmailValidationKey implements Serializable
-{
-   private static final long serialVersionUID = 1L;
+public class HPersonEmailValidationKey implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-   private Long id;
-   
-   private String keyHash;
+    private Long id;
 
-   private org.zanata.model.HPerson person;
+    private String keyHash;
 
-   private Date creationDate;
+    private org.zanata.model.HPerson person;
 
-   private String email;
+    private Date creationDate;
 
-   public HPersonEmailValidationKey(org.zanata.model.HPerson person, String email, String keyHash)
-   {
-      this.person = person;
-      this.keyHash = keyHash;
-      this.email = email;
-   }
+    private String email;
 
-   @Id
-   @GeneratedValue
-   public Long getId()
-   {
-      return id;
-   }
+    public HPersonEmailValidationKey(org.zanata.model.HPerson person, String email, String keyHash) {
+        this.person = person;
+        this.keyHash = keyHash;
+        this.email = email;
+    }
 
-   @Column(nullable = false, unique = true)
-   public String getKeyHash()
-   {
-      return keyHash;
-   }
+    @Id
+    @GeneratedValue
+    public Long getId() {
+        return id;
+    }
 
-   @Temporal(TemporalType.TIMESTAMP)
-   @Column(nullable = false)
-   public Date getCreationDate()
-   {
-      return creationDate;
-   }
+    @Column(nullable = false, unique = true)
+    public String getKeyHash() {
+        return keyHash;
+    }
 
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(nullable = false)
+    public Date getCreationDate() {
+        return creationDate;
+    }
 
-   @ManyToOne(optional = false)
-   @JoinColumn(name = "personId", nullable = false, unique = true)
-   public HPerson getPerson()
-   {
-      return person;
-   }
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "personId", nullable = false, unique = true)
+    public HPerson getPerson() {
+        return person;
+    }
 
-   @Email
-   @NotEmpty
-   public String getEmail()
-   {
-      return email;
-   }
+    @Email
+    @NotEmpty
+    public String getEmail() {
+        return email;
+    }
 
-   @SuppressWarnings("unused")
-   @PrePersist
-   private void onPersist()
-   {
-      creationDate = new Date();
-   }
+    @SuppressWarnings("unused")
+    @PrePersist
+    private void onPersist() {
+        creationDate = new Date();
+    }
 
 }

@@ -20,11 +20,15 @@
  */
 package org.zanata.model;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.validator.constraints.NotEmpty;
+import org.zanata.common.EntityStatus;
+import org.zanata.common.ProjectType;
+import org.zanata.model.type.EntityStatusType;
+
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -38,176 +42,147 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.validator.constraints.NotEmpty;
-import org.zanata.common.EntityStatus;
-import org.zanata.common.ProjectType;
-import org.zanata.model.type.EntityStatusType;
-
-import lombok.Setter;
-import lombok.ToString;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @see org.zanata.rest.dto.Project
- *
  */
 @Entity
 @TypeDef(name = "entityStatus", typeClass = EntityStatusType.class)
 @Setter
 @ToString(callSuper = true, of = "name")
-public class HProject extends SlugEntityBase implements Serializable, HasEntityStatus
-{
-   private static final long serialVersionUID = 1L;
-   private String name;
-   private String description;
-   private String homeContent;
-   private String sourceViewURL;
-   private String sourceCheckoutURL;
-   private boolean overrideLocales = false;
-   private boolean restrictedByRoles = false;
-   private boolean overrideValidations = false;
-   private HCopyTransOptions defaultCopyTransOpts;
-   private Set<HLocale> customizedLocales;
-   private ProjectType defaultProjectType;
+public class HProject extends SlugEntityBase implements Serializable, HasEntityStatus {
+    private static final long serialVersionUID = 1L;
+    private String name;
+    private String description;
+    private String homeContent;
+    private String sourceViewURL;
+    private String sourceCheckoutURL;
+    private boolean overrideLocales = false;
+    private boolean restrictedByRoles = false;
+    private boolean overrideValidations = false;
+    private HCopyTransOptions defaultCopyTransOpts;
+    private Set<HLocale> customizedLocales;
+    private ProjectType defaultProjectType;
 
-   private Set<org.zanata.model.HPerson> maintainers;
-   private Set<HAccountRole> allowedRoles;
-   private Set<String> customizedValidations;
+    private Set<org.zanata.model.HPerson> maintainers;
+    private Set<HAccountRole> allowedRoles;
+    private Set<String> customizedValidations;
 
-   private List<HProjectIteration> projectIterations = new ArrayList<HProjectIteration>();
-   private EntityStatus status = EntityStatus.ACTIVE;
+    private List<HProjectIteration> projectIterations = new ArrayList<HProjectIteration>();
+    private EntityStatus status = EntityStatus.ACTIVE;
 
-   @OneToMany(mappedBy = "project")
-   public List<HProjectIteration> getProjectIterations()
-   {
-      return projectIterations;
-   }
+    @OneToMany(mappedBy = "project")
+    public List<HProjectIteration> getProjectIterations() {
+        return projectIterations;
+    }
 
-   public void addIteration(HProjectIteration iteration)
-   {
-      projectIterations.add(iteration);
-      iteration.setProject(this);
-   }
+    public void addIteration(HProjectIteration iteration) {
+        projectIterations.add(iteration);
+        iteration.setProject(this);
+    }
 
-   @Size(max = 80)
-   @NotEmpty
-   public String getName()
-   {
-      return name;
-   }
+    @Size(max = 80)
+    @NotEmpty
+    public String getName() {
+        return name;
+    }
 
-   public boolean getOverrideLocales()
-   {
-      return this.overrideLocales;
-   }
+    public boolean getOverrideLocales() {
+        return this.overrideLocales;
+    }
 
-   public boolean getOverrideValidations()
-   {
-      return overrideValidations;
-   }
+    public boolean getOverrideValidations() {
+        return overrideValidations;
+    }
 
-   public boolean isRestrictedByRoles()
-   {
-      return restrictedByRoles;
-   }
+    public boolean isRestrictedByRoles() {
+        return restrictedByRoles;
+    }
 
-   @Enumerated(EnumType.STRING)
-   public ProjectType getDefaultProjectType()
-   {
-      return defaultProjectType;
-   }
+    @Enumerated(EnumType.STRING)
+    public ProjectType getDefaultProjectType() {
+        return defaultProjectType;
+    }
 
-   @Size(max = 100)
-   public String getDescription()
-   {
-      return description;
-   }
+    @Size(max = 100)
+    public String getDescription() {
+        return description;
+    }
 
-   @Type(type = "text")
-   public String getHomeContent()
-   {
-      return homeContent;
-   }
+    @Type(type = "text")
+    public String getHomeContent() {
+        return homeContent;
+    }
 
-   public String getSourceViewURL()
-   {
-      return sourceViewURL;
-   }
+    public String getSourceViewURL() {
+        return sourceViewURL;
+    }
 
-   public String getSourceCheckoutURL()
-   {
-      return sourceCheckoutURL;
-   }
+    public String getSourceCheckoutURL() {
+        return sourceCheckoutURL;
+    }
 
-   @OneToOne(fetch = FetchType.LAZY, optional = true)
-   @JoinColumn(name = "default_copy_trans_opts_id")
-   public HCopyTransOptions getDefaultCopyTransOpts()
-   {
-      return defaultCopyTransOpts;
-   }
+    @OneToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "default_copy_trans_opts_id")
+    public HCopyTransOptions getDefaultCopyTransOpts() {
+        return defaultCopyTransOpts;
+    }
 
-   /**
-    * @see {@link #addMaintainer(org.zanata.model.HPerson)}
-    */
-   @ManyToMany
-   @JoinTable(name = "HProject_Maintainer", joinColumns = @JoinColumn(name = "projectId"), inverseJoinColumns = @JoinColumn(name = "personId"))
-   public Set<org.zanata.model.HPerson> getMaintainers()
-   {
-      if (maintainers == null)
-      {
-         maintainers = new HashSet<org.zanata.model.HPerson>();
-      }
-      return maintainers;
-   }
+    /**
+     * @see {@link #addMaintainer(org.zanata.model.HPerson)}
+     */
+    @ManyToMany
+    @JoinTable(name = "HProject_Maintainer", joinColumns = @JoinColumn(name = "projectId"), inverseJoinColumns = @JoinColumn(name = "personId"))
+    public Set<org.zanata.model.HPerson> getMaintainers() {
+        if (maintainers == null) {
+            maintainers = new HashSet<org.zanata.model.HPerson>();
+        }
+        return maintainers;
+    }
 
-   public void addMaintainer( HPerson maintainer )
-   {
-      this.getMaintainers().add(maintainer);
-      maintainer.getMaintainerProjects().add(this);
-   }
+    public void addMaintainer(HPerson maintainer) {
+        this.getMaintainers().add(maintainer);
+        maintainer.getMaintainerProjects().add(this);
+    }
 
-   @ManyToMany
-   @JoinTable(name = "HProject_Locale", joinColumns = @JoinColumn(name = "projectId"), inverseJoinColumns = @JoinColumn(name = "localeId"))
-   public Set<HLocale> getCustomizedLocales()
-   {
-      if (customizedLocales == null)
-      {
-         customizedLocales = new HashSet<HLocale>();
-      }
-      return customizedLocales;
-   }
+    @ManyToMany
+    @JoinTable(name = "HProject_Locale", joinColumns = @JoinColumn(name = "projectId"), inverseJoinColumns = @JoinColumn(name = "localeId"))
+    public Set<HLocale> getCustomizedLocales() {
+        if (customizedLocales == null) {
+            customizedLocales = new HashSet<HLocale>();
+        }
+        return customizedLocales;
+    }
 
-   @ManyToMany
-   @JoinTable(name = "HProject_AllowedRole", joinColumns = @JoinColumn(name = "projectId"), inverseJoinColumns = @JoinColumn(name = "roleId"))
-   public Set<HAccountRole> getAllowedRoles()
-   {
-      if(allowedRoles == null)
-      {
-         allowedRoles = new HashSet<HAccountRole>();
-      }
-      return allowedRoles;
-   }
+    @ManyToMany
+    @JoinTable(name = "HProject_AllowedRole", joinColumns = @JoinColumn(name = "projectId"), inverseJoinColumns = @JoinColumn(name = "roleId"))
+    public Set<HAccountRole> getAllowedRoles() {
+        if (allowedRoles == null) {
+            allowedRoles = new HashSet<HAccountRole>();
+        }
+        return allowedRoles;
+    }
 
-   @JoinTable(name = "HProject_Validation", joinColumns = @JoinColumn(name = "projectId"))
-   @Type(type = "text")
-   @ElementCollection(fetch = FetchType.LAZY)
-   @Column(name = "validation", nullable = false)
-   public Set<String> getCustomizedValidations()
-   {
-      if (customizedValidations == null)
-      {
-         customizedValidations = new HashSet<String>();
-      }
-      return customizedValidations;
-   }
+    @JoinTable(name = "HProject_Validation", joinColumns = @JoinColumn(name = "projectId"))
+    @Type(type = "text")
+    @ElementCollection(fetch = FetchType.LAZY)
+    @Column(name = "validation", nullable = false)
+    public Set<String> getCustomizedValidations() {
+        if (customizedValidations == null) {
+            customizedValidations = new HashSet<String>();
+        }
+        return customizedValidations;
+    }
 
-   @Type(type = "entityStatus")
-   @NotNull
-   @Override
-   public EntityStatus getStatus()
-   {
-      return status;
-   }
+    @Type(type = "entityStatus")
+    @NotNull
+    @Override
+    public EntityStatus getStatus() {
+        return status;
+    }
 }

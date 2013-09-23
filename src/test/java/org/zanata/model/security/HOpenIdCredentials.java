@@ -20,12 +20,11 @@
  */
 package org.zanata.model.security;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
+import lombok.NoArgsConstructor;
 import org.zanata.model.HAccount;
 
-import lombok.NoArgsConstructor;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 
 /**
  * @author Carlos Munoz <a href="mailto:camunoz@redhat.com">camunoz@redhat.com</a>
@@ -33,12 +32,10 @@ import lombok.NoArgsConstructor;
 @Entity
 @DiscriminatorValue("OPENID")
 @NoArgsConstructor
-public class HOpenIdCredentials extends HCredentials
-{
-   public HOpenIdCredentials(HAccount account, String user, String email)
-   {
-      setAccount(account);
-      setUser(user);
-      setEmail(email);
-   }
+public class HOpenIdCredentials extends HCredentials {
+    public HOpenIdCredentials(HAccount account, String user, String email) {
+        setAccount(account);
+        setUser(user);
+        setEmail(email);
+    }
 }

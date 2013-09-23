@@ -20,45 +20,37 @@
  */
 package org.zanata.model.validator;
 
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 
-public class UrlValidator implements ConstraintValidator<Url, String>, Serializable
-{
-   private static final long serialVersionUID = 1L;
+public class UrlValidator implements ConstraintValidator<Url, String>, Serializable {
+    private static final long serialVersionUID = 1L;
 
-   private boolean canEndInSlash;
+    private boolean canEndInSlash;
 
-   @Override
-   public void initialize(Url u)
-   {
-      this.canEndInSlash = u.canEndInSlash();
-   }
+    @Override
+    public void initialize(Url u) {
+        this.canEndInSlash = u.canEndInSlash();
+    }
 
-   @Override
-   public boolean isValid(String string, ConstraintValidatorContext context)
-   {
-      if (string == null || string.isEmpty())
-      {
-         return true;
-      }
-      if (!canEndInSlash && string.endsWith("/"))
-      {
-         return false;
-      }
+    @Override
+    public boolean isValid(String string, ConstraintValidatorContext context) {
+        if (string == null || string.isEmpty()) {
+            return true;
+        }
+        if (!canEndInSlash && string.endsWith("/")) {
+            return false;
+        }
 
-      try
-      {
-         new URL(string);
-         return true;
-      }
-      catch (MalformedURLException e)
-      {
-         return false;
-      }
-   }
+        try {
+            new URL(string);
+            return true;
+        } catch (MalformedURLException e) {
+            return false;
+        }
+    }
 
 }

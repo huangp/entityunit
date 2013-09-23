@@ -20,8 +20,15 @@
  */
 package org.zanata.model.tm;
 
-import java.util.Map;
-import java.util.Set;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Setter;
+import lombok.ToString;
+import org.zanata.model.SlugEntityBase;
+
 import javax.annotation.Nonnull;
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -34,16 +41,8 @@ import javax.persistence.JoinTable;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.MapKeyEnumerated;
 import javax.persistence.OneToMany;
-
-import org.zanata.model.SlugEntityBase;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Setter;
-import lombok.ToString;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A translation Memory representation.
@@ -55,46 +54,42 @@ import lombok.ToString;
 @ToString(exclude = "translationUnits")
 @Data
 @Access(AccessType.FIELD)
-public class TransMemory extends SlugEntityBase implements HasTMMetadata
-{
-   private static final long serialVersionUID = 1L;
+public class TransMemory extends SlugEntityBase implements HasTMMetadata {
+    private static final long serialVersionUID = 1L;
 
-   private String description;
+    private String description;
 
-   // This is the BCP-47 language code.  Null means any source language (*all* in TMX)
-   @Column(name = "source_language", nullable = true)
-   private String sourceLanguage;
-   
-   public static org.zanata.model.tm.TransMemory tm(String slug)
-   {
-      org.zanata.model.tm.TransMemory tm = new org.zanata.model.tm.TransMemory();
-      tm.setSlug(slug);
-      return tm;
-   }
+    // This is the BCP-47 language code.  Null means any source language (*all* in TMX)
+    @Column(name = "source_language", nullable = true)
+    private String sourceLanguage;
 
-   @Setter(AccessLevel.PROTECTED)
-   @OneToMany(mappedBy = "translationMemory", orphanRemoval = true)
-   private Set<TransMemoryUnit> translationUnits = Sets.newHashSet();
+    public static org.zanata.model.tm.TransMemory tm(String slug) {
+        org.zanata.model.tm.TransMemory tm = new org.zanata.model.tm.TransMemory();
+        tm.setSlug(slug);
+        return tm;
+    }
 
-   /**
-    * Map values are Json strings containing metadata for the particular type of translation memory
-    */
-   @ElementCollection
-   @MapKeyEnumerated(EnumType.STRING)
-   @MapKeyColumn(name = "metadata_type")
-   @JoinTable(name = "TransMemory_Metadata", joinColumns = {@JoinColumn(name = "trans_memory_id")})
-   @Column(name = "metadata",length = Integer.MAX_VALUE)
-   private Map<TMMetadataType, String> metadata = Maps.newHashMap();
+    @Setter(AccessLevel.PROTECTED)
+    @OneToMany(mappedBy = "translationMemory", orphanRemoval = true)
+    private Set<TransMemoryUnit> translationUnits = Sets.newHashSet();
 
-   @Override
-   public String getMetadata(TMMetadataType tmType)
-   {
-      return metadata.get(tmType);
-   }
+    /**
+     * Map values are Json strings containing metadata for the particular type of translation memory
+     */
+    @ElementCollection
+    @MapKeyEnumerated(EnumType.STRING)
+    @MapKeyColumn(name = "metadata_type")
+    @JoinTable(name = "TransMemory_Metadata", joinColumns = {@JoinColumn(name = "trans_memory_id")})
+    @Column(name = "metadata", length = Integer.MAX_VALUE)
+    private Map<TMMetadataType, String> metadata = Maps.newHashMap();
 
-   @Override
-   public void setMetadata(@Nonnull org.zanata.model.tm.TMMetadataType tmType, String metadata)
-   {
-      this.metadata.put(tmType, metadata);
-   }
+    @Override
+    public String getMetadata(TMMetadataType tmType) {
+        return metadata.get(tmType);
+    }
+
+    @Override
+    public void setMetadata(@Nonnull org.zanata.model.tm.TMMetadataType tmType, String metadata) {
+        this.metadata.put(tmType, metadata);
+    }
 }

@@ -20,11 +20,6 @@
  */
 package org.zanata.model.type;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.dialect.Dialect;
@@ -33,75 +28,66 @@ import org.hibernate.type.ImmutableType;
 import org.zanata.model.HAccountRole;
 import org.zanata.model.HAccountRole.RoleType;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+
 /**
  * @author Carlos Munoz <a href="mailto:camunoz@redhat.com">camunoz@redhat.com</a>
  */
 // FIXME convert to AbstractStandardBasicType approach
-public class RoleTypeType extends ImmutableType implements DiscriminatorType<RoleType>
-{
-   @Override
-   public RoleType stringToObject(String xml) throws Exception
-   {
-      if (xml.length() != 1)
-      {
-         throw new MappingException("multiple or zero characters found parsing string");
-      }
-      return HAccountRole.RoleType.valueOf(xml.charAt(0));
-   }
+public class RoleTypeType extends ImmutableType implements DiscriminatorType<RoleType> {
+    @Override
+    public RoleType stringToObject(String xml) throws Exception {
+        if (xml.length() != 1) {
+            throw new MappingException("multiple or zero characters found parsing string");
+        }
+        return HAccountRole.RoleType.valueOf(xml.charAt(0));
+    }
 
-   @Override
-   public String objectToSQLString(RoleType value, Dialect dialect) throws Exception
-   {
-      return "'" + value.getInitial() + "'";
-   }
+    @Override
+    public String objectToSQLString(RoleType value, Dialect dialect) throws Exception {
+        return "'" + value.getInitial() + "'";
+    }
 
-   @Override
-   public Object get(ResultSet rs, String name) throws HibernateException, SQLException
-   {
-      String str = rs.getString(name);
-      if (str == null)
-      {
-         return null;
-      }
-      else
-      {
-         return HAccountRole.RoleType.valueOf(str.charAt(0));
-      }
-   }
+    @Override
+    public Object get(ResultSet rs, String name) throws HibernateException, SQLException {
+        String str = rs.getString(name);
+        if (str == null) {
+            return null;
+        } else {
+            return HAccountRole.RoleType.valueOf(str.charAt(0));
+        }
+    }
 
-   @Override
-   public void set(PreparedStatement st, Object value, int index) throws HibernateException, SQLException
-   {
-      st.setString(index, String.valueOf(((HAccountRole.RoleType) value).getInitial()));
-   }
+    @Override
+    public void set(PreparedStatement st, Object value, int index) throws HibernateException, SQLException {
+        st.setString(index, String.valueOf(((HAccountRole.RoleType) value).getInitial()));
+    }
 
-   @Override
-   public int sqlType()
-   {
-      return Types.CHAR;
-   }
+    @Override
+    public int sqlType() {
+        return Types.CHAR;
+    }
 
-   @Override
-   public String toString(Object value) throws HibernateException
-   {
-      return String.valueOf(((HAccountRole.RoleType) value).getInitial());
-   }
+    @Override
+    public String toString(Object value) throws HibernateException {
+        return String.valueOf(((HAccountRole.RoleType) value).getInitial());
+    }
 
-   @Override
-   public Object fromStringValue(String xml) throws HibernateException
-   {
-      return HAccountRole.RoleType.valueOf(xml.charAt(0));
-   }
+    @Override
+    public Object fromStringValue(String xml) throws HibernateException {
+        return HAccountRole.RoleType.valueOf(xml.charAt(0));
+    }
 
-   @Override
-   public Class<RoleType> getReturnedClass()
-   {
-      return HAccountRole.RoleType.class;
-   }
+    @Override
+    public Class<RoleType> getReturnedClass() {
+        return HAccountRole.RoleType.class;
+    }
 
-   @Override
-   public String getName()
-   {
-      return "roleType";
-   }
+    @Override
+    public String getName() {
+        return "roleType";
+    }
 }

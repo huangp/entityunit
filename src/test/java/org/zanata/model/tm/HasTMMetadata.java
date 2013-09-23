@@ -21,16 +21,15 @@
 
 package org.zanata.model.tm;
 
-import javax.annotation.Nonnull;
-
 import org.zanata.model.HasEntityDates;
+
+import javax.annotation.Nonnull;
 
 /**
  * @author Sean Flanigan <a href="mailto:sflaniga@redhat.com">sflaniga@redhat.com</a>
- *
  */
-public interface HasTMMetadata extends HasEntityDates
-{
-   String getMetadata(org.zanata.model.tm.TMMetadataType tmType);
-   void setMetadata(@Nonnull org.zanata.model.tm.TMMetadataType tmType, String metadata);
+public interface HasTMMetadata extends HasEntityDates {
+    String getMetadata(org.zanata.model.tm.TMMetadataType tmType);
+
+    void setMetadata(@Nonnull org.zanata.model.tm.TMMetadataType tmType, String metadata);
 }

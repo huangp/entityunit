@@ -20,28 +20,26 @@
  */
 package org.zanata.model;
 
+import org.zanata.common.ContentState;
+
 import java.util.Date;
 import java.util.List;
 
-import org.zanata.common.ContentState;
+public interface ITextFlowTargetHistory {
 
+    ContentState getState();
 
-public interface ITextFlowTargetHistory
-{
+    Integer getTextFlowRevision();
 
-   ContentState getState();
+    org.zanata.model.HPerson getLastModifiedBy();
 
-   Integer getTextFlowRevision();
+    List<String> getContents();
 
-   org.zanata.model.HPerson getLastModifiedBy();
+    Date getLastChanged();
 
-   List<String> getContents();
+    Integer getVersionNum();
 
-   Date getLastChanged();
+    org.zanata.model.HPerson getTranslator();
 
-   Integer getVersionNum();
-
-   org.zanata.model.HPerson getTranslator();
-
-   HPerson getReviewer();
+    HPerson getReviewer();
 }

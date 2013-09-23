@@ -8,8 +8,7 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor(staticName = "of")
 @EqualsAndHashCode
-class CacheKey
-{
-   private final Class type;
-   private final ScanOption option;
+class CacheKey {
+    private final Class type;
+    private final ScanOption option;
 }

@@ -20,8 +20,9 @@
  */
 package org.zanata.model;
 
-import java.io.Serializable;
-import java.sql.Blob;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -29,50 +30,45 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
-
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.io.Serializable;
+import java.sql.Blob;
 
 @Entity
-@NoArgsConstructor // is this necessary?
-public class HDocumentUploadPart implements Serializable
-{
+@NoArgsConstructor
+// is this necessary?
+public class HDocumentUploadPart implements Serializable {
 
-   private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-   @Setter
-   private long id;
-   @Setter
-   private org.zanata.model.HDocumentUpload upload;
-   @Setter
-   private Blob content;
+    @Setter
+    private long id;
+    @Setter
+    private org.zanata.model.HDocumentUpload upload;
+    @Setter
+    private Blob content;
 
-   @Id
-   @GeneratedValue
-   public Long getId()
-   {
-      return id;
-   }
+    @Id
+    @GeneratedValue
+    public Long getId() {
+        return id;
+    }
 
-   @ManyToOne
-   @JoinColumn(name = "documentUploadId", nullable = false, updatable = false, insertable = false)
-   public HDocumentUpload getUpload()
-   {
-      return upload;
-   }
+    @ManyToOne
+    @JoinColumn(name = "documentUploadId", nullable = false, updatable = false, insertable = false)
+    public HDocumentUpload getUpload() {
+        return upload;
+    }
 
-   @NotNull
-   @Lob
-   public Blob getContent()
-   {
-      return content;
-   }
+    @NotNull
+    @Lob
+    public Blob getContent() {
+        return content;
+    }
 
-   @Override
-   public String toString()
-   {
-      return getClass().getSimpleName() + "@" + Integer.toHexString(hashCode())
-            + "[upload id=" + upload.getId() + "]";
-   }
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "@" + Integer.toHexString(hashCode())
+                + "[upload id=" + upload.getId() + "]";
+    }
 
 }

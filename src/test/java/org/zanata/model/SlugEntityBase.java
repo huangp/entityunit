@@ -20,36 +20,33 @@
  */
 package org.zanata.model;
 
-import javax.persistence.MappedSuperclass;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
-import org.hibernate.annotations.NaturalId;
-import org.zanata.model.validator.Slug;
-
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.NaturalId;
+import org.zanata.model.validator.Slug;
+
+import javax.persistence.MappedSuperclass;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @MappedSuperclass
 @ToString(callSuper = true)
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public abstract class SlugEntityBase extends ModelEntityBase
-{
+public abstract class SlugEntityBase extends ModelEntityBase {
 
-   private static final long serialVersionUID = -1911540675412928681L;
-   private String slug;
+    private static final long serialVersionUID = -1911540675412928681L;
+    private String slug;
 
-   // TODO PERF @NaturalId(mutable=false) for better criteria caching
-   @NaturalId
-   @Size(min = 1, max = 40)
-   @Slug
-   @NotNull
-   public String getSlug()
-   {
-      return slug;
-   }
+    // TODO PERF @NaturalId(mutable=false) for better criteria caching
+    @NaturalId
+    @Size(min = 1, max = 40)
+    @Slug
+    @NotNull
+    public String getSlug() {
+        return slug;
+    }
 }

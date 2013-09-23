@@ -20,17 +20,16 @@
  */
 package org.zanata.model;
 
-import javax.persistence.Entity;
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.zanata.model.type.ConditionRuleActionType;
-
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.zanata.model.type.ConditionRuleActionType;
+
+import javax.persistence.Entity;
+import javax.validation.constraints.NotNull;
 
 /**
  * Persistent representation of Copy Trans options.
@@ -43,75 +42,66 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class HCopyTransOptions extends ModelEntityBase
-{
-   /**
-    * Indicates the different actions that can be taken when evaluating conditions
-    * for a Text Flow during Copy Trans.
-    */
-   public enum ConditionRuleAction
-   {
-      /**
-       * Indicates to reject the text flow.
-       */
-      REJECT,
+public class HCopyTransOptions extends ModelEntityBase {
+    /**
+     * Indicates the different actions that can be taken when evaluating conditions
+     * for a Text Flow during Copy Trans.
+     */
+    public enum ConditionRuleAction {
+        /**
+         * Indicates to reject the text flow.
+         */
+        REJECT,
 
-      /**
-       * Indicates to flag the potentially copied translation as fuzzy.
-       */
-      DOWNGRADE_TO_FUZZY,
+        /**
+         * Indicates to flag the potentially copied translation as fuzzy.
+         */
+        DOWNGRADE_TO_FUZZY,
 
-      /**
-       * Indicates to ignore the condition entirely.
-       */
-      IGNORE;
+        /**
+         * Indicates to ignore the condition entirely.
+         */
+        IGNORE;
 
-      public char getInitial()
-      {
-         return name().charAt(0);
-      }
+        public char getInitial() {
+            return name().charAt(0);
+        }
 
-      public static ConditionRuleAction valueOf(char initial)
-      {
-         switch (initial)
-         {
-            case 'R':
-               return REJECT;
-            case 'D':
-               return DOWNGRADE_TO_FUZZY;
-            case 'I':
-               return IGNORE;
-            default:
-               throw new IllegalArgumentException(String.valueOf(initial));
-         }
-      }
-   }
+        public static ConditionRuleAction valueOf(char initial) {
+            switch (initial) {
+                case 'R':
+                    return REJECT;
+                case 'D':
+                    return DOWNGRADE_TO_FUZZY;
+                case 'I':
+                    return IGNORE;
+                default:
+                    throw new IllegalArgumentException(String.valueOf(initial));
+            }
+        }
+    }
 
-   private ConditionRuleAction contextMismatchAction = ConditionRuleAction.REJECT;
+    private ConditionRuleAction contextMismatchAction = ConditionRuleAction.REJECT;
 
-   private ConditionRuleAction docIdMismatchAction = ConditionRuleAction.REJECT;
+    private ConditionRuleAction docIdMismatchAction = ConditionRuleAction.REJECT;
 
-   private ConditionRuleAction projectMismatchAction = ConditionRuleAction.REJECT;
+    private ConditionRuleAction projectMismatchAction = ConditionRuleAction.REJECT;
 
+    @Type(type = "conditionRuleAction")
+    @NotNull
+    public ConditionRuleAction getContextMismatchAction() {
+        return contextMismatchAction;
+    }
 
-   @Type(type = "conditionRuleAction")
-   @NotNull
-   public ConditionRuleAction getContextMismatchAction()
-   {
-      return contextMismatchAction;
-   }
+    @Type(type = "conditionRuleAction")
+    @NotNull
+    public ConditionRuleAction getDocIdMismatchAction() {
+        return docIdMismatchAction;
+    }
 
-   @Type(type = "conditionRuleAction")
-   @NotNull
-   public ConditionRuleAction getDocIdMismatchAction()
-   {
-      return docIdMismatchAction;
-   }
-
-   @Type(type = "conditionRuleAction")
-   @NotNull
-   public ConditionRuleAction getProjectMismatchAction()
-   {
-      return projectMismatchAction;
-   }
+    @Type(type = "conditionRuleAction")
+    @NotNull
+    public ConditionRuleAction getProjectMismatchAction() {
+        return projectMismatchAction;
+    }
 }

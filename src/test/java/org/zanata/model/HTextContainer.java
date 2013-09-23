@@ -21,53 +21,49 @@
 
 package org.zanata.model;
 
+import org.zanata.common.HasContents;
+
+import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.persistence.Transient;
-
-import org.zanata.common.HasContents;
 
 /**
  * @author Sean Flanigan <a href="mailto:sflaniga@redhat.com">sflaniga@redhat.com</a>
- *
  */
-abstract class HTextContainer implements HasContents, Serializable
-{
-   private static final long serialVersionUID = 1L;
+abstract class HTextContainer implements HasContents, Serializable {
+    private static final long serialVersionUID = 1L;
 
-   @SuppressWarnings("unused")
-   private List<String> getContentsToIndex()
-   {
-      return getContents();
-   }
+    @SuppressWarnings("unused")
+    private List<String> getContentsToIndex() {
+        return getContents();
+    }
 
-   /**
-    * As of release 1.6, replaced by {@link #getContents()}
-    * @return
-    */
-   @Deprecated
-   @Transient
-   public String getContent()
-   {
-      return getContents() != null && getContents().size() > 0 ? getContents().get(0) : null;
-   }
+    /**
+     * As of release 1.6, replaced by {@link #getContents()}
+     *
+     * @return
+     */
+    @Deprecated
+    @Transient
+    public String getContent() {
+        return getContents() != null && getContents().size() > 0 ? getContents().get(0) : null;
+    }
 
-   /**
-    * As of release 1.6, replaced by {@link #setContents(String...)}
-    * @return
-    */
-   @Deprecated
-   public void setContent(String content)
-   {
-      setContents(content);
-   }
+    /**
+     * As of release 1.6, replaced by {@link #setContents(String...)}
+     *
+     * @return
+     */
+    @Deprecated
+    public void setContent(String content) {
+        setContents(content);
+    }
 
-   @Override
-   public void setContents(String... args)
-   {
-      setContents(new ArrayList<String>(Arrays.asList(args)));
-   }
+    @Override
+    public void setContents(String... args) {
+        setContents(new ArrayList<String>(Arrays.asList(args)));
+    }
 
 }

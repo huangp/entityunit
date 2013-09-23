@@ -31,14 +31,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Flags an entity field or method as representing the API key for a user
- * 
+ *
  * @author Asgeir Frimannsson
  */
-@Target( { METHOD, FIELD })
+@Target({METHOD, FIELD})
 @Documented
 @Retention(RUNTIME)
 @Inherited
-public @interface UserApiKey
-{
+public @interface UserApiKey {
 
 }

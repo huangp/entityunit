@@ -25,7 +25,6 @@ import org.zanata.common.EntityStatus;
 /**
  * @author Carlos Munoz <a href="mailto:camunoz@redhat.com">camunoz@redhat.com</a>
  */
-public interface HasEntityStatus
-{
-   EntityStatus getStatus();
+public interface HasEntityStatus {
+    EntityStatus getStatus();
 }
