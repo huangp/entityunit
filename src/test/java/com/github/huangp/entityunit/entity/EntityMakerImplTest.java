@@ -6,6 +6,7 @@ import com.github.huangp.entities.Person;
 import com.github.huangp.entityunit.maker.FixedValueMaker;
 import com.github.huangp.entityunit.maker.IntervalValuesMaker;
 import com.github.huangp.entityunit.maker.RangeValuesMaker;
+import com.github.huangp.entityunit.maker.SkipFieldValueMaker;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.hamcrest.Matchers;
@@ -34,6 +35,7 @@ import org.zanata.model.HProject;
 import org.zanata.model.HProjectIteration;
 import org.zanata.model.HTextFlow;
 import org.zanata.model.HTextFlowTarget;
+import org.zanata.model.type.EntityType;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -251,9 +253,8 @@ public class EntityMakerImplTest {
         entityManager.persist(role);
         entityManager.getTransaction().commit();
 
-        maker.makeAndPersist(entityManager, HAccount.class, Callbacks.chain(new FixIdCallback(HAccount.class, 10L)));
+        HAccount result = maker.makeAndPersist(entityManager, HAccount.class, Callbacks.chain(new FixIdCallback(HAccount.class, 10L)));
 
-        HAccount result = entityManager.find(HAccount.class, 10L);
         result.getRoles().add(role);
         entityManager.getTransaction().begin();
         entityManager.flush();
@@ -290,17 +291,20 @@ public class EntityMakerImplTest {
     public void canMakeEntityUsesInterfaceAsParameterType() {
         maker.makeAndPersist(entityManager, HTextFlowTarget.class, copyCallback);
 
+        HProjectIteration iteration = copyCallback.getByType(HProjectIteration.class);
         EntityMaker activityPersistService = EntityMakerBuilder.builder()
                 .reuseEntities(copyCallback.getCopy())
                         //   public Activity(HPerson actor, IsEntityWithType context, IsEntityWithType target, ActivityType activityType,
                 .addConstructorParameterMaker(Activity.class, 1,
-                        FixedValueMaker.fix(copyCallback.getByType(HProjectIteration.class)))
+                      FixedValueMaker.fix(iteration))
                 .addConstructorParameterMaker(Activity.class, 2,
-                        RangeValuesMaker.cycle(copyCallback.getByType(HDocument.class), copyCallback.getByType(HTextFlowTarget.class)))
+                      RangeValuesMaker.cycle(copyCallback.getByType(HDocument.class), copyCallback.getByType(HTextFlowTarget.class)))
                 .addConstructorParameterMaker(Activity.class, 3,
                         RangeValuesMaker.cycle(ActivityType.UPLOAD_SOURCE_DOCUMENT, ActivityType.UPDATE_TRANSLATION,
                                 ActivityType.UPLOAD_TRANSLATION_DOCUMENT, ActivityType.REVIEWED_TRANSLATION))
                 .addFieldOrPropertyMaker(Activity.class, "creationDate", IntervalValuesMaker.startFrom(new Date(), -TimeUnit.DAYS.toMillis(1)))
+                .addFieldOrPropertyMaker(Activity.class, "contextId", SkipFieldValueMaker.MAKER)
+                .addFieldOrPropertyMaker(Activity.class, "lastTargetId", SkipFieldValueMaker.MAKER)
                 .build();
 
         activityPersistService.makeAndPersist(entityManager, Activity.class);
@@ -310,9 +314,11 @@ public class EntityMakerImplTest {
         activityPersistService.makeAndPersist(entityManager, Activity.class);
         activityPersistService.makeAndPersist(entityManager, Activity.class);
 
-        List<Activity> result = entityManager.createQuery("from Activity", Activity.class).getResultList();
+        List<Activity> result = entityManager.createQuery("from Activity order by id", Activity.class).getResultList();
 
         assertThat(result, Matchers.hasSize(6));
+        assertThat(result.get(0).getContextType(), Matchers.equalTo(EntityType.HProjectIteration));
+        assertThat(result.get(0).getContextId(), Matchers.equalTo(iteration.getId()));
     }
 
     @Test

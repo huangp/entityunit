@@ -54,19 +54,7 @@ public class FixIdCallback extends AbstractNoOpCallback {
         log.debug("update generated id affected row: {}", affectedRow);
 
         // set the updated value back to entity
-        entityManager.detach(entity); // otherwise it won't allow us  to modify id field
-        Field idField = Iterables.find(ClassUtil.getAllDeclaredFields(entityType), new Predicate<Field>() {
-            @Override
-            public boolean apply(Field input) {
-                return input.getName().equals(identityField.getSimpleName());
-            }
-        });
-        idField.setAccessible(true);
-        try {
-            idField.set(entity, wantedIdValue);
-        } catch (IllegalAccessException e) {
-            throw Throwables.propagate(e);
-        }
+        entityManager.detach(entity); // remove it from current persistence context
         // regain the entity back
         Object updated = entityManager.find(entityType, wantedIdValue);
         List<Object> toReturn = Lists.newArrayList(persisted);

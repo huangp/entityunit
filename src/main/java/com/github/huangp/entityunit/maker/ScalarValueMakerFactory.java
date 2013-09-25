@@ -63,7 +63,7 @@ public class ScalarValueMakerFactory {
         if (ClassUtil.isEntity(type)) {
             log.debug("{} is entity type", token);
             // we don't want to make unnecessary entities
-            // @see EntityPersistService
+            // @see EntityMakerBuilder
             return new ReuseOrNullMaker(context.getBeanValueHolder(), token.getRawType());
         }
         log.debug("guessing this is a bean {}", token);

@@ -110,6 +110,11 @@ public class BeanMaker<T> implements Maker<T> {
     private void trySetValue(T result, Settable settable) {
         log.debug("about to make {}", settable);
         Object fieldValue = factory.from(settable).value();
+        // this is ugly. But don't want to change the whole design to fit this feature
+        if (SkipFieldValueMaker.shouldSkipThisField(fieldValue))
+        {
+            return;
+        }
         log.debug("value {}", fieldValue);
         try {
             if (ClassUtil.isAccessTypeIsField(type)) {
