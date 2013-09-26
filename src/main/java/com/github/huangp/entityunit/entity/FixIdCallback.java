@@ -53,10 +53,14 @@ public class FixIdCallback extends AbstractNoOpCallback {
     public Iterable<Object> afterPersist(EntityManager entityManager, Iterable<Object> persisted) {
 
         Object entity = findEntity(persisted, entityType);
-        checkPrecondition(entity);
 
         final Settable identityField = ClassUtil.getIdentityField(entity);
         Serializable generatedIdValue = getGeneratedId(entity, identityField);
+        if (generatedIdValue.equals(wantedIdValue))
+        {
+           return persisted;
+        }
+        checkPrecondition(entity);
 
         // TODO consider entity name mapping and id column mapping
         String tableName = entityType.getSimpleName();

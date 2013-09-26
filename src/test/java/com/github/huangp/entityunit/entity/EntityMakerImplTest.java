@@ -265,7 +265,7 @@ public class EntityMakerImplTest {
         assertThat(result.getRoles(), Matchers.hasSize(1));
 
         try {
-            maker.makeAndPersist(entityManager, HAccount.class, Callbacks.chain(new WireManyToManyCallback(HAccount.class, role), new FixIdCallback(HAccount.class, 11L)));
+            maker.makeAndPersist(entityManager, HAccount.class, Callbacks.chain(new WireManyToManyCallback(HAccount.class, role), new FixIdCallback(HAccount.class, 100L)));
             Assert.fail("should fail");
         } catch (Exception e) {
 
