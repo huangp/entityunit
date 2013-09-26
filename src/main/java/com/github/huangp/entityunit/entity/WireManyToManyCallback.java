@@ -18,17 +18,17 @@ import java.util.Collection;
  * <pre>
  * <code>
  *
- * {@literal@}Entity
+ * {@literal @}Entity
  * class Account {
- *     {@literal@}ManyToMany(targetEntity = Role.class)
- *     {@literal@}JoinTable(name = "AccountMembership", joinColumns = @JoinColumn(name = "accountId"), inverseJoinColumns = @JoinColumn(name = "memberOf"))
+ *     {@literal @}ManyToMany(targetEntity = Role.class)
+ *     {@literal @}JoinTable(name = "AccountMembership", joinColumns = @JoinColumn(name = "accountId"), inverseJoinColumns = @JoinColumn(name = "memberOf"))
  *     public Set<Role> getRoles() {
  *         return roles;
  *     }
  *
  * }
  *
- * {@literal@}Entity
+ * {@literal @}Entity
  * class Role {
  * }
  *

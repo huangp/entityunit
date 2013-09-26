@@ -54,23 +54,23 @@ import static com.google.common.collect.Lists.newArrayList;
  * <pre>
  * <code>
  *
- * {@literal@}MappedSuperclass
+ * {@literal @}MappedSuperclass
  * class Identifier {
- *     {@literal@}Id
+ *     {@literal @}Id
  *     Long id;
  * }
  *
- * {@literal@}Entity
+ * {@literal @}Entity
  * class LineItem extends Identifier {
- *     {@literal@}ManyToOne
+ *     {@literal @}ManyToOne
  *     Category category;
  *
- *     {@literal@}OneToOne
+ *     {@literal @}OneToOne
  *     Person owner;
  *
  *     String name;
  *
- *     {@literal@}OneToMany
+ *     {@literal @}OneToMany
  *     List<Item> items;
  * }
  * </code>
