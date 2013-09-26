@@ -18,9 +18,9 @@ public class SettableProperty implements Settable {
     private final Optional<Field> optionalField;
     private final Method getterMethod;
 
-    private transient final String simpleName;
-    private transient final String fullName;
-    private transient final Type propertyType;
+    private final transient String simpleName;
+    private final transient String fullName;
+    private final transient Type propertyType;
 
     private SettableProperty(Class ownerType, PropertyDescriptor propertyDescriptor) {
         simpleName = propertyDescriptor.getName();
@@ -82,7 +82,7 @@ public class SettableProperty implements Settable {
 
     @Override
     public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
-        return (optionalField.isPresent() && optionalField.get().isAnnotationPresent(annotationClass))
+        return optionalField.isPresent() && optionalField.get().isAnnotationPresent(annotationClass)
                 || getterMethod.isAnnotationPresent(annotationClass);
 
     }

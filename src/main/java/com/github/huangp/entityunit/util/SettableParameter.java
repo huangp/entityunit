@@ -13,8 +13,8 @@ import java.lang.reflect.Type;
 public class SettableParameter implements Settable {
     @Delegate(types = AnnotatedElement.class)
     private final Parameter parameter;
-    private transient final String simpleName;
-    private transient final String fullName;
+    private final transient String simpleName;
+    private final transient String fullName;
 
     private SettableParameter(Class<?> ownerType, Parameter parameter) {
         simpleName = parameter.toString().replaceFirst("^.+\\s", "");

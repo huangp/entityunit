@@ -12,7 +12,7 @@ public class SettableField implements Settable {
     @Delegate
     private final Field field;
     private final Method getterMethod;
-    private transient final String fullName;
+    private final transient String fullName;
 
     private SettableField(Class ownerType, Field field) {
         this.field = field;

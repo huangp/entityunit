@@ -7,6 +7,8 @@ import javax.persistence.EntityManager;
 import static com.github.huangp.entityunit.entity.EntityMaker.Callback;
 
 /**
+ * Factory class.
+ *
  * @author Patrick Huang
  */
 public final class Callbacks {
@@ -22,6 +24,15 @@ public final class Callbacks {
         return new WireManyToManyCallback(typeToFind, objectToWire);
     }
 
+    /**
+     * Chain callback together.
+     *
+     * @param one
+     *         first callback
+     * @param others
+     *         other callbacks
+     * @return a chained callback
+     */
     public static Callback chain(Callback one, Callback... others) {
         return new ChainedCallback(one, others);
     }
@@ -29,7 +40,7 @@ public final class Callbacks {
     private static class ChainedCallback implements Callback {
         private final ImmutableList<EntityMaker.Callback> callbacks;
 
-        public ChainedCallback(Callback one, Callback... rest) {
+        private ChainedCallback(Callback one, Callback... rest) {
             callbacks = ImmutableList.<Callback>builder().add(one).add(rest).build();
         }
 

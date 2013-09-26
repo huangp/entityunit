@@ -119,7 +119,7 @@ public class EntityMakerImplTest {
     @Test
     public void canSetPreferredValue() {
         maker = EntityMakerBuilder.builder()
-                .addConstructorParameterMaker(HLocale.class, 0, new FixedValueMaker<LocaleId>(LocaleId.DE))
+                .addConstructorParameterMaker(HLocale.class, 0, FixedValueMaker.fix(LocaleId.DE))
                 .addFieldOrPropertyMaker(HLocale.class, "enabledByDefault", FixedValueMaker.ALWAYS_TRUE_MAKER)
                 .addFieldOrPropertyMaker(HLocale.class, "active", FixedValueMaker.ALWAYS_TRUE_MAKER)
                 .build();
@@ -177,7 +177,7 @@ public class EntityMakerImplTest {
     @Test
     public void willNotInheritContext() {
         maker = EntityMakerBuilder.builder()
-                .addConstructorParameterMaker(HLocale.class, 0, new FixedValueMaker<LocaleId>(LocaleId.DE))
+                .addConstructorParameterMaker(HLocale.class, 0, FixedValueMaker.fix(LocaleId.DE))
                 .build();
 
         maker.makeAndPersist(mockEntityManager, HLocale.class, copyCallback);
@@ -186,7 +186,7 @@ public class EntityMakerImplTest {
 
         // re-create maker will override previous set up
         maker = EntityMakerBuilder.builder()
-                .addConstructorParameterMaker(HLocale.class, 0, new FixedValueMaker<LocaleId>(LocaleId.FR))
+                .addConstructorParameterMaker(HLocale.class, 0, FixedValueMaker.fix(LocaleId.FR))
                 .build();
 
         maker.makeAndPersist(mockEntityManager, HLocale.class, copyCallback);

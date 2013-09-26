@@ -8,6 +8,8 @@ import javax.persistence.EntityManager;
 import java.util.List;
 
 /**
+ * Take a copy of the objects and expose it (so that some of the objects can be reused).
+ *
  * @author Patrick Huang
  */
 public class TakeCopyCallback extends AbstractNoOpCallback {
@@ -20,10 +22,24 @@ public class TakeCopyCallback extends AbstractNoOpCallback {
         return toBePersisted;
     }
 
+    /**
+     * @param index
+     *         index
+     * @param <T>
+     *         return type
+     * @return object at that index in the copy
+     */
     public <T> T getByIndex(int index) {
         return (T) copy.get(index);
     }
 
+    /**
+     * @param type
+     *         wanted class type
+     * @param <T>
+     *         return type
+     * @return object that matches the type in the copy
+     */
     public <T> T getByType(Class<T> type) {
         return ClassUtil.findEntity(copy, type);
     }

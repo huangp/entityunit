@@ -12,6 +12,35 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 /**
+ * By default the EntityMaker will not wire many to many associations. This callback is provided to take care of it.
+ * <p/>
+ * Example:
+ * <pre>
+ * <code>
+ *
+ * {@literal@}Entity
+ * class Account {
+ *     {@literal@}ManyToMany(targetEntity = Role.class)
+ *     {@literal@}JoinTable(name = "AccountMembership", joinColumns = @JoinColumn(name = "accountId"), inverseJoinColumns = @JoinColumn(name = "memberOf"))
+ *     public Set<Role> getRoles() {
+ *         return roles;
+ *     }
+ *
+ * }
+ *
+ * {@literal@}Entity
+ * class Role {
+ * }
+ *
+ * // assuming role is already in database
+ * Role role = entityManager.find(Role.class, 1L);
+ * Account account = maker.makeAndPersist(entityManager, HAccount.class, new WireManyToManyCallback(HAccount.class, role));
+ *
+ * assertThat(account.getRoles(), Matchers.containsInAnyOrder(role));
+ *
+ * </code>
+ * </pre>
+ *
  * @author Patrick Huang
  */
 @RequiredArgsConstructor

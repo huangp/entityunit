@@ -47,7 +47,7 @@ public class EntityMakerBuilderTest {
 
         EntityMaker service = EntityMakerBuilder.builder()
                 .includeOptionalOneToOne()
-                .addConstructorParameterMaker(HLocale.class, 0, new FixedValueMaker<LocaleId>(LocaleId.DE))
+                .addConstructorParameterMaker(HLocale.class, 0, FixedValueMaker.fix(LocaleId.DE))
                 .build();
 
         // make something

@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
+ * At the moment BeanValueHolder and PreferredValueMakersRegistry are the context.
+ *
  * @author Patrick Huang
  */
 @RequiredArgsConstructor

@@ -3,6 +3,8 @@ package com.github.huangp.entityunit.entity;
 import javax.persistence.EntityManager;
 
 /**
+ * Default implementation that does nothing.
+ *
  * @author Patrick Huang
  */
 public class AbstractNoOpCallback implements EntityMaker.Callback {

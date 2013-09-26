@@ -1,6 +1,5 @@
 package com.github.huangp.entityunit.entity;
 
-import com.github.huangp.entityunit.util.ClassUtil;
 import com.github.huangp.entityunit.util.Settable;
 import com.github.huangp.entityunit.util.SettableField;
 import com.github.huangp.entityunit.util.SettableProperty;
@@ -36,18 +35,60 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
+import static com.github.huangp.entityunit.util.ClassUtil.getInstanceFields;
+import static com.github.huangp.entityunit.util.ClassUtil.getReadablePropertyDescriptors;
+import static com.github.huangp.entityunit.util.ClassUtil.isAccessTypeIsField;
 import static com.github.huangp.entityunit.util.HasAnnotationPredicate.has;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 
 /**
+ * Adaptor of entity class.
+ * <p/>
+ * It scans the class hierarchy and figure out what elements are of interest when making an entity bean.
+ * <p/>
+ * It supports both access type: field and property.
+ * <p/>
+ * Example:
+ * <pre>
+ * <code>
+ *
+ * {@literal@}MappedSuperclass
+ * class Identifier {
+ *     {@literal@}Id
+ *     Long id;
+ * }
+ *
+ * {@literal@}Entity
+ * class LineItem extends Identifier {
+ *     {@literal@}ManyToOne
+ *     Category category;
+ *
+ *     {@literal@}OneToOne
+ *     Person owner;
+ *
+ *     String name;
+ *
+ *     {@literal@}OneToMany
+ *     List<Item> items;
+ * }
+ * </code>
+ * // The resulting object is cached so calling it again with same arguments it won't do the reflection scan again.
+ * EntityClass entityClass = EntityClass.from(LineItem.class, ScanOption.IncludeOneToOne);
+ * // entityClass.getDependingEntityTypes() will return Category and Person (since we include optional one to one mapping)
+ * // entityClass.getElements() will return all elements including id, name, owner, category
+ * // entityClass.getContainingEntitiesGetterMethods will return getItems() method
+ * // entityClass.getManyToManyMethods will return empty
+ * </pre>
+ * <p/>
+ *
  * @author Patrick Huang
  */
 @ToString(of = "type")
 @EqualsAndHashCode(of = {"type", "scanOption"})
 public class EntityClass {
-    private static Cache<CacheKey, EntityClass> cache = CacheBuilder.newBuilder()
+    private static final Cache<CacheKey, EntityClass> CACHE = CacheBuilder.newBuilder()
             .maximumSize(100)
             .build();
 
@@ -94,7 +135,7 @@ public class EntityClass {
      */
     public static EntityClass from(final Class clazz, final ScanOption scanOption) {
         try {
-            return cache.get(CacheKey.of(clazz, scanOption), new Callable<EntityClass>() {
+            return CACHE.get(CacheKey.of(clazz, scanOption), new Callable<EntityClass>() {
                 @Override
                 public EntityClass call() throws Exception {
                     return createEntityClass(clazz, scanOption);
@@ -116,17 +157,20 @@ public class EntityClass {
     }
 
     private static List<Settable> getSettables(Class rootClass, Class targetClass) {
-        if (ClassUtil.isAccessTypeIsField(targetClass)) {
+        if (isAccessTypeIsField(targetClass)) {
             // field based annotation
-            List<Field> fields = ClassUtil.getInstanceFields(targetClass);
+            List<Field> fields = getInstanceFields(targetClass);
             return Lists.transform(fields, new FieldToSettableFunction(rootClass));
         } else {
             // property based annotation
-            Iterable<PropertyDescriptor> descriptors = ClassUtil.getReadablePropertyDescriptors(targetClass);
+            Iterable<PropertyDescriptor> descriptors = getReadablePropertyDescriptors(targetClass);
             return Lists.newArrayList(Iterables.transform(descriptors, new PropertyToSettableFunction(rootClass)));
         }
     }
 
+    /**
+     * @return Other entity classes that is required to persist this entity
+     */
     public Iterable<EntityClass> getDependingEntityTypes() {
         if (requiredEntityTypes == null) {
             Iterable<EntityClass> manyToOne = transform(filter(elements, has(ManyToOne.class)), new TypeFunction(scanOption, false));
@@ -136,6 +180,9 @@ public class EntityClass {
         return requiredEntityTypes;
     }
 
+    /**
+     * @return getter methods that will return associations (OneToMany collections)
+     */
     public Iterable<Method> getContainingEntitiesGetterMethods() {
         if (associationGetters == null) {
             Iterable<Settable> oneToMany = filter(elements, has(OneToMany.class));
@@ -144,6 +191,9 @@ public class EntityClass {
         return associationGetters;
     }
 
+    /**
+     * @return manyToMany mapping getter methods
+     */
     public Iterable<Method> getManyToManyMethods() {
         if (manyToManyGetters == null) {
             Iterable<Settable> manyToMany = filter(getElements(), Predicates.and(has(ManyToMany.class), has(JoinTable.class)));

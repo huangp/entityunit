@@ -1,5 +1,7 @@
 package com.github.huangp.entityunit.holder;
 
+import com.github.huangp.entityunit.entity.EntityMakerBuilder;
+import com.github.huangp.entityunit.maker.ScalarValueMakerFactory;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.reflect.ImmutableTypeToInstanceMap;
@@ -10,6 +12,11 @@ import com.google.common.reflect.TypeToken;
 import java.util.Map;
 
 /**
+ * Holds created beans so that it can be reused.
+ *
+ * @see EntityMakerBuilder
+ * @see ScalarValueMakerFactory
+ *
  * @author Patrick Huang
  */
 public class BeanValueHolder {
@@ -43,7 +50,7 @@ public class BeanValueHolder {
     public BeanValueHolder merge(BeanValueHolder other) {
         for (Map.Entry<TypeToken<?>, Object> entry : other.map.entrySet()) {
             TypeToken key = entry.getKey();
-            this.map.putInstance(key, entry.getValue());
+            map.putInstance(key, entry.getValue());
         }
         return this;
     }

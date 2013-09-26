@@ -12,9 +12,15 @@ import java.util.Collection;
 import java.util.List;
 
 /**
+ * Builder for EntityMaker.
+ * <p/>
+ * Once built the EntityMaker is immutable.
+ *
  * @author Patrick Huang
+ * @see MakeContext
+ * @see PreferredValueMakersRegistry
+ * @see BeanValueHolder
  */
-
 @NoArgsConstructor(staticName = "builder")
 @Slf4j
 public class EntityMakerBuilder {
@@ -32,11 +38,25 @@ public class EntityMakerBuilder {
         return this;
     }
 
+    /**
+     * Reuse objects from another BeanValueHolder.
+     *
+     * @param beanValueHolder
+     *         another bean value holder
+     * @return this
+     */
     public EntityMakerBuilder reuseObjects(BeanValueHolder beanValueHolder) {
         valueHolder.merge(beanValueHolder);
         return this;
     }
 
+    /**
+     * Reuse a collection of objects when making new entities.
+     *
+     * @param entities
+     *         reusable collection of entities
+     * @return this
+     */
     public EntityMakerBuilder reuseEntities(Collection<Object> entities) {
         for (Object entity : entities) {
             Class aClass = entity.getClass();
@@ -45,38 +65,79 @@ public class EntityMakerBuilder {
         return this;
     }
 
+    /**
+     * Reuse single entity.
+     *
+     * @param entity
+     *         entity
+     * @return this
+     */
     public EntityMakerBuilder reuseEntity(Serializable entity) {
         Class aClass = entity.getClass();
         valueHolder.putIfNotNull(aClass, entity);
         return this;
     }
 
+    /**
+     * Reuse entities.
+     *
+     * @param first
+     *         first
+     * @param second
+     *         second
+     * @param rest
+     *         rest of reusable entities as var args
+     * @return this
+     */
     public EntityMakerBuilder reuseEntities(Object first, Object second, Object... rest) {
         List<Object> objects = ImmutableList.builder().add(first).add(second).add(rest).build();
         return reuseEntities(objects);
     }
 
+    /**
+     * @see PreferredValueMakersRegistry#addFieldOrPropertyMaker(Class, String, Maker)
+     */
     public EntityMakerBuilder addFieldOrPropertyMaker(Class<?> ownerType, String fieldName, Maker<?> maker) {
         registry.addFieldOrPropertyMaker(ownerType, fieldName, maker);
         return this;
     }
 
+    /**
+     * @see PreferredValueMakersRegistry#addConstructorParameterMaker(Class, int, Maker)
+     */
     public EntityMakerBuilder addConstructorParameterMaker(Class<?> ownerType, int argIndex, Maker<?> maker) {
         registry.addConstructorParameterMaker(ownerType, argIndex, maker);
         return this;
     }
 
+    /**
+     * Merge another registry in.
+     *
+     * @param other
+     *         other preferred value makers registry
+     * @return this
+     */
     public EntityMakerBuilder reusePreferredValueMakers(PreferredValueMakersRegistry other) {
         registry.merge(other);
         return this;
     }
 
+    /**
+     * Merge MakeContext.
+     *
+     * @param context
+     *         make context
+     * @return this
+     */
     public EntityMakerBuilder mergeContext(MakeContext context) {
         valueHolder.merge(context.getBeanValueHolder());
         registry.merge(context.getPreferredValueMakers());
         return this;
     }
 
+    /**
+     * @return EntityMaker
+     */
     public EntityMaker build() {
 
         log.debug("registry: {}", registry);

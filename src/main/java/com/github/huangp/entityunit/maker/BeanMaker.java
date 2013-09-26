@@ -28,6 +28,23 @@ import java.util.List;
 import static com.github.huangp.entityunit.util.HasAnnotationPredicate.has;
 
 /**
+ * The core maker that makes java bean.
+ * <p/>
+ * For a given class type, the make process follows certain rules:
+ * <pre>
+ * 1. Ff it can find public constants, it will use that as value.
+ * 2. It will try to use constructor with the most arguments to create a instance.
+ * 3. For all its instance fields, it will skip:
+ *      - Fields that has the same type as itself.
+ *      - Object type field that has default value.
+ *      - Field has @Id or @Version annotation.
+ *      - Made field value that SkipFieldValueMaker#shouldSkipThisField(java.lang.Object) returns true.
+ * 4. If class is entity class and has access type of field, it will use reflection to set field value.
+ *    Otherwise it uses commons bean util to populate properties (which will ignore protected setters).
+ * </pre>
+ *
+ * @see ScalarValueMakerFactory
+ * @see SkipFieldValueMaker
  * @author Patrick Huang
  */
 @Slf4j
@@ -111,8 +128,7 @@ public class BeanMaker<T> implements Maker<T> {
         log.debug("about to make {}", settable);
         Object fieldValue = factory.from(settable).value();
         // this is ugly. But don't want to change the whole design to fit this feature
-        if (SkipFieldValueMaker.shouldSkipThisField(fieldValue))
-        {
+        if (SkipFieldValueMaker.shouldSkipThisField(fieldValue)) {
             return;
         }
         log.debug("value {}", fieldValue);

@@ -81,7 +81,7 @@ public class ScalarValueMakerFactoryTest {
 
     @Test
     public void canRegisterPreferredValueMakerAndUseIt() throws Exception {
-        registry.add(Matchers.equalTo("com.github.huangp.entities.Person - name"), new FixedValueMaker<String>("admin"));
+        registry.add(Matchers.equalTo("com.github.huangp.entities.Person - name"), FixedValueMaker.fix("admin"));
         Maker<String> maker = factory.from(SettableProperty.from(Person.class, Person.class.getMethod("getName")));
 
         String name = maker.value();
@@ -90,7 +90,7 @@ public class ScalarValueMakerFactoryTest {
 
     @Test
     public void preferredValueMakerWorksOnConstructor() throws NoSuchMethodException {
-        registry.addConstructorParameterMaker(TestClass.class, 0, new FixedValueMaker<String>("constructor"));
+        registry.addConstructorParameterMaker(TestClass.class, 0, FixedValueMaker.fix("constructor"));
         Settable settableParam = SettableParameter.from(TestClass.class,
                 Invokable.from(TestClass.class.getConstructor(String.class)).getParameters().get(0));
 
@@ -104,7 +104,7 @@ public class ScalarValueMakerFactoryTest {
     @Test
     public void primitiveTypeCanBeSet() throws NoSuchMethodException {
 
-        registry.add(Matchers.containsString("enabledByDefault"), new FixedValueMaker<Boolean>(true));
+        registry.add(Matchers.containsString("enabledByDefault"), FixedValueMaker.ALWAYS_TRUE_MAKER);
 
         Maker<Boolean> enabledByDefaultMaker = factory.from(SettableProperty.from(HLocale.class, HLocale.class.getMethod("isEnabledByDefault")));
         Maker<Boolean> activeMaker = factory.from(SettableProperty.from(HLocale.class, HLocale.class.getMethod("isActive")));

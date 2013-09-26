@@ -27,6 +27,8 @@ import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.transform;
 
 /**
+ * Helper class to clear database records.
+ *
  * @author Patrick Huang
  */
 @Slf4j
@@ -34,15 +36,26 @@ public final class EntityCleaner {
     private EntityCleaner() {
     }
 
-    public static void deleteAll(EntityManager entityManager, Class... entityClasses) {
+
+    static void deleteAll(EntityManager entityManager, Class... entityClasses) {
         for (Class clazz : entityClasses) {
             EntityClass entityClass = EntityClass.from(clazz, ScanOption.IncludeOneToOne);
 
         }
-        //TODO implement
-        //throw new UnsupportedOperationException("Implement me!");
+        //TODO giving entity classes in arbitrary order and this can sort it out
+        throw new UnsupportedOperationException("Implement me!");
     }
 
+    /**
+     * Delete all records from given entity representing tables and their many to many and element collection tables.
+     * <p/>
+     * The entity classes must be in correct order. Item references Category then Category must in front of the iterable.
+     *
+     * @param entityManager
+     *         entity manager
+     * @param entityClasses
+     *         entity class in correct order
+     */
     public static void deleteAll(final EntityManager entityManager, Iterable<Class> entityClasses) {
         entityManager.getTransaction().begin();
         for (Class entityType : entityClasses) {
@@ -60,6 +73,19 @@ public final class EntityCleaner {
         entityManager.getTransaction().commit();
     }
 
+    /**
+     * Delete all records from given entity representing tables except exclusion. Exclusion are given as entity object.
+     * So a match on id will be used.
+     * <p/>
+     * TODO manyToMany and element collection table is not considering exlusion yet
+     *
+     * @param entityManager
+     *         entity manager
+     * @param entityClasses
+     *         entity cless in correct order
+     * @param excludedEntities
+     *         excluded persisted entity objects
+     */
     public static void deleteAllExcept(EntityManager entityManager, Iterable<Class> entityClasses, Object... excludedEntities) {
         if (excludedEntities.length == 0) {
             deleteAll(entityManager, entityClasses);
