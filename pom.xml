@@ -24,9 +24,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git://github.com/huangp/entityunit.git</connection>
+        <connection>scm:git:git@github.com:huangp/entityunity.git</connection>
         <developerConnection>scm:git:git@github.com:huangp/entityunit.git</developerConnection>
-        <url>https://github.com/huangp/entityunit</url>
+        <url>git@github.com:huangp/entityunity.git</url>
     </scm>
 
     <developers>
