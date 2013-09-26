@@ -6,7 +6,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.RandomStringUtils;
-import org.hibernate.validator.constraints.Email;
 
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -33,7 +32,7 @@ class StringMaker implements Maker<String> {
         int max = DEFAULT_MAX;
         Settable settable = optionalElement.get();
         for (Annotation annotation : settable.getAnnotations()) {
-            if (annotation instanceof Email || settable.getSimpleName().equals("email")) {
+            if (looksLikeEmail(settable, annotation)) {
                 isEmail = true;
             }
             if (annotation instanceof Size) {
@@ -51,6 +50,10 @@ class StringMaker implements Maker<String> {
             // TODO Max and Min?
         }
         return new StringMaker(isEmail, min, max);
+    }
+
+    private static boolean looksLikeEmail(Settable settable, Annotation annotation) {
+        return annotation.annotationType().getName().endsWith("Email") || settable.getSimpleName().equals("email");
     }
 
     @Override
