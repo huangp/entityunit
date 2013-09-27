@@ -22,7 +22,7 @@ public interface EntityMaker {
      * // Given:
      * // Category <--- oneToMany --- LineItem
      *
-     * EntityMaker maker = EntityMakerBuilder.builder();
+     * EntityMaker maker = EntityMakerBuilder.builder().build();
      * LineItem itemOne = maker.makeAndPersist(entityManager, LineItem.class);
      * LineItem itemTwo = maker.makeAndPersist(entityManager, LineItem.class);
      *

@@ -303,6 +303,7 @@ public class EntityMakerImplTest {
                         RangeValuesMaker.cycle(ActivityType.UPLOAD_SOURCE_DOCUMENT, ActivityType.UPDATE_TRANSLATION,
                                 ActivityType.UPLOAD_TRANSLATION_DOCUMENT, ActivityType.REVIEWED_TRANSLATION))
                 .addFieldOrPropertyMaker(Activity.class, "creationDate", IntervalValuesMaker.startFrom(new Date(), -TimeUnit.DAYS.toMillis(1)))
+                // below two fields are primitive types. It can not tell whether it has default value or not so we have to skip them
                 .addFieldOrPropertyMaker(Activity.class, "contextId", SkipFieldValueMaker.MAKER)
                 .addFieldOrPropertyMaker(Activity.class, "lastTargetId", SkipFieldValueMaker.MAKER)
                 .build();
@@ -392,5 +393,49 @@ public class EntityMakerImplTest {
         assertThat(result.getProjectIteration().getProject().getSlug(), Matchers.equalTo("about-fedora"));
         assertThat(result.getProjectIteration().getProject().getName(), Matchers.equalTo("about fedora"));
     }
+
+    @Test
+    // to test wiki page is right
+    public void wikiContentPageTest() {
+        //Assuming you have obtained an EntityManager instance
+        //### Basic Usage:
+        //```java
+        EntityMaker maker = EntityMakerBuilder.builder().build();
+        LineItem itemOne = maker.makeAndPersist(entityManager, LineItem.class);
+        LineItem itemTwo = maker.makeAndPersist(entityManager, LineItem.class);
+
+        // you should have itemOne and itemTwo in database both referencing the same Category record.
+        assertThat(itemOne.getId(), Matchers.notNullValue());
+        assertThat(itemTwo.getId(), Matchers.notNullValue());
+
+        // for optional=false OneToOne mapping, it will create one for each
+        assertThat(itemOne.getOwner(), Matchers.notNullValue());
+        assertThat(itemTwo.getOwner(), Matchers.notNullValue());
+        assertThat(itemOne.getOwner(), Matchers.not(Matchers.equalTo(itemTwo.getOwner())));
+
+        Category category = itemOne.getCategory();
+        assertThat(category, Matchers.notNullValue());
+        assertThat(category.getId(), Matchers.notNullValue());
+        assertThat(itemOne.getCategory(), Matchers.sameInstance(itemTwo.getCategory()));
+        assertThat(category.getLineItems(), Matchers.contains(itemOne, itemTwo));
+
+        // optional OneToOne mapping is ignored by default
+        assertThat(category.getCategoryOwner(), Matchers.nullValue());
+        //```
+
+        //### Need to tweak a bit:
+        EntityMaker customMaker = EntityMakerBuilder.builder()
+                .includeOptionalOneToOne()
+                .addFieldOrPropertyMaker(LineItem.class, "content", FixedValueMaker.fix("This is the content I want"))
+                .addConstructorParameterMaker(Category.class, 0, FixedValueMaker.fix("Awesomeness"))
+                .build();
+        LineItem itemThree = customMaker.makeAndPersist(entityManager, LineItem.class);
+
+        assertThat(itemThree.getContent(), Matchers.equalTo("This is the content I want"));
+        assertThat(itemThree.getCategory().getName(), Matchers.equalTo("Awesomeness"));
+        // optional OneToOne entity is also created
+        assertThat(itemThree.getCategory().getCategoryOwner(), Matchers.notNullValue());
+    }
+
 
 }

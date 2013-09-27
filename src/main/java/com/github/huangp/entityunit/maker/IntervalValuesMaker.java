@@ -57,7 +57,7 @@ public abstract class IntervalValuesMaker<T> implements Maker<T> {
      *         interval difference
      * @param <T>
      *         value type
-     * @return a Maker will make interval values indefinitely
+     * @return a Maker will make interval values infinitely
      */
     public static <T> Maker<T> startFrom(T start, long difference) {
         if (Integer.class.isInstance(start)) {

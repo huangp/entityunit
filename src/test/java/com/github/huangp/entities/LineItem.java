@@ -33,6 +33,7 @@ public class LineItem extends Identifier {
     }
 
     @OneToOne(targetEntity = Person.class, optional = false)
+    @JoinColumn(name = "owner_id")
     public Person getOwner() {
         return owner;
     }

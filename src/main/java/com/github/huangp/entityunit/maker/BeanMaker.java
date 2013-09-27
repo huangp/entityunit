@@ -39,6 +39,8 @@ import static com.github.huangp.entityunit.util.HasAnnotationPredicate.has;
  *      - Object type field that has default value.
  *      - Field has @Id or @Version annotation.
  *      - Made field value that SkipFieldValueMaker#shouldSkipThisField(java.lang.Object) returns true.
+ *        i.e. for primitive type fields, in some cases we may want to provide a value but in other cases the value may
+ *        be derived from constructor parameter or populated in PrePersist method.
  * 4. If class is entity class and has access type of field, it will use reflection to set field value.
  *    Otherwise it uses commons bean util to populate properties (which will ignore protected setters).
  * </pre>
