@@ -12,7 +12,7 @@
     <packaging>jar</packaging>
 
     <name>entityunit</name>
-    <description>Simple tool to make JPA entity for testing</description>
+    <description>Simple tool to make JPA entities for testing</description>
     <url>https://github.com/huangp/entityunity</url>
 
     <licenses>
