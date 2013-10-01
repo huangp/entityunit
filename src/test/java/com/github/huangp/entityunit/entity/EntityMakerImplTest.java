@@ -298,11 +298,14 @@ public class EntityMakerImplTest {
                 .addConstructorParameterMaker(Activity.class, 1,
                       FixedValueMaker.fix(iteration))
                 .addConstructorParameterMaker(Activity.class, 2,
-                      RangeValuesMaker.cycle(copyCallback.getByType(HDocument.class), copyCallback.getByType(HTextFlowTarget.class)))
+                      RangeValuesMaker.cycle(
+                          copyCallback.getByType(HDocument.class),
+                          copyCallback.getByType(HTextFlowTarget.class)))
                 .addConstructorParameterMaker(Activity.class, 3,
                         RangeValuesMaker.cycle(ActivityType.UPLOAD_SOURCE_DOCUMENT, ActivityType.UPDATE_TRANSLATION,
                                 ActivityType.UPLOAD_TRANSLATION_DOCUMENT, ActivityType.REVIEWED_TRANSLATION))
-                .addFieldOrPropertyMaker(Activity.class, "creationDate", IntervalValuesMaker.startFrom(new Date(), -TimeUnit.DAYS.toMillis(1)))
+                .addFieldOrPropertyMaker(Activity.class, "creationDate", IntervalValuesMaker.startFrom(
+                    new Date(), -TimeUnit.DAYS.toMillis(1)))
                 // below two fields are primitive types. It can not tell whether it has default value or not so we have to skip them
                 .addFieldOrPropertyMaker(Activity.class, "contextId", SkipFieldValueMaker.MAKER)
                 .addFieldOrPropertyMaker(Activity.class, "lastTargetId", SkipFieldValueMaker.MAKER)

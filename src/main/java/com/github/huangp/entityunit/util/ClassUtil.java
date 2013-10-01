@@ -159,7 +159,7 @@ public final class ClassUtil {
         } catch (IntrospectionException e) {
             throw Throwables.propagate(e);
         }
-        throw new RuntimeException("not found");
+        throw new RuntimeException("getter method not found: " + type + " - " + name);
     }
 
     public static boolean isUnsaved(Object entity) {
