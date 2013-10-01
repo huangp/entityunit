@@ -1,4 +1,4 @@
-entityunity
+Entity Unit
 ===========
 
 Simple tool to make JPA entities for testing.
