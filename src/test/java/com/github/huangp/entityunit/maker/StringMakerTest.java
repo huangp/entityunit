@@ -8,6 +8,9 @@ import org.junit.Test;
 import org.zanata.model.HAccount;
 import org.zanata.model.HPerson;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
@@ -26,9 +29,9 @@ public class StringMakerTest {
     }
 
     @Test
-    public void canMakeStringWithEmailConstraint() throws NoSuchMethodException {
+    public void canMakeStringWithEmailConstraint() throws NoSuchMethodException, IntrospectionException {
 
-        StringMaker maker = StringMaker.from(Optional.of(SettableProperty.from(HPerson.class, HPerson.class.getMethod("getEmail"))));
+        StringMaker maker = StringMaker.from(Optional.of(SettableProperty.from(HPerson.class, new PropertyDescriptor("email", HPerson.class))));
 
         String value = maker.value();
 
@@ -36,8 +39,8 @@ public class StringMakerTest {
     }
 
     @Test
-    public void canMakeStringWithSizeLimit() throws NoSuchMethodException {
-        StringMaker maker = StringMaker.from(Optional.of(SettableProperty.from(HAccount.class, HAccount.class.getMethod("getApiKey"))));
+    public void canMakeStringWithSizeLimit() throws NoSuchMethodException, IntrospectionException {
+        StringMaker maker = StringMaker.from(Optional.of(SettableProperty.from(HAccount.class, new PropertyDescriptor("apiKey", HAccount.class))));
 
         String value = maker.value();
 

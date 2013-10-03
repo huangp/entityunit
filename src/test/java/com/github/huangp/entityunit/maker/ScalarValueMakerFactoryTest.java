@@ -18,6 +18,8 @@ import org.zanata.model.HCopyTransOptions;
 import org.zanata.model.HLocale;
 import org.zanata.model.StatusCount;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +84,7 @@ public class ScalarValueMakerFactoryTest {
     @Test
     public void canRegisterPreferredValueMakerAndUseIt() throws Exception {
         registry.add(Matchers.equalTo("com.github.huangp.entities.Person - name"), FixedValueMaker.fix("admin"));
-        Maker<String> maker = factory.from(SettableProperty.from(Person.class, Person.class.getMethod("getName")));
+        Maker<String> maker = factory.from(SettableProperty.from(Person.class, new PropertyDescriptor("name", Person.class)));
 
         String name = maker.value();
         assertThat(name, Matchers.equalTo("admin"));
@@ -102,12 +104,12 @@ public class ScalarValueMakerFactoryTest {
     }
 
     @Test
-    public void primitiveTypeCanBeSet() throws NoSuchMethodException {
+    public void primitiveTypeCanBeSet() throws NoSuchMethodException, IntrospectionException {
 
         registry.add(Matchers.containsString("enabledByDefault"), FixedValueMaker.ALWAYS_TRUE_MAKER);
 
-        Maker<Boolean> enabledByDefaultMaker = factory.from(SettableProperty.from(HLocale.class, HLocale.class.getMethod("isEnabledByDefault")));
-        Maker<Boolean> activeMaker = factory.from(SettableProperty.from(HLocale.class, HLocale.class.getMethod("isActive")));
+        Maker<Boolean> enabledByDefaultMaker = factory.from(SettableProperty.from(HLocale.class, new PropertyDescriptor("enabledByDefault", HLocale.class)));
+        Maker<Boolean> activeMaker = factory.from(SettableProperty.from(HLocale.class, new PropertyDescriptor("active", HLocale.class)));
 
         assertThat(enabledByDefaultMaker.value(), Matchers.is(true));
         assertThat(activeMaker.value(), Matchers.is(false));

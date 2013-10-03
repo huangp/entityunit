@@ -1,6 +1,7 @@
 package com.github.huangp.entityunit.util;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.ObjectArrays;
@@ -23,6 +24,8 @@ public class SettableProperty implements Settable {
     private final transient Type propertyType;
 
     private SettableProperty(Class ownerType, PropertyDescriptor propertyDescriptor) {
+        Preconditions.checkArgument(propertyDescriptor.getReadMethod() != null || propertyDescriptor.getPropertyType() != null,
+                "%s has no getter or field. Did you misspell the name?", propertyDescriptor.getName());
         simpleName = propertyDescriptor.getName();
         fullName = String.format(FULL_NAME_FORMAT, ownerType.getName(), simpleName);
 
@@ -32,14 +35,14 @@ public class SettableProperty implements Settable {
         propertyType = getGenericType(propertyDescriptor);
     }
 
-    private Type getGenericType(PropertyDescriptor propertyDescriptor) {
+    private Type getGenericType(PropertyDescriptor propDesc) {
         if (getterMethod != null) {
             return getterMethod.getGenericReturnType();
         }
         else if (optionalField.isPresent()) {
             return optionalField.get().getGenericType();
         }
-        return propertyDescriptor.getPropertyType();
+        return propDesc.getPropertyType();
     }
 
     private static Optional<Field> findField(Class ownerType, final String fieldName) {
@@ -51,24 +54,8 @@ public class SettableProperty implements Settable {
         });
     }
 
-    private SettableProperty(Class ownerType, Method getterMethod) {
-        this.getterMethod = getterMethod;
-        String stripped = getterMethod.getName().replaceFirst("get|is", "");
-        String lower = stripped.substring(0, 1).toLowerCase();
-        String rest = stripped.substring(1);
-        simpleName = lower + rest;
-        optionalField = findField(ownerType, simpleName);
-        propertyType = getterMethod.getGenericReturnType();
-        fullName = String.format(FULL_NAME_FORMAT, ownerType.getName(), simpleName);
-    }
-
     public static Settable from(Class ownerType, PropertyDescriptor propertyDescriptor) {
         return new SettableProperty(ownerType, propertyDescriptor);
-    }
-
-    // TODO this is only used by test
-    public static Settable from(Class ownerType, Method getterMethod) {
-        return new SettableProperty(ownerType, getterMethod);
     }
 
     @Override
