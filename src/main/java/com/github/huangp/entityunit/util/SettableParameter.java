@@ -4,7 +4,6 @@ import com.google.common.reflect.Parameter;
 import lombok.Delegate;
 
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 /**
@@ -18,7 +17,7 @@ public class SettableParameter implements Settable {
 
     private SettableParameter(Class<?> ownerType, Parameter parameter) {
         simpleName = parameter.toString().replaceFirst("^.+\\s", "");
-        this.fullName = String.format(FULL_NAME_FORMAT, ownerType.getName(), simpleName);
+        fullName = String.format(FULL_NAME_FORMAT, ownerType.getName(), simpleName);
         this.parameter = parameter;
     }
 
@@ -37,17 +36,12 @@ public class SettableParameter implements Settable {
     }
 
     @Override
-    public Method getterMethod() {
-        throw new UnsupportedOperationException("This should not be called");
-    }
-
-    @Override
     public String fullyQualifiedName() {
         return fullName;
     }
 
     @Override
-    public Object valueIn(Object ownerInstance) {
+    public <T> T valueIn(Object ownerInstance) {
         throw new UnsupportedOperationException("not supported");
     }
 }

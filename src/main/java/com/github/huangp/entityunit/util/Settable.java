@@ -29,13 +29,6 @@ public interface Settable extends AnnotatedElement {
     Type getType();
 
     /**
-     * When settable represents a field or property, this returns the getter method.
-     *
-     * @return getter method of the field/property
-     */
-    Method getterMethod();
-
-    /**
      * Use owner_class_name - simpleName as format.
      * <p/>
      * For settable field, property, i.e. org.example.Person - name.
@@ -50,7 +43,8 @@ public interface Settable extends AnnotatedElement {
     String fullyQualifiedName();
 
     /**
-     * Invoke getter method of this settable field and return the value.
+     * Actual value in given instance. Like java.lang.reflect.Field#get(java.lang.Object)
+     * or getter method java.lang.reflect.Method#invoke(java.lang.Object, java.lang.Object...).
      *
      * @param ownerInstance
      *         instance that contains this Settable

@@ -1,6 +1,7 @@
 package com.github.huangp.entityunit.entity;
 
 import com.github.huangp.entityunit.util.ClassUtil;
+import com.github.huangp.entityunit.util.Settable;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -8,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.jodah.typetools.TypeResolver;
 
 import javax.persistence.EntityManager;
-import java.lang.reflect.Method;
 import java.util.Collection;
 
 /**
@@ -59,17 +59,17 @@ public class WireManyToManyCallback extends AbstractNoOpCallback {
     private static void addManyToMany(Object manyOwner, final Object manyElement) {
         EntityClass oneEntityClass = EntityClass.from(manyOwner.getClass());
 
-        Iterable<Method> manyToManyGetters = oneEntityClass.getManyToManyMethods();
+        Iterable<Settable> manyToManyGetters = oneEntityClass.getManyToMany();
 
-        Optional<Method> methodFound = Iterables.tryFind(manyToManyGetters, new Predicate<Method>() {
+        Optional<Settable> methodFound = Iterables.tryFind(manyToManyGetters, new Predicate<Settable>() {
             @Override
-            public boolean apply(Method input) {
-                Class<?> genericType = TypeResolver.resolveRawArgument(input.getGenericReturnType(), Collection.class);
+            public boolean apply(Settable input) {
+                Class<?> genericType = TypeResolver.resolveRawArgument(input.getType(), Collection.class);
                 return genericType.isInstance(manyElement);
             }
         });
         if (methodFound.isPresent()) {
-            Collection collection = ClassUtil.invokeGetter(manyOwner, methodFound.get(), Collection.class);
+            Collection collection = methodFound.get().valueIn(manyOwner);
             if (collection != null) {
                 collection.add(manyElement);
             }

@@ -131,12 +131,11 @@ public class BeanMaker<T> implements Maker<T> {
         log.debug("about to make {}", settable);
         Object fieldValue = factory.from(settable).value();
         // this is ugly. But don't want to change the whole design to fit this feature
-        if (SkipFieldValueMaker.shouldSkipThisField(fieldValue)) {
+        if (fieldValue == null || SkipFieldValueMaker.shouldSkipThisField(fieldValue)) {
             return;
         }
         log.debug("value {}", fieldValue);
         try {
-            // TODO here we should always try field level access (See HTextFlowTarget.content0 ...)
             if (ClassUtil.isAccessTypeIsField(type)) {
                 ClassUtil.setValue(settable, result, fieldValue);
             } else {

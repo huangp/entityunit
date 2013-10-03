@@ -29,7 +29,17 @@ public class SettableProperty implements Settable {
         optionalField = findField(ownerType, simpleName);
 
         getterMethod = propertyDescriptor.getReadMethod();
-        propertyType = propertyDescriptor.getPropertyType();
+        propertyType = getGenericType(propertyDescriptor);
+    }
+
+    private Type getGenericType(PropertyDescriptor propertyDescriptor) {
+        if (getterMethod != null) {
+            return getterMethod.getGenericReturnType();
+        }
+        else if (optionalField.isPresent()) {
+            return optionalField.get().getGenericType();
+        }
+        return propertyDescriptor.getPropertyType();
     }
 
     private static Optional<Field> findField(Class ownerType, final String fieldName) {
@@ -56,6 +66,7 @@ public class SettableProperty implements Settable {
         return new SettableProperty(ownerType, propertyDescriptor);
     }
 
+    // TODO this is only used by test
     public static Settable from(Class ownerType, Method getterMethod) {
         return new SettableProperty(ownerType, getterMethod);
     }
@@ -71,18 +82,13 @@ public class SettableProperty implements Settable {
     }
 
     @Override
-    public Method getterMethod() {
-        return getterMethod;
-    }
-
-    @Override
     public String fullyQualifiedName() {
         return fullName;
     }
 
     @Override
-    public Object valueIn(Object ownerInstance) {
-        return ClassUtil.invokeGetter(ownerInstance, getterMethod, Object.class);
+    public <T> T valueIn(Object ownerInstance) {
+        return ClassUtil.invokeGetter(ownerInstance, getterMethod);
     }
 
     @Override

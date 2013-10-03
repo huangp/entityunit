@@ -7,7 +7,6 @@ import org.zanata.model.HProjectIteration;
 import org.zanata.model.HTextFlowTargetReviewComment;
 
 import javax.persistence.OneToOne;
-import java.lang.reflect.Method;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -41,10 +40,10 @@ public class EntityClassTest {
 
         Iterable<Settable> elements = entityClass.getElements();
 
-        assertThat(elements, Matchers.<Settable>iterableWithSize(19));
+        assertThat(elements, Matchers.<Settable>iterableWithSize(18));
 
         assertThat(entityClass.getDependingEntityTypes(), Matchers.<EntityClass>iterableWithSize(2));
-        assertThat(entityClass.getContainingEntitiesGetterMethods(), Matchers.<Method>iterableWithSize(3));
+        assertThat(entityClass.getContainingEntitiesElements(), Matchers.<Settable>iterableWithSize(3));
     }
 
     @Test
@@ -53,6 +52,6 @@ public class EntityClassTest {
 
         Iterable<Settable> elements = entityClass.getElements();
 
-        assertThat(elements, Matchers.<Settable>iterableWithSize(19));
+        assertThat(elements, Matchers.<Settable>iterableWithSize(18));
     }
 }

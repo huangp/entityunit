@@ -3,7 +3,6 @@ package com.github.huangp.entityunit.entity;
 import com.github.huangp.entityunit.util.ClassUtil;
 import com.github.huangp.entityunit.util.HasAnnotationPredicate;
 import com.github.huangp.entityunit.util.Settable;
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicates;
 import com.google.common.base.Throwables;
@@ -15,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import javax.persistence.EntityManager;
 import javax.persistence.OneToOne;
 import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -85,23 +83,26 @@ public class FixIdCallback extends AbstractNoOpCallback {
         try {
             EntityClass entityClass = EntityClass.from(entityType, ScanOption.IncludeOneToOne);
 
-            Iterable<Method> oneToManyGetters = entityClass.getContainingEntitiesGetterMethods();
-            Iterable<Method> manyToManyGetters = entityClass.getManyToManyMethods();
-            Iterable<Method> oneToOneGetters = getOneToOneGetters(entityClass);
-            Iterable<Method> associations = Iterables.concat(oneToManyGetters, manyToManyGetters, oneToOneGetters);
+            Iterable<Settable> oneToManyGetters = entityClass.getContainingEntitiesElements();
+            Iterable<Settable> manyToManyGetters = entityClass.getManyToMany();
+            Iterable<Settable> oneToOneGetters = getOneToOneGetters(entityClass);
+            Iterable<Settable> associations = Iterables.concat(oneToManyGetters, manyToManyGetters, oneToOneGetters);
 
-            for (Method method : associations) {
-                Object result = method.invoke(entity);
+            for (Settable settable : associations) {
+                Object result = settable.valueIn(entity);
                 if (result == null) {
                     continue;
                 }
-                log.debug("method [{}] result: {}", method.getName(), result);
+                log.debug("settable [{}] result: {}", settable.getSimpleName(), result);
                 if (ClassUtil.isCollection(result.getClass())) {
-                    Preconditions.checkState((result == null) || ((Collection) result).isEmpty(), NOT_EMPTY_ASSOCIATION_ERROR, method.getName());
+                    Preconditions.checkState((result == null) || ((Collection) result).isEmpty(),
+                            NOT_EMPTY_ASSOCIATION_ERROR, settable.fullyQualifiedName());
                 } else if (ClassUtil.isMap(result.getClass())) {
-                    Preconditions.checkState((result == null) || ((Map) result).isEmpty(), NOT_EMPTY_ASSOCIATION_ERROR, method.getName());
+                    Preconditions.checkState((result == null) || ((Map) result).isEmpty(),
+                            NOT_EMPTY_ASSOCIATION_ERROR, settable.fullyQualifiedName());
                 } else {
-                    Preconditions.checkState(result == null, NOT_EMPTY_ASSOCIATION_ERROR, method.getName());
+                    Preconditions.checkState(result == null, NOT_EMPTY_ASSOCIATION_ERROR,
+                            settable.fullyQualifiedName());
                 }
             }
         } catch (Exception e) {
@@ -109,15 +110,8 @@ public class FixIdCallback extends AbstractNoOpCallback {
         }
     }
 
-    private static Iterable<Method> getOneToOneGetters(EntityClass entityClass) {
-        Iterable<Settable> oneToOnes = Iterables.filter(entityClass.getElements(), HasAnnotationPredicate.has(OneToOne.class));
-        return Iterables.transform(oneToOnes, new Function<Settable, Method>() {
-
-            @Override
-            public Method apply(Settable input) {
-                return input.getterMethod();
-            }
-        });
+    private static Iterable<Settable> getOneToOneGetters(EntityClass entityClass) {
+        return Iterables.filter(entityClass.getElements(), HasAnnotationPredicate.has(OneToOne.class));
     }
 
 }

@@ -3,6 +3,7 @@ package com.github.huangp.entityunit.entity;
 import com.github.huangp.entityunit.holder.BeanValueHolder;
 import com.github.huangp.entityunit.maker.BeanMaker;
 import com.github.huangp.entityunit.util.ClassUtil;
+import com.github.huangp.entityunit.util.Settable;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Queues;
@@ -13,7 +14,6 @@ import org.jodah.typetools.TypeResolver;
 
 import javax.persistence.EntityManager;
 import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
@@ -72,14 +72,14 @@ class EntityMakerImpl implements EntityMaker {
         for (EntityClass entityNode : dependingEntities) {
             Object entity = valueHolder.tryGet(entityNode.getType()).get();
 
-            Iterable<Method> getterMethods = entityNode.getContainingEntitiesGetterMethods();
-            for (Method method : getterMethods) {
-                Type returnType = method.getGenericReturnType();
+            Iterable<Settable> elements = entityNode.getContainingEntitiesElements();
+            for (Settable element : elements) {
+                Type returnType = element.getType();
                 if (ClassUtil.isCollection(returnType)) {
-                    addManySideEntityIfExists(entity, method, valueHolder);
+                    addManySideEntityIfExists(entity, element, valueHolder);
                 }
                 if (ClassUtil.isMap(returnType)) {
-                    putManySideEntityIfExists(entity, method, valueHolder);
+                    putManySideEntityIfExists(entity, element, valueHolder);
                 }
             }
         }
@@ -119,39 +119,35 @@ class EntityMakerImpl implements EntityMaker {
         return valueHolder.getCopy();
     }
 
-    private static void addManySideEntityIfExists(Object entity, Method method, BeanValueHolder holder) {
-        Class<?> genericType = TypeResolver.resolveRawArgument(method.getGenericReturnType(), Collection.class);
+    private static void addManySideEntityIfExists(Object entity, Settable element, BeanValueHolder holder) {
+        Class<?> genericType = TypeResolver.resolveRawArgument(element.getType(), Collection.class);
         Optional<?> manySideExists = holder.tryGet(genericType);
         if (manySideExists.isPresent()) {
             Object existValue = manySideExists.get();
-            Collection collection = ClassUtil.invokeGetter(entity, method, Collection.class);
+            Collection collection = element.valueIn(entity);
             if (collection != null) {
                 collection.add(existValue);
             }
         }
     }
 
-    private static void putManySideEntityIfExists(Object entity, Method method, BeanValueHolder holder) {
-        Class<?>[] genericTypes = TypeResolver.resolveRawArguments(method.getGenericReturnType(), Collection.class);
+    private static void putManySideEntityIfExists(Object entity, Settable element, BeanValueHolder holder) {
+        Class<?>[] genericTypes = TypeResolver.resolveRawArguments(element.getType(), Collection.class);
         Class<?> keyType = genericTypes[0];
         Class<?> valueType = genericTypes[1];
         Optional keyOptional = holder.tryGet(keyType);
         Optional valueOptional = holder.tryGet(valueType);
-        warningIfTrue(!keyOptional.isPresent(), "You have to manually resolve this: {} {}.{}()", entity, method);
+        if (!keyOptional.isPresent()) {
+            log.warn("You have to manually resolve this: {} {}", element.getType(), element);
+        }
 
         if (keyOptional.isPresent() && valueOptional.isPresent()) {
             Object key = keyOptional.get();
             Object value = valueOptional.get();
-            Map map = ClassUtil.invokeGetter(entity, method, Map.class);
+            Map map = element.valueIn(entity);
             if (map != null) {
                 map.put(key, value);
             }
-        }
-    }
-
-    private static void warningIfTrue(boolean expression, String logTemplate, Object entity, Method method) {
-        if (expression) {
-            log.warn(logTemplate, method.getGenericReturnType(), entity.getClass().getSimpleName(), method.getName());
         }
     }
 

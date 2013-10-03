@@ -62,16 +62,9 @@ public final class ClassUtil {
         return ImmutableList.copyOf(Iterables.filter(fields, InstanceFieldPredicate.PREDICATE));
     }
 
-    public static Iterable<PropertyDescriptor> getReadablePropertyDescriptors(Class clazz) {
+    public static Iterable<PropertyDescriptor> getPropertyDescriptors(Class clazz) {
         try {
-            List<PropertyDescriptor> descriptors = Lists.newArrayList(
-                    Introspector.getBeanInfo(clazz, clazz.getSuperclass()).getPropertyDescriptors());
-            return Iterables.filter(descriptors, new Predicate<PropertyDescriptor>() {
-                @Override
-                public boolean apply(PropertyDescriptor input) {
-                    return input.getReadMethod() != null;
-                }
-            });
+            return Lists.newArrayList(Introspector.getBeanInfo(clazz, clazz.getSuperclass()).getPropertyDescriptors());
         } catch (IntrospectionException e) {
             throw Throwables.propagate(e);
         }
@@ -141,7 +134,7 @@ public final class ClassUtil {
         return (T) Iterables.find(entities, Predicates.instanceOf(typeToFind));
     }
 
-    public static <T> T invokeGetter(Object entity, Method method, Class<T> getterReturnType) {
+    public static <T> T invokeGetter(Object entity, Method method) {
         try {
             method.setAccessible(true);
             T result = (T) method.invoke(entity);
@@ -196,10 +189,10 @@ public final class ClassUtil {
         }
     }
 
-    static Object getFieldValue(Object ownerInstance, Field field) {
+    static <T> T getFieldValue(Object ownerInstance, Field field) {
         try {
             field.setAccessible(true);
-            return field.get(ownerInstance);
+            return (T) field.get(ownerInstance);
         }
         catch (IllegalAccessException e) {
             throw Throwables.propagate(e);

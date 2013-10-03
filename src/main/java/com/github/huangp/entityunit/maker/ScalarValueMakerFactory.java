@@ -9,6 +9,7 @@ import com.google.common.reflect.TypeToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.persistence.Transient;
 import java.lang.reflect.Type;
 import java.util.Date;
 
@@ -59,8 +60,13 @@ public class ScalarValueMakerFactory {
         return from(type, Optional.of(settable));
     }
 
+    // TODO optional.absent is only used in test
     protected Maker from(Type type, Optional<Settable> optionalAnnotatedElement) {
         TypeToken<?> token = TypeToken.of(type);
+        // TODO see above
+        if (optionalAnnotatedElement.isPresent() && optionalAnnotatedElement.get().isAnnotationPresent(Transient.class)) {
+            return new NullMaker();
+        }
         if (token.getRawType().isPrimitive()) {
             return new PrimitiveMaker(token.getRawType());
         }

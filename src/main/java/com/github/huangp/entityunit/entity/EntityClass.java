@@ -4,6 +4,7 @@ import com.github.huangp.entityunit.util.Settable;
 import com.github.huangp.entityunit.util.SettableField;
 import com.github.huangp.entityunit.util.SettableProperty;
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.base.Throwables;
@@ -28,7 +29,6 @@ import javax.persistence.OneToOne;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -36,7 +36,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import static com.github.huangp.entityunit.util.ClassUtil.getInstanceFields;
-import static com.github.huangp.entityunit.util.ClassUtil.getReadablePropertyDescriptors;
+import static com.github.huangp.entityunit.util.ClassUtil.getPropertyDescriptors;
 import static com.github.huangp.entityunit.util.ClassUtil.isAccessTypeIsField;
 import static com.github.huangp.entityunit.util.HasAnnotationPredicate.has;
 import static com.google.common.collect.Iterables.filter;
@@ -104,8 +104,8 @@ public class EntityClass {
     private boolean requireNewInstance;
 
     private transient Iterable<EntityClass> requiredEntityTypes;
-    private transient Iterable<Method> associationGetters;
-    private transient Iterable<Method> manyToManyGetters;
+    private transient Iterable<Settable> associationGetters;
+    private transient Iterable<Settable> manyToManyGetters;
 
     private EntityClass(Class type, Iterable<Settable> elements, ScanOption scanOption) {
         this.type = type;
@@ -157,14 +157,31 @@ public class EntityClass {
     }
 
     private static List<Settable> getSettables(Class rootClass, Class targetClass) {
+        List<Field> fields = getInstanceFields(targetClass);
         if (isAccessTypeIsField(targetClass)) {
             // field based annotation
-            List<Field> fields = getInstanceFields(targetClass);
             return Lists.transform(fields, new FieldToSettableFunction(rootClass));
         } else {
             // property based annotation
-            Iterable<PropertyDescriptor> descriptors = getReadablePropertyDescriptors(targetClass);
-            return Lists.newArrayList(Iterables.transform(descriptors, new PropertyToSettableFunction(rootClass)));
+            List<Settable> result = Lists.newArrayList();
+            Iterable<PropertyDescriptor> descriptors = getPropertyDescriptors(targetClass);
+
+            for (Field field : fields) {
+                final String fieldName = field.getName();
+                // TODO this is not very optimal
+                Optional<PropertyDescriptor> propertyDescriptorOptional = Iterables.tryFind(descriptors, new Predicate<PropertyDescriptor>() {
+                    @Override
+                    public boolean apply(PropertyDescriptor input) {
+                        return input.getName().equals(fieldName);
+                    }
+                });
+                if (!propertyDescriptorOptional.isPresent() || propertyDescriptorOptional.get().getReadMethod() == null) {
+                    result.add(SettableField.from(rootClass, field));
+                } else {
+                    result.add(SettableProperty.from(rootClass, propertyDescriptorOptional.get()));
+                }
+            }
+            return result;
         }
     }
 
@@ -181,23 +198,21 @@ public class EntityClass {
     }
 
     /**
-     * @return getter methods that will return associations (OneToMany collections)
+     * @return elements that will return associations (OneToMany collections)
      */
-    public Iterable<Method> getContainingEntitiesGetterMethods() {
+    public Iterable<Settable> getContainingEntitiesElements() {
         if (associationGetters == null) {
-            Iterable<Settable> oneToMany = filter(elements, has(OneToMany.class));
-            associationGetters = transform(oneToMany, SettableGetterMethodFunction.FUNCTION);
+            associationGetters = filter(elements, has(OneToMany.class));
         }
         return associationGetters;
     }
 
     /**
-     * @return manyToMany mapping getter methods
+     * @return manyToMany mapping
      */
-    public Iterable<Method> getManyToManyMethods() {
+    public Iterable<Settable> getManyToMany() {
         if (manyToManyGetters == null) {
-            Iterable<Settable> manyToMany = filter(getElements(), Predicates.and(has(ManyToMany.class), has(JoinTable.class)));
-            manyToManyGetters = transform(manyToMany, SettableGetterMethodFunction.FUNCTION);
+            manyToManyGetters = filter(getElements(), Predicates.and(has(ManyToMany.class), has(JoinTable.class)));
         }
         return manyToManyGetters;
     }
@@ -224,15 +239,6 @@ public class EntityClass {
         }
     }
 
-    private static enum SettableGetterMethodFunction implements Function<Settable, Method> {
-        FUNCTION;
-
-        @Override
-        public Method apply(Settable input) {
-            return input.getterMethod();
-        }
-    }
-
     private static enum RequiredOneToOnePredicate implements Predicate<AnnotatedElement> {
         PREDICATE;
 
@@ -240,16 +246,6 @@ public class EntityClass {
         public boolean apply(AnnotatedElement input) {
             OneToOne oneToOne = input.getAnnotation(OneToOne.class);
             return oneToOne != null && !oneToOne.optional();
-        }
-    }
-
-    @RequiredArgsConstructor
-    private static class PropertyToSettableFunction implements Function<PropertyDescriptor, Settable> {
-        private final Class ownerType;
-
-        @Override
-        public Settable apply(PropertyDescriptor input) {
-            return SettableProperty.from(ownerType, input);
         }
     }
 

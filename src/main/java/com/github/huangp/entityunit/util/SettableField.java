@@ -2,14 +2,16 @@ package com.github.huangp.entityunit.util;
 
 import lombok.Delegate;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 /**
  * @author Patrick Huang
  */
 public class SettableField implements Settable {
-    @Delegate
+    @Delegate(types = AnnotatedElement.class)
     private final Field field;
     private final Method getterMethod;
     private final transient String fullName;
@@ -20,13 +22,13 @@ public class SettableField implements Settable {
         fullName = String.format(FULL_NAME_FORMAT, ownerType.getName(), field.getName());
     }
 
-    @Override
-    public Method getterMethod() {
-        return getterMethod;
-    }
-
     public static Settable from(Class ownerType, Field field) {
         return new SettableField(ownerType, field);
+    }
+
+    @Override
+    public Type getType() {
+        return field.getGenericType();
     }
 
     @Override
@@ -40,9 +42,9 @@ public class SettableField implements Settable {
     }
 
     @Override
-    public Object valueIn(Object ownerInstance) {
+    public <T> T valueIn(Object ownerInstance) {
         if (getterMethod != null) {
-            return ClassUtil.invokeGetter(ownerInstance, getterMethod, Object.class);
+            return ClassUtil.invokeGetter(ownerInstance, getterMethod);
         }
         return ClassUtil.getFieldValue(ownerInstance, field);
     }
