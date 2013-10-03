@@ -273,14 +273,14 @@ public class EntityMakerImplTest {
     }
 
     @Test
-    @Ignore("include optional one to one will bypass reuse entity. Without it, it will work but BeanMaker is actually reusing oneToOne entity which is not good")
-    public void canFixIdAndCascadeUpdateToReferencedEntity() {
+    public void canFixIdAndReuseAsReference() {
         HAccount hAccount = maker.makeAndPersist(entityManager, HAccount.class, new FixIdCallback(HAccount.class, 100L));
 
-        // TODO this has to be manually sort out. can we automate this?
         HPerson hPerson = EntityMakerBuilder.builder()
-                .includeOptionalOneToOne()
-                .reuseEntity(hAccount).build()
+                // this will mark HAccount requireNewInstance to true therefore not reusable. Without it, BeanMaker will reuse it when populating fields
+//                .includeOptionalOneToOne()
+                .reuseEntity(hAccount)
+                .build()
                 .makeAndPersist(entityManager, HPerson.class, new WireManyToManyCallback(HPerson.class, hAccount));
 
         assertThat(hAccount.getId(), Matchers.equalTo(100L));

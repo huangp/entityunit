@@ -42,7 +42,7 @@ import static com.github.huangp.entityunit.util.ClassUtil.findEntity;
 public class FixIdCallback extends AbstractNoOpCallback {
     // TODO reformat and provide some example
     private static final String NOT_EMPTY_ASSOCIATION_ERROR =
-            "Found not empty or null associations [%s]. Fix Id only works on no association entity. You can make it with fix id first and add the association manually";
+            "Found not empty or null associations [%s]. Fix Id only works on no association entity. You can make it with fix id first and add the association manually later";
 
     private final Class<?> entityType;
     private final Serializable wantedIdValue;
@@ -93,7 +93,7 @@ public class FixIdCallback extends AbstractNoOpCallback {
                 if (result == null) {
                     continue;
                 }
-                log.debug("settable [{}] result: {}", settable.getSimpleName(), result);
+                log.debug("referenced entity association [{}] result: {}", settable.getSimpleName(), result);
                 if (ClassUtil.isCollection(result.getClass())) {
                     Preconditions.checkState((result == null) || ((Collection) result).isEmpty(),
                             NOT_EMPTY_ASSOCIATION_ERROR, settable.fullyQualifiedName());

@@ -28,11 +28,21 @@ public class EntityMakerBuilder {
     private BeanValueHolder valueHolder = new BeanValueHolder();
     private PreferredValueMakersRegistry registry = new PreferredValueMakersRegistry();
 
+    /**
+     * This is the default option. When making entities, unless there is reusable entity, optional OneToOne mapped entity will be ignored.
+     *
+     * @return this
+     */
     public EntityMakerBuilder ignoreOptionalOneToOne() {
         scanOption = ScanOption.IgnoreOptionalOneToOne;
         return this;
     }
 
+    /**
+     * When making entities, optional OneToOne mapped entity will also be created.
+     * TODO OneToOne mapped entity will always bypass reusable entities even if the entity qualifies reusability (i.e. not referencing other entity)
+     * @return this
+     */
     public EntityMakerBuilder includeOptionalOneToOne() {
         scanOption = ScanOption.IncludeOneToOne;
         return this;
