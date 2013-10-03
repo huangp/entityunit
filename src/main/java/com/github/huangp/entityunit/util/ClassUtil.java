@@ -3,15 +3,15 @@ package com.github.huangp.entityunit.util;
 import com.github.huangp.entityunit.entity.EntityClass;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.common.reflect.Invokable;
 import com.google.common.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -206,6 +206,16 @@ public final class ClassUtil {
         }
         catch (IllegalAccessException e) {
             throw Throwables.propagate(e);
+        }
+    }
+
+    public static String getEntityName(Class<?> entityType) {
+        Preconditions.checkArgument(entityType.isAnnotationPresent(Entity.class));
+        Entity entityAnnotation = entityType.getAnnotation(Entity.class);
+        if (!Strings.isNullOrEmpty(entityAnnotation.name())) {
+            return entityAnnotation.name();
+        } else {
+            return entityType.getSimpleName();
         }
     }
 

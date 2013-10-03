@@ -1,5 +1,6 @@
 package com.github.huangp.entityunit.entity;
 
+import com.github.huangp.entityunit.util.ClassUtil;
 import com.github.huangp.entityunit.util.HasAnnotationPredicate;
 import com.github.huangp.entityunit.util.Settable;
 import com.google.common.base.Function;
@@ -66,7 +67,7 @@ public final class EntityCleaner {
                 deleteTable(entityManager, table);
             }
 
-            deleteEntity(entityManager, entityType.getSimpleName());
+            deleteEntity(entityManager, ClassUtil.getEntityName(entityType));
         }
 
         entityManager.getTransaction().commit();

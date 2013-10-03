@@ -60,13 +60,12 @@ public class FixIdCallback extends AbstractNoOpCallback {
         }
         checkPrecondition(entity);
 
-        // TODO consider entity name mapping and id column mapping
-        String tableName = entityType.getSimpleName();
+        String entityName = ClassUtil.getEntityName(entityType);
         String idColumnName = identityField.getSimpleName();
-        String sqlString = String.format("update %s set %s=%s where %s=%s", tableName, idColumnName, wantedIdValue, idColumnName, generatedIdValue);
-        log.info("query to update generated id: {}", sqlString);
+        String queryString = String.format("update %s set %s=%s where %s=%s", entityName, idColumnName, wantedIdValue, idColumnName, generatedIdValue);
+        log.info("query to update generated id: {}", queryString);
 
-        int affectedRow = entityManager.createQuery(sqlString).executeUpdate();
+        int affectedRow = entityManager.createQuery(queryString).executeUpdate();
         log.debug("update generated id affected row: {}", affectedRow);
 
         // set the updated value back to entity
