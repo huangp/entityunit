@@ -1,13 +1,17 @@
 package com.github.huangp.entityunit.util;
 
 import com.github.huangp.entityunit.entity.EntityClass;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.reflect.Invokable;
 import com.google.common.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -62,9 +66,15 @@ public final class ClassUtil {
         return ImmutableList.copyOf(Iterables.filter(fields, InstanceFieldPredicate.PREDICATE));
     }
 
-    public static Iterable<PropertyDescriptor> getPropertyDescriptors(Class clazz) {
+    public static Map<String, PropertyDescriptor> getPropertyDescriptors(Class clazz) {
         try {
-            return Lists.newArrayList(Introspector.getBeanInfo(clazz, clazz.getSuperclass()).getPropertyDescriptors());
+            PropertyDescriptor[] propDesc = Introspector.getBeanInfo(clazz, clazz.getSuperclass()).getPropertyDescriptors();
+            return Maps.uniqueIndex(Lists.newArrayList(propDesc), new Function<PropertyDescriptor, String>() {
+                @Override
+                public String apply(PropertyDescriptor input) {
+                    return input.getName();
+                }
+            });
         } catch (IntrospectionException e) {
             throw Throwables.propagate(e);
         }

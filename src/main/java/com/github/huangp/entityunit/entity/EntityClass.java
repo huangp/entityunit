@@ -33,6 +33,7 @@ import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
@@ -166,21 +167,15 @@ public class EntityClass {
         } else {
             // property based annotation
             List<Settable> result = Lists.newArrayList();
-            Iterable<PropertyDescriptor> descriptors = getPropertyDescriptors(targetClass);
+            Map<String, PropertyDescriptor> descriptors = getPropertyDescriptors(targetClass);
 
             for (Field field : fields) {
-                final String fieldName = field.getName();
-                // TODO this is not very optimal
-                Optional<PropertyDescriptor> propertyDescriptorOptional = Iterables.tryFind(descriptors, new Predicate<PropertyDescriptor>() {
-                    @Override
-                    public boolean apply(PropertyDescriptor input) {
-                        return input.getName().equals(fieldName);
-                    }
-                });
-                if (!propertyDescriptorOptional.isPresent() || propertyDescriptorOptional.get().getReadMethod() == null) {
+                String fieldName = field.getName();
+                PropertyDescriptor propertyDescriptor = descriptors.get(fieldName);
+                if (propertyDescriptor == null || propertyDescriptor.getReadMethod() == null) {
                     result.add(SettableField.from(rootClass, field));
                 } else {
-                    result.add(SettableProperty.from(rootClass, propertyDescriptorOptional.get()));
+                    result.add(SettableProperty.from(rootClass, propertyDescriptor));
                 }
             }
             return result;
