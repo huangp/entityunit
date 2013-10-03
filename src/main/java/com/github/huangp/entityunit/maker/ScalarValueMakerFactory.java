@@ -58,9 +58,6 @@ public class ScalarValueMakerFactory {
 
         Type type = settable.getType();
         TypeToken<?> token = TypeToken.of(type);
-        if (settable.isAnnotationPresent(Transient.class)) {
-            return new NullMaker();
-        }
         if (token.getRawType().isPrimitive()) {
             return new PrimitiveMaker(token.getRawType());
         }

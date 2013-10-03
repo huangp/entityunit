@@ -26,6 +26,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
@@ -153,7 +154,8 @@ public class EntityClass {
             settables.addAll(getSettables(rootClass, superClass));
             superClass = superClass.getSuperclass();
         }
-        return new EntityClass(rootClass, settables, scanOption);
+        Iterable<Settable> elements = Iterables.filter(settables, Predicates.not(has(Transient.class)));
+        return new EntityClass(rootClass, elements, scanOption);
     }
 
     private static List<Settable> getSettables(Class rootClass, Class targetClass) {
