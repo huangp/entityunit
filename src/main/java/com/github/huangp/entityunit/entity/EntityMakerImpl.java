@@ -114,11 +114,6 @@ class EntityMakerImpl implements EntityMaker {
         }
     }
 
-    @Override
-    public BeanValueHolder exportCopyOfBeans() {
-        return valueHolder.getCopy();
-    }
-
     private static void addManySideEntityIfExists(Object entity, Settable element, BeanValueHolder holder) {
         Class<?> genericType = TypeResolver.resolveRawArgument(element.getType(), Collection.class);
         Optional<?> manySideExists = holder.tryGet(genericType);

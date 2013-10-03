@@ -133,19 +133,6 @@ public class EntityMakerBuilder {
     }
 
     /**
-     * Merge MakeContext.
-     *
-     * @param context
-     *         make context
-     * @return this
-     */
-    public EntityMakerBuilder mergeContext(MakeContext context) {
-        valueHolder.merge(context.getBeanValueHolder());
-        registry.merge(context.getPreferredValueMakers());
-        return this;
-    }
-
-    /**
      * @return EntityMaker
      */
     public EntityMaker build() {

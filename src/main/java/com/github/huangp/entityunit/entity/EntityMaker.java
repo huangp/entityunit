@@ -64,9 +64,6 @@ public interface EntityMaker {
      */
     <T> T makeAndPersist(EntityManager entityManager, Class<T> entityType, Callback callback);
 
-    // TODO do we need this anymore? TakeCopyCallback should handle it
-    BeanValueHolder exportCopyOfBeans();
-
     /**
      * Provide callback functionality before and after persistence.
      *

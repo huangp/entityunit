@@ -33,11 +33,11 @@ public class EntityMakerBuilderTest {
     @Test
     public void canReuseEntity() {
         Category existEntity = new Category();
-        EntityMaker service = EntityMakerBuilder.builder()
+        EntityMaker maker = EntityMakerBuilder.builder()
                 .reuseEntity(existEntity)
                 .build();
 
-        LineItem result = service.makeAndPersist(em, LineItem.class);
+        LineItem result = maker.makeAndPersist(em, LineItem.class);
 
         assertThat(result.getCategory(), Matchers.sameInstance(existEntity));
     }
@@ -45,22 +45,22 @@ public class EntityMakerBuilderTest {
     @Test
     public void canReuseMakeContext() {
 
-        EntityMaker service = EntityMakerBuilder.builder()
+        EntityMaker maker = EntityMakerBuilder.builder()
                 .includeOptionalOneToOne()
                 .addConstructorParameterMaker(HLocale.class, 0, FixedValueMaker.fix(LocaleId.DE))
                 .build();
 
         // make something
-        HLocale hLocale = service.makeAndPersist(em, HLocale.class);
+        TakeCopyCallback callback = Callbacks.takeCopy();
+        HLocale hLocale = maker.makeAndPersist(em, HLocale.class, callback);
         assertThat(hLocale.getLocaleId(), Matchers.equalTo(LocaleId.DE));
-        BeanValueHolder beans = service.exportCopyOfBeans();
 
-        service = EntityMakerBuilder.builder()
-                .reuseObjects(beans)
+        maker = EntityMakerBuilder.builder()
+                .reuseEntities(callback.getCopy())
                 .build();
 
         // make another
-        HTextFlow hTextFlow = service.makeAndPersist(em, HTextFlow.class);
+        HTextFlow hTextFlow = maker.makeAndPersist(em, HTextFlow.class);
 
         assertThat(hTextFlow.getLocale(), Matchers.equalTo(LocaleId.DE));
         assertThat(hTextFlow.getDocument().getLocale(), Matchers.sameInstance(hLocale));

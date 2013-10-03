@@ -55,17 +55,6 @@ public class BeanValueHolder {
         return this;
     }
 
-    public BeanValueHolder getCopy() {
-        ImmutableTypeToInstanceMap.Builder<Object> builder = ImmutableTypeToInstanceMap.builder();
-        for (Map.Entry<TypeToken<?>, Object> entry : map.entrySet()) {
-            TypeToken key = entry.getKey();
-            builder.put(key, entry.getValue());
-        }
-        BeanValueHolder result = new BeanValueHolder();
-        result.map = builder.build();
-        return result;
-    }
-
     @Override
     public String toString() {
         return Objects.toStringHelper(this)

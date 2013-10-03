@@ -77,7 +77,7 @@ public final class EntityCleaner {
      * Delete all records from given entity representing tables except exclusion. Exclusion are given as entity object.
      * So a match on id will be used.
      * <p/>
-     * TODO manyToMany and element collection table is not considering exlusion yet
+     * TODO manyToMany and element collection table do not consider exlusion yet
      *
      * @param entityManager
      *         entity manager
