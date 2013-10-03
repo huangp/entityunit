@@ -23,6 +23,7 @@ import javax.persistence.Id;
 import javax.persistence.Version;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.List;
 
 import static com.github.huangp.entityunit.util.HasAnnotationPredicate.has;
@@ -142,7 +143,7 @@ public class BeanMaker<T> implements Maker<T> {
                 BeanUtils.setProperty(result, settable.getSimpleName(), fieldValue);
             }
             if (log.isDebugEnabled()) {
-                log.debug("value after set: {}", settable.getterMethod().invoke(result));
+                log.debug("value after set: {}", settable.valueIn(result));
             }
         } catch (Exception e) {
             log.warn("can not set property: {}={}", settable, fieldValue);
@@ -168,19 +169,15 @@ public class BeanMaker<T> implements Maker<T> {
         @Override
         public boolean apply(Settable input) {
             try {
-                Method getter = input.getterMethod();
-                return notPrimitive(getter) && getter.invoke(object) != null;
-            } catch (IllegalAccessException e) {
+                return notPrimitive(input.getType()) && input.valueIn(object) != null;
+            } catch (Exception e) {
                 log.warn("can not determine field [{}] has default value or not", input);
-                return false;
-            } catch (InvocationTargetException e) {
-                log.warn("can not invoke getter method {}", e.getMessage());
                 return false;
             }
         }
 
-        private static boolean notPrimitive(Method getter) {
-            return !getter.getReturnType().isPrimitive();
+        private static boolean notPrimitive(Type settableType) {
+            return !((Class) settableType).isPrimitive();
         }
     }
 

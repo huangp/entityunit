@@ -45,4 +45,9 @@ public class SettableParameter implements Settable {
     public String fullyQualifiedName() {
         return fullName;
     }
+
+    @Override
+    public Object valueIn(Object ownerInstance) {
+        throw new UnsupportedOperationException("not supported");
+    }
 }

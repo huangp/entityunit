@@ -81,6 +81,11 @@ public class SettableProperty implements Settable {
     }
 
     @Override
+    public Object valueIn(Object ownerInstance) {
+        return ClassUtil.invokeGetter(ownerInstance, getterMethod, Object.class);
+    }
+
+    @Override
     public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
         return optionalField.isPresent() && optionalField.get().isAnnotationPresent(annotationClass)
                 || getterMethod.isAnnotationPresent(annotationClass);

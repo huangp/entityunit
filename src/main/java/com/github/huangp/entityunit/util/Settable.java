@@ -1,5 +1,7 @@
 package com.github.huangp.entityunit.util;
 
+import com.github.huangp.entityunit.maker.PreferredValueMakersRegistry;
+
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -43,7 +45,16 @@ public interface Settable extends AnnotatedElement {
      *
      * @return owner_class_name - simpleName
      * @see Settable#FULL_NAME_FORMAT
-     * @see com.github.huangp.entityunit.maker.PreferredValueMakersRegistry
+     * @see PreferredValueMakersRegistry
      */
     String fullyQualifiedName();
+
+    /**
+     * Invoke getter method of this settable field and return the value.
+     *
+     * @param ownerInstance
+     *         instance that contains this Settable
+     * @return instance value of this Settable
+     */
+    <T> T valueIn(Object ownerInstance);
 }

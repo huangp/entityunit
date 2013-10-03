@@ -54,8 +54,8 @@ public class FixIdCallback extends AbstractNoOpCallback {
 
         Object entity = findEntity(persisted, entityType);
 
-        final Settable identityField = ClassUtil.getIdentityField(entity);
-        Serializable generatedIdValue = getGeneratedId(entity, identityField);
+        Settable identityField = ClassUtil.getIdentityField(entity);
+        Serializable generatedIdValue = identityField.valueIn(entity);
         if (generatedIdValue.equals(wantedIdValue))
         {
            return persisted;
@@ -118,14 +118,6 @@ public class FixIdCallback extends AbstractNoOpCallback {
                 return input.getterMethod();
             }
         });
-    }
-
-    private static Serializable getGeneratedId(Object entity, Settable identityField) {
-        try {
-            return (Serializable) identityField.getterMethod().invoke(entity);
-        } catch (Exception e) {
-            throw Throwables.propagate(e);
-        }
     }
 
 }

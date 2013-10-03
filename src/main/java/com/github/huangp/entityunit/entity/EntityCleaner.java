@@ -1,6 +1,5 @@
 package com.github.huangp.entityunit.entity;
 
-import com.github.huangp.entityunit.util.ClassUtil;
 import com.github.huangp.entityunit.util.HasAnnotationPredicate;
 import com.github.huangp.entityunit.util.Settable;
 import com.google.common.base.Function;
@@ -158,7 +157,7 @@ public final class EntityCleaner {
         return Lists.transform(entities, new Function<Object, Serializable>() {
             @Override
             public Serializable apply(Object input) {
-                return ClassUtil.invokeGetter(input, idSettable.getterMethod(), Serializable.class);
+                return idSettable.valueIn(input);
             }
         });
     }

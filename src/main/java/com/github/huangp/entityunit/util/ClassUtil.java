@@ -10,6 +10,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.Invokable;
 import com.google.common.reflect.TypeToken;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -34,6 +35,7 @@ import java.util.Map;
 /**
  * @author Patrick Huang
  */
+@Slf4j
 public final class ClassUtil {
     private ClassUtil() {
     }
@@ -141,6 +143,7 @@ public final class ClassUtil {
 
     public static <T> T invokeGetter(Object entity, Method method, Class<T> getterReturnType) {
         try {
+            method.setAccessible(true);
             T result = (T) method.invoke(entity);
             return result;
         } catch (Exception e) {
@@ -159,13 +162,14 @@ public final class ClassUtil {
         } catch (IntrospectionException e) {
             throw Throwables.propagate(e);
         }
-        throw new RuntimeException("getter method not found: " + type + " - " + name);
+        log.warn("getter method not found: {} - {}", type, name);
+        return null;
     }
 
     public static boolean isUnsaved(Object entity) {
         Settable idSettable = getIdentityField(entity);
         try {
-            return idSettable.getterMethod().invoke(entity) == null;
+            return idSettable.valueIn(entity) == null;
         } catch (Exception e) {
             throw Throwables.propagate(e);
         }
@@ -188,6 +192,16 @@ public final class ClassUtil {
             field.setAccessible(true);
             field.set(owner, value);
         } catch (Exception e) {
+            throw Throwables.propagate(e);
+        }
+    }
+
+    static Object getFieldValue(Object ownerInstance, Field field) {
+        try {
+            field.setAccessible(true);
+            return field.get(ownerInstance);
+        }
+        catch (IllegalAccessException e) {
             throw Throwables.propagate(e);
         }
     }

@@ -40,6 +40,14 @@ public class SettableField implements Settable {
     }
 
     @Override
+    public Object valueIn(Object ownerInstance) {
+        if (getterMethod != null) {
+            return ClassUtil.invokeGetter(ownerInstance, getterMethod, Object.class);
+        }
+        return ClassUtil.getFieldValue(ownerInstance, field);
+    }
+
+    @Override
     public String toString() {
         return fullName;
     }
