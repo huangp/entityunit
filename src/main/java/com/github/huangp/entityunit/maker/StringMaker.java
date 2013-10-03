@@ -22,15 +22,11 @@ class StringMaker implements Maker<String> {
     private final int min;
     private final int max;
 
-    public static StringMaker from(Optional<Settable> optionalElement) {
-        if (!optionalElement.isPresent()) {
-            return new StringMaker(false, 0, DEFAULT_MAX);
-        }
+    public static StringMaker from(Settable settable) {
 
         boolean isEmail = false;
         int min = 0;
         int max = DEFAULT_MAX;
-        Settable settable = optionalElement.get();
         for (Annotation annotation : settable.getAnnotations()) {
             if (looksLikeEmail(settable, annotation)) {
                 isEmail = true;

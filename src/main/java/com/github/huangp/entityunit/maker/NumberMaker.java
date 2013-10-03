@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.Version;
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Predicates.instanceOf;
 import static com.google.common.base.Predicates.or;
@@ -17,25 +18,23 @@ import static com.google.common.base.Predicates.or;
  * @author Patrick Huang
  */
 class NumberMaker implements Maker<Number> {
-    private static int counter;
+    private static AtomicInteger counter = new AtomicInteger(0);
 
     @Override
     public Number value() {
         return next();
     }
 
-    private synchronized static int next() {
-        return ++counter;
+    private static int next() {
+        return counter.incrementAndGet();
     }
 
-    public static Maker<Number> from(Optional<Settable> optionalAnnotatedElement) {
-        if (optionalAnnotatedElement.isPresent()) {
-            List<Annotation> annotations = Lists.newArrayList(optionalAnnotatedElement.get().getAnnotations());
-            Optional<Annotation> idOrVersion = Iterables.tryFind(annotations,
-                    or(instanceOf(Id.class), instanceOf(Version.class)));
-            if (idOrVersion.isPresent()) {
-                return new NullMaker<Number>();
-            }
+    public static Maker<Number> from(Settable settable) {
+        List<Annotation> annotations = Lists.newArrayList(settable.getAnnotations());
+        Optional<Annotation> idOrVersion = Iterables.tryFind(annotations,
+                or(instanceOf(Id.class), instanceOf(Version.class)));
+        if (idOrVersion.isPresent()) {
+            return new NullMaker<Number>();
         }
         return new NumberMaker();
     }

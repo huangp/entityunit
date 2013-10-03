@@ -57,51 +57,45 @@ public class ScalarValueMakerFactory {
         }
 
         Type type = settable.getType();
-        return from(type, Optional.of(settable));
-    }
-
-    // TODO optional.absent is only used in test
-    protected Maker from(Type type, Optional<Settable> optionalAnnotatedElement) {
         TypeToken<?> token = TypeToken.of(type);
-        // TODO see above
-        if (optionalAnnotatedElement.isPresent() && optionalAnnotatedElement.get().isAnnotationPresent(Transient.class)) {
+        if (settable.isAnnotationPresent(Transient.class)) {
             return new NullMaker();
         }
         if (token.getRawType().isPrimitive()) {
             return new PrimitiveMaker(token.getRawType());
         }
         if (type == String.class) {
-            return StringMaker.from(optionalAnnotatedElement);
+            return StringMaker.from(settable);
         }
         if (type == Date.class) {
             return new DateMaker();
         }
         if (NUMBER_TYPE_TOKEN.isAssignableFrom(type)) {
-            return NumberMaker.from(optionalAnnotatedElement);
+            return NumberMaker.from(settable);
         }
         if (token.isArray()) {
-            log.debug("array type: {}", token.getComponentType());
+            ScalarValueMakerFactory.log.debug("array type: {}", token.getComponentType());
             return new NullMaker();
         }
         if (token.getRawType().isEnum()) {
-            log.debug("enum type: {}", type);
+            ScalarValueMakerFactory.log.debug("enum type: {}", type);
             return new EnumMaker(token.getRawType().getEnumConstants());
         }
         if (ClassUtil.isCollection(type)) {
-            log.debug("collection: {}", token);
+            ScalarValueMakerFactory.log.debug("collection: {}", token);
             return new NullMaker();
         }
         if (ClassUtil.isMap(type)) {
-            log.debug("map: {}", token);
+            ScalarValueMakerFactory.log.debug("map: {}", token);
             return new NullMaker<Object>();
         }
         if (ClassUtil.isEntity(type)) {
-            log.debug("{} is entity type", token);
+            ScalarValueMakerFactory.log.debug("{} is entity type", token);
             // we don't want to make unnecessary entities
             // @see EntityMakerBuilder
             return new ReuseOrNullMaker(context.getBeanValueHolder(), token.getRawType());
         }
-        log.debug("guessing this is a bean {}", token);
+        ScalarValueMakerFactory.log.debug("guessing this is a bean {}", token);
         return new BeanMaker(token.getRawType(), context);
     }
 

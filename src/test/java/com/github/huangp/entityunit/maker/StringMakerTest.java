@@ -1,6 +1,8 @@
 package com.github.huangp.entityunit.maker;
 
+import com.github.huangp.entities.Person;
 import com.github.huangp.entityunit.util.Settable;
+import com.github.huangp.entityunit.util.SettableField;
 import com.github.huangp.entityunit.util.SettableProperty;
 import com.google.common.base.Optional;
 import org.hamcrest.Matchers;
@@ -19,8 +21,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class StringMakerTest {
 
     @Test
-    public void canMakeRandomString() {
-        StringMaker maker = StringMaker.from(Optional.<Settable>absent());
+    public void canMakeRandomString() throws IntrospectionException {
+        StringMaker maker = StringMaker.from(SettableProperty.from(Person.class, new PropertyDescriptor("name", Person.class)));
 
         String value = maker.value();
 
@@ -31,7 +33,7 @@ public class StringMakerTest {
     @Test
     public void canMakeStringWithEmailConstraint() throws NoSuchMethodException, IntrospectionException {
 
-        StringMaker maker = StringMaker.from(Optional.of(SettableProperty.from(HPerson.class, new PropertyDescriptor("email", HPerson.class))));
+        StringMaker maker = StringMaker.from(SettableProperty.from(HPerson.class, new PropertyDescriptor("email", HPerson.class)));
 
         String value = maker.value();
 
@@ -40,7 +42,7 @@ public class StringMakerTest {
 
     @Test
     public void canMakeStringWithSizeLimit() throws NoSuchMethodException, IntrospectionException {
-        StringMaker maker = StringMaker.from(Optional.of(SettableProperty.from(HAccount.class, new PropertyDescriptor("apiKey", HAccount.class))));
+        StringMaker maker = StringMaker.from(SettableProperty.from(HAccount.class, new PropertyDescriptor("apiKey", HAccount.class)));
 
         String value = maker.value();
 

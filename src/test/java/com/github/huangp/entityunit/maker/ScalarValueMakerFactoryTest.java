@@ -6,8 +6,8 @@ import com.github.huangp.entityunit.holder.BeanValueHolder;
 import com.github.huangp.entityunit.util.Settable;
 import com.github.huangp.entityunit.util.SettableParameter;
 import com.github.huangp.entityunit.util.SettableProperty;
-import com.google.common.base.Optional;
 import com.google.common.reflect.Invokable;
+import lombok.Delegate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hamcrest.Matchers;
@@ -20,6 +20,7 @@ import org.zanata.model.StatusCount;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +32,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 @Slf4j
 public class ScalarValueMakerFactoryTest {
-
-    private Optional<Settable> settableOptional = Optional.absent();
     private ScalarValueMakerFactory factory;
     private BeanValueHolder holder;
     private PreferredValueMakersRegistry registry;
@@ -48,37 +47,37 @@ public class ScalarValueMakerFactoryTest {
 
     @Test
     public void canGetNumberMaker() {
-        assertThat(factory.from(Integer.class, settableOptional), Matchers.instanceOf(NumberMaker.class));
-        assertThat(factory.from(Long.class, settableOptional), Matchers.instanceOf(NumberMaker.class));
-        assertThat(factory.from(Short.class, settableOptional), Matchers.instanceOf(NumberMaker.class));
+        assertThat(factory.from(new FakeSettable(Integer.class)), Matchers.instanceOf(NumberMaker.class));
+        assertThat(factory.from(new FakeSettable(Long.class)), Matchers.instanceOf(NumberMaker.class));
+        assertThat(factory.from(new FakeSettable(Short.class)), Matchers.instanceOf(NumberMaker.class));
     }
 
     @Test
     public void canGetBeanMaker() {
-        assertThat(factory.from(StatusCount.class, settableOptional), Matchers.instanceOf(BeanMaker.class));
+        assertThat(factory.from(new FakeSettable(StatusCount.class)), Matchers.instanceOf(BeanMaker.class));
     }
 
     @Test
     public void reuseEntityOrNull() {
-        assertThat(factory.from(HCopyTransOptions.class, settableOptional).value(), Matchers.nullValue());
+        assertThat(factory.from(new FakeSettable(HCopyTransOptions.class)).value(), Matchers.nullValue());
 
         // if holder has value it will return
         HCopyTransOptions bean = new HCopyTransOptions();
         holder.putIfNotNull(HCopyTransOptions.class, bean);
-        assertThat(factory.from(HCopyTransOptions.class, settableOptional).value(), Matchers.<Object>sameInstance(bean));
+        assertThat(factory.from(new FakeSettable(HCopyTransOptions.class)).value(), Matchers.<Object>sameInstance(bean));
     }
 
     @Test
     public void canGetNullMakerForArrayAndCollection() {
-        assertThat(factory.from(new Integer[]{}.getClass(), settableOptional), Matchers.instanceOf(NullMaker.class));
-        assertThat(factory.from(Collection.class, settableOptional), Matchers.instanceOf(NullMaker.class));
-        assertThat(factory.from(List.class, settableOptional), Matchers.instanceOf(NullMaker.class));
-        assertThat(factory.from(Map.class, settableOptional), Matchers.instanceOf(NullMaker.class));
+        assertThat(factory.from(new FakeSettable(new Integer[]{}.getClass())), Matchers.instanceOf(NullMaker.class));
+        assertThat(factory.from(new FakeSettable(Collection.class)), Matchers.instanceOf(NullMaker.class));
+        assertThat(factory.from(new FakeSettable(List.class)), Matchers.instanceOf(NullMaker.class));
+        assertThat(factory.from(new FakeSettable(Map.class)), Matchers.instanceOf(NullMaker.class));
     }
 
     @Test
     public void canGetEnumMaker() {
-        assertThat(factory.from(ProjectType.class, settableOptional), Matchers.instanceOf(EnumMaker.class));
+        assertThat(factory.from(new FakeSettable(ProjectType.class)), Matchers.instanceOf(EnumMaker.class));
     }
 
     @Test
@@ -96,7 +95,7 @@ public class ScalarValueMakerFactoryTest {
         Settable settableParam = SettableParameter.from(TestClass.class,
                 Invokable.from(TestClass.class.getConstructor(String.class)).getParameters().get(0));
 
-        log.debug("settable parameter: {}", settableParam.fullyQualifiedName());
+        ScalarValueMakerFactoryTest.log.debug("settable parameter: {}", settableParam.fullyQualifiedName());
         Maker<String> maker = factory.from(settableParam);
 
         String name = maker.value();
@@ -118,5 +117,27 @@ public class ScalarValueMakerFactoryTest {
     @RequiredArgsConstructor
     private static class TestClass {
         private final String name;
+    }
+
+    @RequiredArgsConstructor
+    private static class FakeSettable implements Settable {
+        @Delegate
+        private final Class delegate;
+
+
+        @Override
+        public Type getType() {
+            return delegate;
+        }
+
+        @Override
+        public String fullyQualifiedName() {
+            return delegate + ".null";
+        }
+
+        @Override
+        public <T> T valueIn(Object ownerInstance) {
+            return null;
+        }
     }
 }
