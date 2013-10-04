@@ -21,6 +21,7 @@ import org.apache.commons.beanutils.BeanUtils;
 
 import javax.persistence.Id;
 import javax.persistence.Version;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -103,9 +104,7 @@ public class BeanMaker<T> implements Maker<T> {
             log.warn("fail calling constructor method: {}. Will fall back to default constructor", constructor);
             log.warn("exception {}", e.getMessage());
             log.debug("exception", e);
-            Invokable<T, T> noArgConstructor = ClassUtil.getNoArgConstructor(type);
-            noArgConstructor.setAccessible(true);
-            return noArgConstructor.invoke(result);
+            return ClassUtil.invokeNoArgConstructor(type);
         }
     }
 

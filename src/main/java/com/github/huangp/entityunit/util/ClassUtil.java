@@ -27,6 +27,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -111,10 +112,12 @@ public final class ClassUtil {
         return (Invokable<T, T>) Invokable.from(constructors.get(0));
     }
 
-    public static <T> Invokable<T, T> getNoArgConstructor(Class<T> entityType) {
+    public static <T> T invokeNoArgConstructor(Class<T> type) {
         try {
-            return Invokable.from(entityType.getConstructor());
-        } catch (NoSuchMethodException e) {
+            Constructor<T> constructor = type.getConstructor();
+            constructor.setAccessible(true);
+            return constructor.newInstance();
+        } catch (Exception e) {
             throw Throwables.propagate(e);
         }
     }
