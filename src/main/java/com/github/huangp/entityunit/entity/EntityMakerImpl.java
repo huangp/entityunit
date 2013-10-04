@@ -7,7 +7,6 @@ import com.github.huangp.entityunit.util.Settable;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Queues;
-import com.google.common.reflect.TypeToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jodah.typetools.TypeResolver;
@@ -97,7 +96,7 @@ class EntityMakerImpl implements EntityMaker {
             queue.offer(existing.get());
         } else {
             Serializable entity = new BeanMaker<Serializable>(entityClass.getType(), context).value();
-            context.getBeanValueHolder().putIfNotNull(TypeToken.of(entityClass.getType()), entity);
+            context.getBeanValueHolder().putIfNotNull(entityClass.getType(), entity);
             queue.offer(entity);
         }
     }

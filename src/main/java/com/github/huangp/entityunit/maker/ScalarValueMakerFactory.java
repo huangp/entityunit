@@ -5,11 +5,9 @@ import com.github.huangp.entityunit.holder.BeanValueHolder;
 import com.github.huangp.entityunit.util.ClassUtil;
 import com.github.huangp.entityunit.util.Settable;
 import com.google.common.base.Optional;
-import com.google.common.reflect.TypeToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.persistence.Transient;
 import java.lang.reflect.Type;
 import java.util.Date;
 
@@ -40,7 +38,6 @@ import java.util.Date;
 @Slf4j
 @RequiredArgsConstructor
 public class ScalarValueMakerFactory {
-    private static final TypeToken<Number> NUMBER_TYPE_TOKEN = TypeToken.of(Number.class);
     private final MakeContext context;
 
     /**
@@ -57,9 +54,10 @@ public class ScalarValueMakerFactory {
         }
 
         Type type = settable.getType();
-        TypeToken<?> token = TypeToken.of(type);
-        if (token.getRawType().isPrimitive()) {
-            return new PrimitiveMaker(token.getRawType());
+        Class<?> rawType = ClassUtil.getRawType(type);
+
+        if (ClassUtil.isPrimitive(type)) {
+            return new PrimitiveMaker(type);
         }
         if (type == String.class) {
             return StringMaker.from(settable);
@@ -67,33 +65,33 @@ public class ScalarValueMakerFactory {
         if (type == Date.class) {
             return new DateMaker();
         }
-        if (NUMBER_TYPE_TOKEN.isAssignableFrom(type)) {
+        if (Number.class.isAssignableFrom(rawType)) {
             return NumberMaker.from(settable);
         }
-        if (token.isArray()) {
-            ScalarValueMakerFactory.log.debug("array type: {}", token.getComponentType());
+        if (ClassUtil.isArray(type)) {
+            log.trace("array type: {}", rawType.getComponentType());
             return new NullMaker();
         }
-        if (token.getRawType().isEnum()) {
-            ScalarValueMakerFactory.log.debug("enum type: {}", type);
-            return new EnumMaker(token.getRawType().getEnumConstants());
+        if (ClassUtil.isEnum(type)) {
+            log.trace("enum type: {}", type);
+            return new EnumMaker(rawType.getEnumConstants());
         }
         if (ClassUtil.isCollection(type)) {
-            ScalarValueMakerFactory.log.debug("collection: {}", token);
+            log.trace("collection: {}", type);
             return new NullMaker();
         }
         if (ClassUtil.isMap(type)) {
-            ScalarValueMakerFactory.log.debug("map: {}", token);
+            log.trace("map: {}", type);
             return new NullMaker<Object>();
         }
         if (ClassUtil.isEntity(type)) {
-            ScalarValueMakerFactory.log.debug("{} is entity type", token);
+            log.trace("{} is entity type", type);
             // we don't want to make unnecessary entities
             // @see EntityMakerBuilder
-            return new ReuseOrNullMaker(context.getBeanValueHolder(), token.getRawType());
+            return new ReuseOrNullMaker(context.getBeanValueHolder(), rawType);
         }
-        ScalarValueMakerFactory.log.debug("guessing this is a bean {}", token);
-        return new BeanMaker(token.getRawType(), context);
+        log.debug("guessing this is a bean {}", type);
+        return new BeanMaker(rawType, context);
     }
 
 }

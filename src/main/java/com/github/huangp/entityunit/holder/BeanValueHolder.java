@@ -4,11 +4,9 @@ import com.github.huangp.entityunit.entity.EntityMakerBuilder;
 import com.github.huangp.entityunit.maker.ScalarValueMakerFactory;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
-import com.google.common.reflect.ImmutableTypeToInstanceMap;
-import com.google.common.reflect.MutableTypeToInstanceMap;
-import com.google.common.reflect.TypeToInstanceMap;
-import com.google.common.reflect.TypeToken;
+import com.google.common.collect.Maps;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -21,26 +19,18 @@ import java.util.Map;
  */
 public class BeanValueHolder {
 
-    private TypeToInstanceMap<Object> map = new MutableTypeToInstanceMap<Object>();
+    private Map<Class<?>, Object> map = Collections.synchronizedMap(Maps.<Class<?>, Object>newIdentityHashMap());
 
-    public <T> BeanValueHolder putIfNotNull(TypeToken<T> typeToken, T bean) {
+    public <T> BeanValueHolder putIfNotNull(Class<T> type, T bean) {
         if (bean != null) {
-            map.putInstance(typeToken, bean);
+            map.put(type, bean);
         }
         return this;
     }
 
-    public <T> Optional<T> tryGet(TypeToken<T> typeToken) {
-        T instance = map.getInstance(typeToken);
-        return Optional.fromNullable(instance);
-    }
-
-    public <T> BeanValueHolder putIfNotNull(Class<T> type, T bean) {
-        return putIfNotNull(TypeToken.of(type), bean);
-    }
-
     public <T> Optional<T> tryGet(Class<T> type) {
-        return tryGet(TypeToken.of(type));
+        T instance = (T) map.get(type);
+        return Optional.fromNullable(instance);
     }
 
     public void clear() {
@@ -48,10 +38,7 @@ public class BeanValueHolder {
     }
 
     public BeanValueHolder merge(BeanValueHolder other) {
-        for (Map.Entry<TypeToken<?>, Object> entry : other.map.entrySet()) {
-            TypeToken key = entry.getKey();
-            map.putInstance(key, entry.getValue());
-        }
+        map.putAll(other.map);
         return this;
     }
 

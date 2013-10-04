@@ -1,10 +1,10 @@
 package com.github.huangp.entityunit.entity;
 
+import com.github.huangp.entityunit.util.ClassUtil;
 import com.github.huangp.entityunit.util.Settable;
 import com.github.huangp.entityunit.util.SettableField;
 import com.github.huangp.entityunit.util.SettableProperty;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.base.Throwables;
@@ -13,7 +13,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.reflect.TypeToken;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -230,7 +229,7 @@ public class EntityClass {
 
         @Override
         public EntityClass apply(Settable input) {
-            EntityClass entityClass = EntityClass.from(TypeToken.of(input.getType()).getRawType(), scanOption);
+            EntityClass entityClass = EntityClass.from(ClassUtil.getRawType(input.getType()), scanOption);
             entityClass.setRequireNewInstance(requireNewInstance);
             return entityClass;
         }

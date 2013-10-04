@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.RandomStringUtils;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.lang.annotation.Annotation;
@@ -40,10 +42,18 @@ class StringMaker implements Maker<String> {
                     max = Math.max(min, DEFAULT_MAX);
                 }
             }
+            if (annotation instanceof Max) {
+                Max maxAnnotation = (Max) annotation;
+                max = Long.valueOf(maxAnnotation.value()).intValue();
+            }
+            if (annotation instanceof Min) {
+                Min minAnnotation = (Min) annotation;
+                // This may lose some precision
+                min = Long.valueOf(minAnnotation.value()).intValue();
+            }
             if (annotation instanceof Pattern) {
                 log.warn("can not auto generate string matches pattern constraint for {}", settable.fullyQualifiedName());
             }
-            // TODO Max and Min?
         }
         return new StringMaker(isEmail, min, max);
     }
@@ -57,7 +67,7 @@ class StringMaker implements Maker<String> {
         if (isEmail) {
             return RandomStringUtils.randomAlphabetic(5) + "@nowhere.org";
         }
-        int length = Math.min(DEFAULT_MAX, this.max);
+        int length = Math.min(DEFAULT_MAX, max);
         return RandomStringUtils.randomAlphabetic(Math.max(length, min));
     }
 }

@@ -1,6 +1,9 @@
 package com.github.huangp.entityunit.maker;
 
 import com.google.common.base.Defaults;
+import com.google.common.base.Preconditions;
+
+import java.lang.reflect.Type;
 
 /**
  * @author Patrick Huang
@@ -8,8 +11,9 @@ import com.google.common.base.Defaults;
 class PrimitiveMaker implements Maker {
     private final Class<?> type;
 
-    public PrimitiveMaker(Class<?> type) {
-        this.type = type;
+    public PrimitiveMaker(Type type) {
+        Preconditions.checkArgument(type instanceof Class<?>);
+        this.type = (Class<?>) type;
     }
 
     @Override

@@ -13,7 +13,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.Invokable;
-import com.google.common.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.Access;
@@ -27,8 +26,10 @@ import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
@@ -129,15 +130,34 @@ public final class ClassUtil {
     }
 
     public static boolean isCollection(Type type) {
-        return Collection.class.isAssignableFrom(TypeToken.of(type).getRawType());
+        return Collection.class.isAssignableFrom(getRawType(type));
+    }
+
+    public static Class<?> getRawType(Type type) {
+        if (type instanceof ParameterizedType) {
+            return (Class<?>) ((ParameterizedType) type).getRawType();
+        }
+        return (Class<?>) type;
     }
 
     public static boolean isMap(Type type) {
-        return Map.class.isAssignableFrom(TypeToken.of(type).getRawType());
+        return Map.class.isAssignableFrom(getRawType(type));
+    }
+
+    public static boolean isPrimitive(Type type) {
+        return getRawType(type).isPrimitive();
+    }
+
+    public static boolean isEnum(Type type) {
+        return getRawType(type).isEnum();
     }
 
     public static boolean isEntity(Type type) {
-        return TypeToken.of(type).getRawType().isAnnotationPresent(Entity.class);
+        return getRawType(type).isAnnotationPresent(Entity.class);
+    }
+
+    public static boolean isArray(Type type) {
+        return type instanceof GenericArrayType || getRawType(type).isArray();
     }
 
     public static <T> T findEntity(Iterable<Object> entities, Class<T> typeToFind) {
@@ -165,7 +185,6 @@ public final class ClassUtil {
         } catch (IntrospectionException e) {
             throw Throwables.propagate(e);
         }
-        log.warn("getter method not found: {} - {}", type, name);
         return null;
     }
 

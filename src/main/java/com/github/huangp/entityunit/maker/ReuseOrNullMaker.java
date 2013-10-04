@@ -1,7 +1,6 @@
 package com.github.huangp.entityunit.maker;
 
 import com.github.huangp.entityunit.holder.BeanValueHolder;
-import com.google.common.reflect.TypeToken;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -16,6 +15,6 @@ class ReuseOrNullMaker implements Maker<Object> {
 
     @Override
     public Object value() {
-        return holder.tryGet(TypeToken.of(type)).orNull();
+        return holder.tryGet(type).orNull();
     }
 }

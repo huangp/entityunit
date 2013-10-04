@@ -22,7 +22,6 @@ import org.apache.commons.beanutils.BeanUtils;
 import javax.persistence.Id;
 import javax.persistence.Version;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -116,6 +115,7 @@ public class BeanMaker<T> implements Maker<T> {
         Predicate<Settable> settablePredicate = Predicates.not(
                 Predicates.or(
                         new SameTypePredicate(result.getClass()),
+                        CollectionTypePredicate.PREDICATE,
                         new HasDefaultValuePredicate<T>(result),
                         IdOrVersionPredicate.PREDICATE));
 
@@ -128,26 +128,27 @@ public class BeanMaker<T> implements Maker<T> {
     }
 
     private void trySetValue(T result, Settable settable) {
-        log.debug("about to make {}", settable);
+        log.trace("about to make {}", settable);
         Object fieldValue = factory.from(settable).value();
         // this is ugly. But don't want to change the whole design to fit this feature
         if (fieldValue == null || SkipFieldValueMaker.shouldSkipThisField(fieldValue)) {
             return;
         }
-        log.debug("value {}", fieldValue);
+        log.trace("made value {}", fieldValue);
         try {
             if (ClassUtil.isAccessTypeIsField(type)) {
                 ClassUtil.setValue(settable, result, fieldValue);
             } else {
                 BeanUtils.setProperty(result, settable.getSimpleName(), fieldValue);
             }
-            if (log.isDebugEnabled()) {
-                log.debug("value after set: {}", settable.valueIn(result));
-            }
         } catch (Exception e) {
             log.warn("can not set property: {}={}", settable, fieldValue);
             log.warn("exception {}", e.getMessage());
             log.debug("exception", e);
+        } finally {
+            if (log.isDebugEnabled()) {
+                log.debug("settable [{}] populated with value: {}", settable, settable.valueIn(result));
+            }
         }
     }
 
@@ -161,6 +162,16 @@ public class BeanMaker<T> implements Maker<T> {
         }
     }
 
+    private static enum CollectionTypePredicate implements Predicate<Settable> {
+        PREDICATE;
+
+        @Override
+        public boolean apply(Settable input) {
+            Type type = input.getType();
+            return ClassUtil.isCollection(type) || ClassUtil.isMap(type);
+        }
+    }
+
     @RequiredArgsConstructor
     private static class HasDefaultValuePredicate<T> implements Predicate<Settable> {
         private final T object;
@@ -171,13 +182,16 @@ public class BeanMaker<T> implements Maker<T> {
                 return notPrimitive(input.getType()) && input.valueIn(object) != null;
             } catch (Exception e) {
                 log.warn("can not determine field [{}] has default value or not", input);
+                log.warn("exception: {}", e.getMessage());
+                log.debug("exception", e);
                 return false;
             }
         }
 
         private static boolean notPrimitive(Type settableType) {
-            return !((Class) settableType).isPrimitive();
+            return !ClassUtil.isPrimitive(settableType);
         }
+
     }
 
     private static enum IdOrVersionPredicate implements Predicate<Settable> {

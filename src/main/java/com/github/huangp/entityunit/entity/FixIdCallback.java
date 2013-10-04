@@ -40,7 +40,6 @@ import static com.github.huangp.entityunit.util.ClassUtil.findEntity;
 @RequiredArgsConstructor
 @Slf4j
 public class FixIdCallback extends AbstractNoOpCallback {
-    // TODO reformat and provide some example
     private static final String NOT_EMPTY_ASSOCIATION_ERROR =
             "Found not empty or null associations [%s]. Fix Id only works on no association entity. You can make it with fix id first and add the association manually later";
 
