@@ -3,10 +3,9 @@ package com.github.huangp.entityunit.maker;
 import com.github.huangp.entities.Person;
 import com.github.huangp.entityunit.entity.MakeContext;
 import com.github.huangp.entityunit.holder.BeanValueHolder;
+import com.github.huangp.entityunit.util.ClassUtil;
 import com.github.huangp.entityunit.util.Settable;
-import com.github.huangp.entityunit.util.SettableParameter;
 import com.github.huangp.entityunit.util.SettableProperty;
-import com.google.common.reflect.Invokable;
 import lombok.Delegate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +19,7 @@ import org.zanata.model.StatusCount;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
@@ -92,10 +92,10 @@ public class ScalarValueMakerFactoryTest {
     @Test
     public void preferredValueMakerWorksOnConstructor() throws NoSuchMethodException {
         registry.addConstructorParameterMaker(TestClass.class, 0, FixedValueMaker.fix("constructor"));
-        Settable settableParam = SettableParameter.from(TestClass.class,
-                Invokable.from(TestClass.class.getConstructor(String.class)).getParameters().get(0));
+        Constructor<TestClass> constructor = TestClass.class.getConstructor(String.class);
+        Settable settableParam = ClassUtil.getConstructorParameters(constructor, TestClass.class).get(0);
 
-        ScalarValueMakerFactoryTest.log.debug("settable parameter: {}", settableParam.fullyQualifiedName());
+        log.debug("settable parameter: {}", settableParam.fullyQualifiedName());
         Maker<String> maker = factory.from(settableParam);
 
         String name = maker.value();

@@ -12,7 +12,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.reflect.Invokable;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.Access;
@@ -27,7 +26,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -98,7 +96,7 @@ public final class ClassUtil {
         return Optional.absent();
     }
 
-    public static <T> Invokable<T, T> findMostArgsConstructor(Class<T> type) {
+    public static <T> Constructor<T> findMostArgsConstructor(Class<T> type) {
         List<Constructor<?>> constructors = Lists.newArrayList(type.getDeclaredConstructors());
 
         // sort by number of parameters in descending order
@@ -109,7 +107,20 @@ public final class ClassUtil {
             }
         });
 
-        return (Invokable<T, T>) Invokable.from(constructors.get(0));
+        return (Constructor<T>) constructors.get(0);
+    }
+
+    // TODO when guava reflection is not @Beta, refactor this to use that
+    public static <T> List<Settable> getConstructorParameters(Constructor<T> constructor, Class<?> ownerType) {
+        Type[] parameterTypes = constructor.getGenericParameterTypes();
+        Annotation[][] parameterAnnotations = constructor.getParameterAnnotations();
+        List<Settable> params = Lists.newArrayList();
+        for (int i = 0; i < parameterTypes.length; i++) {
+            Parameter parameterWrap = new Parameter(parameterTypes[i], i, parameterAnnotations[i]);
+            Settable settable = SettableParameter.from(ownerType, parameterWrap);
+            params.add(settable);
+        }
+        return params;
     }
 
     public static <T> T invokeNoArgConstructor(Class<T> type) {

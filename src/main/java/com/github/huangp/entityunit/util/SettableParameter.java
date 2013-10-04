@@ -1,6 +1,5 @@
 package com.github.huangp.entityunit.util;
 
-import com.google.common.reflect.Parameter;
 import lombok.Delegate;
 
 import java.lang.reflect.AnnotatedElement;
@@ -16,7 +15,7 @@ public class SettableParameter implements Settable {
     private final transient String fullName;
 
     private SettableParameter(Class<?> ownerType, Parameter parameter) {
-        simpleName = parameter.toString().replaceFirst("^.+\\s", "");
+        simpleName = parameter.toString();
         fullName = String.format(FULL_NAME_FORMAT, ownerType.getName(), simpleName);
         this.parameter = parameter;
     }
@@ -27,7 +26,7 @@ public class SettableParameter implements Settable {
 
     @Override
     public Type getType() {
-        return parameter.getType().getType();
+        return parameter.getType();
     }
 
     @Override

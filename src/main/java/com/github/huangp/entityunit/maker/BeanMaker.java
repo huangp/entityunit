@@ -4,17 +4,13 @@ import com.github.huangp.entityunit.entity.EntityClass;
 import com.github.huangp.entityunit.entity.MakeContext;
 import com.github.huangp.entityunit.util.ClassUtil;
 import com.github.huangp.entityunit.util.Settable;
-import com.github.huangp.entityunit.util.SettableParameter;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.reflect.Invokable;
-import com.google.common.reflect.Parameter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
@@ -66,8 +62,8 @@ public class BeanMaker<T> implements Maker<T> {
     public T value() {
         T result = null;
         try {
-            Invokable<T, T> constructor = ClassUtil.findMostArgsConstructor(type);
-            result = constructBean(result, constructor);
+            Constructor<T> constructor = ClassUtil.findMostArgsConstructor(type);
+            result = constructBean(constructor);
 
             // if we can find public static constants defined in the class, we will use that as value
             Optional<T> constants = ClassUtil.tryFindPublicConstants(type, result);
@@ -85,21 +81,20 @@ public class BeanMaker<T> implements Maker<T> {
         }
     }
 
-    private T constructBean(T result, Invokable<T, T> constructor)
-            throws InvocationTargetException, IllegalAccessException, InstantiationException {
-        ImmutableList<Parameter> parameters = constructor.getParameters();
-        // TODO this may override some default values provided at field declaration. See HCopyTransOptions
-        List<Object> paramValues = Lists.transform(parameters, new Function<Parameter, Object>() {
+    private T constructBean(Constructor<T> constructor) {
+        // this may override some default values provided at field declaration. See HCopyTransOptions
+        List<Settable> parameters = ClassUtil.getConstructorParameters(constructor, type);
+        List<Object> paramValues = Lists.transform(parameters, new Function<Settable, Object>() {
             @Override
-            public Object apply(Parameter input) {
-                Settable settableParameter = SettableParameter.from(type, input);
-                return factory.from(settableParameter).value();
+            public Object apply(Settable input) {
+                return factory.from(input).value();
             }
         });
+
         try {
             log.debug("invoke args {} constructor with parameters {}", type, parameters);
             constructor.setAccessible(true);
-            return constructor.invoke(result, paramValues.toArray());
+            return constructor.newInstance(paramValues.toArray());
         } catch (Exception e) {
             log.warn("fail calling constructor method: {}. Will fall back to default constructor", constructor);
             log.warn("exception {}", e.getMessage());
