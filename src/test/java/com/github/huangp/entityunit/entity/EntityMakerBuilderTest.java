@@ -2,7 +2,6 @@ package com.github.huangp.entityunit.entity;
 
 import com.github.huangp.entities.Category;
 import com.github.huangp.entities.LineItem;
-import com.github.huangp.entityunit.holder.BeanValueHolder;
 import com.github.huangp.entityunit.maker.FixedValueMaker;
 import org.hamcrest.Matchers;
 import org.junit.Before;

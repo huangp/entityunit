@@ -86,7 +86,7 @@ class EntityMakerImpl implements EntityMaker {
         // @see SingleEntityMaker
         // @see ReuseOrNullMaker
 
-        log.debug("result {}", new NiceIterablePrinter(queue));
+        log.debug("entities made in order: {}", new NiceIterablePrinter(queue));
         return queue;
     }
 

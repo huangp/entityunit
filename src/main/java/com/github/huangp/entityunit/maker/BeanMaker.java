@@ -4,11 +4,7 @@ import com.github.huangp.entityunit.entity.EntityClass;
 import com.github.huangp.entityunit.entity.MakeContext;
 import com.github.huangp.entityunit.util.ClassUtil;
 import com.github.huangp.entityunit.util.Settable;
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.base.Throwables;
+import com.google.common.base.*;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -61,6 +57,7 @@ public class BeanMaker<T> implements Maker<T> {
     @Override
     public T value() {
         T result = null;
+        log.debug(">>> bean: {}", type.getName());
         try {
             Constructor<T> constructor = ClassUtil.findMostArgsConstructor(type);
             result = constructBean(constructor);
@@ -77,6 +74,7 @@ public class BeanMaker<T> implements Maker<T> {
             throw Throwables.propagate(e);
         } finally {
             log.debug("bean of type {} made: {}", type, result);
+            log.debug("<<<");
             context.getBeanValueHolder().putIfNotNull(type, result);
         }
     }
@@ -92,7 +90,7 @@ public class BeanMaker<T> implements Maker<T> {
         });
 
         try {
-            log.debug("invoke args {} constructor with parameters {}", type, parameters);
+            log.debug("invoke {} constructor with parameters {}", type, parameters);
             constructor.setAccessible(true);
             return constructor.newInstance(paramValues.toArray());
         } catch (Exception e) {
@@ -107,7 +105,7 @@ public class BeanMaker<T> implements Maker<T> {
         Iterable<Settable> elements = EntityClass.from(type).getElements();
 
         Predicate<Settable> settablePredicate = Predicates.not(
-                Predicates.or(
+                Predicates.<Settable>or(
                         new SameTypePredicate(result.getClass()),
                         CollectionTypePredicate.PREDICATE,
                         new HasDefaultValuePredicate<T>(result),
@@ -141,7 +139,8 @@ public class BeanMaker<T> implements Maker<T> {
             log.debug("exception", e);
         } finally {
             if (log.isDebugEnabled()) {
-                log.debug("settable [{}] populated with value: {}", settable, settable.valueIn(result));
+                String field = Strings.padEnd(settable.getSimpleName(), 20, ' ');
+                log.debug("    {} <=     {}", field, settable.valueIn(result));
             }
         }
     }
