@@ -13,7 +13,7 @@
 
     <name>entityunit</name>
     <description>Simple tool to make JPA entities for testing</description>
-    <url>https://github.com/huangp/entityunity</url>
+    <url>https://github.com/huangp/entityunit</url>
 
     <licenses>
         <license>
@@ -24,9 +24,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git://github.com/huangp/entityunity.git</connection>
-        <developerConnection>scm:git:https://github.com/huangp/entityunity.git</developerConnection>
-        <url>https://github.com/huangp/entityunity</url>
+        <connection>scm:git:git://github.com/huangp/entityunit.git</connection>
+        <developerConnection>scm:git:https://github.com/huangp/entityunit.git</developerConnection>
+        <url>https://github.com/huangp/entityunit</url>
     </scm>
 
     <developers>

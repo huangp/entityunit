@@ -14,4 +14,4 @@ To use it:
 </dependency>
 ```
 
-See https://github.com/huangp/entityunity/wiki for more information.
+See https://github.com/huangp/entityunit/wiki for more information.
