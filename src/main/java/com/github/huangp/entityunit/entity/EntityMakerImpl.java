@@ -43,13 +43,10 @@ class EntityMakerImpl implements EntityMaker {
     public <T> T makeAndPersist(EntityManager entityManager, Class<T> entityType, Callback callback) {
         Iterable<Object> allObjects = getRequiredEntitiesFor(entityType);
 
-        entityManager.getTransaction().begin();
-
         Iterable<Object> toPersist = callback.beforePersist(entityManager, allObjects);
         persistInOrder(entityManager, toPersist);
         Iterable<Object> toReturn = callback.afterPersist(entityManager, toPersist);
 
-        entityManager.getTransaction().commit();
         return ClassUtil.findEntity(toReturn, entityType);
     }
 

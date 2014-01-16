@@ -57,7 +57,6 @@ public final class EntityCleaner {
      *         entity class in correct order
      */
     public static void deleteAll(final EntityManager entityManager, Iterable<Class> entityClasses) {
-        entityManager.getTransaction().begin();
         for (Class entityType : entityClasses) {
             EntityClass entityClass = EntityClass.from(entityType);
 
@@ -69,8 +68,6 @@ public final class EntityCleaner {
 
             deleteEntity(entityManager, ClassUtil.getEntityName(entityType));
         }
-
-        entityManager.getTransaction().commit();
     }
 
     /**
@@ -97,7 +94,6 @@ public final class EntityCleaner {
             }
         });
 
-        entityManager.getTransaction().begin();
         for (Class entityType : entityClasses) {
             EntityClass entityClass = EntityClass.from(entityType);
             Iterable<String> manyToManyTables = getAssociationTables(entityClass);
@@ -113,7 +109,6 @@ public final class EntityCleaner {
             deleteEntityExcept(entityManager, entityType.getSimpleName(), exclusion.get(entityType), idSettable, ids);
         }
 
-        entityManager.getTransaction().commit();
     }
 
     private static void deleteTable(EntityManager entityManager, String table) {

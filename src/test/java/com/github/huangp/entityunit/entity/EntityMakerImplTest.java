@@ -67,6 +67,7 @@ public class EntityMakerImplTest {
         MockitoAnnotations.initMocks(this);
         maker = EntityMakerBuilder.builder().build();
         entityManager = emFactory.createEntityManager();
+        entityManager.getTransaction().begin();
         EntityCleaner.deleteAll(entityManager, Lists.<Class>newArrayList(
                 // simple test entities
                 LineItem.class, Category.class, Person.class,
@@ -79,6 +80,7 @@ public class EntityMakerImplTest {
                 HPerson.class, HAccount.class
         ));
         copyCallback = new TakeCopyCallback();
+        entityManager.getTransaction().commit();
     }
 
     @After
@@ -103,7 +105,9 @@ public class EntityMakerImplTest {
 
     @Test
     public void testInReal() {
+        entityManager.getTransaction().begin();
         HProjectIteration hProjectIteration = maker.makeAndPersist(entityManager, HProjectIteration.class);
+        entityManager.getTransaction().commit();
 
         Long numOfIteration = entityManager.createQuery("select count(*) from HProjectIteration", Long.class).getSingleResult();
         Long numOfProject = entityManager.createQuery("select count(*) from HProject", Long.class).getSingleResult();
@@ -133,8 +137,9 @@ public class EntityMakerImplTest {
 
     @Test
     public void canMakeUltimateObjectTree() {
-
+        entityManager.getTransaction().begin();
         maker.makeAndPersist(entityManager, HTextFlowTarget.class, copyCallback);
+        entityManager.getTransaction().commit();
 
         HTextFlowTarget textFlowTarget = entityManager.createQuery("from HTextFlowTarget", HTextFlowTarget.class).getSingleResult();
         log.info("persisted text flow target {}", textFlowTarget);
@@ -159,7 +164,9 @@ public class EntityMakerImplTest {
 
     @Test
     public void testWithMixedAccessType() {
+        entityManager.getTransaction().begin();
         maker.makeAndPersist(mockEntityManager, LineItem.class, copyCallback);
+        entityManager.getTransaction().commit();
         List<Object> result = copyCallback.getCopy();
         assertThat(result, Matchers.iterableWithSize(3));
 
@@ -207,13 +214,19 @@ public class EntityMakerImplTest {
 
     @Test
     public void canDeleteWithExclusion() throws Exception {
+        entityManager.getTransaction().begin();
+
         Category one = maker.makeAndPersist(entityManager, Category.class);
         Category two = maker.makeAndPersist(entityManager, Category.class);
+
+        entityManager.getTransaction().commit();
 
         log.info("category 1: {}", one);
         log.info("category 2: {}", two);
 
+        entityManager.getTransaction().begin();
         EntityCleaner.deleteAllExcept(entityManager, Lists.<Class>newArrayList(Category.class), two);
+        entityManager.getTransaction().commit();
 
         List<Category> result = entityManager.createQuery("from Category", Category.class).getResultList();
         log.info("result: {}", result);
@@ -224,7 +237,9 @@ public class EntityMakerImplTest {
 
     @Test
     public void canFixId() {
+        entityManager.getTransaction().begin();
         HProject one = maker.makeAndPersist(entityManager, HProject.class, new FixIdCallback(HProject.class, 100L));
+        entityManager.getTransaction().commit();
 
         assertThat(one.getId(), Matchers.equalTo(100L));
 
@@ -232,9 +247,13 @@ public class EntityMakerImplTest {
         assertThat(found.getId(), Matchers.equalTo(one.getId()));
         assertThat(found.getSlug(), Matchers.equalTo(one.getSlug()));
 
+        entityManager.getTransaction().begin();
         EntityCleaner.deleteAll(entityManager, Lists.<Class>newArrayList(HProject.class));
+        entityManager.getTransaction().commit();
 
+        entityManager.getTransaction().begin();
         HProject two = maker.makeAndPersist(entityManager, HProject.class, new FixIdCallback(HProject.class, 200L));
+        entityManager.getTransaction().commit();
         List<HProject> result = entityManager.createQuery("from HProject order by id", HProject.class).getResultList();
         log.info("result: {}", result);
         log.info("second one: {}", two.getId());
@@ -250,9 +269,9 @@ public class EntityMakerImplTest {
         role.setName("admin");
         entityManager.getTransaction().begin();
         entityManager.persist(role);
-        entityManager.getTransaction().commit();
 
         HAccount result = maker.makeAndPersist(entityManager, HAccount.class, Callbacks.chain(new FixIdCallback(HAccount.class, 10L)));
+        entityManager.getTransaction().commit();
 
         result.getRoles().add(role);
         entityManager.getTransaction().begin();
@@ -264,16 +283,19 @@ public class EntityMakerImplTest {
         assertThat(result.getRoles(), Matchers.hasSize(1));
 
         try {
+            entityManager.getTransaction().begin();
             maker.makeAndPersist(entityManager, HAccount.class, Callbacks.chain(new WireManyToManyCallback(HAccount.class, role), new FixIdCallback(HAccount.class, 100L)));
             Assert.fail("should fail");
         } catch (Exception e) {
-
+            entityManager.getTransaction().rollback();
         }
     }
 
     @Test
     public void canFixIdAndReuseAsReference() {
+        entityManager.getTransaction().begin();
         HAccount hAccount = maker.makeAndPersist(entityManager, HAccount.class, new FixIdCallback(HAccount.class, 100L));
+        entityManager.getTransaction().commit();
 
         HPerson hPerson = EntityMakerBuilder.builder()
                 // this will mark HAccount requireNewInstance to true therefore not reusable. Without it, BeanMaker will reuse it when populating fields
@@ -288,6 +310,7 @@ public class EntityMakerImplTest {
 
     @Test
     public void canMakeEntityUsesInterfaceAsParameterType() {
+        entityManager.getTransaction().begin();
         maker.makeAndPersist(entityManager, HTextFlowTarget.class, copyCallback);
 
         HProjectIteration iteration = copyCallback.getByType(HProjectIteration.class);
@@ -316,6 +339,7 @@ public class EntityMakerImplTest {
         activityPersistService.makeAndPersist(entityManager, Activity.class);
         activityPersistService.makeAndPersist(entityManager, Activity.class);
         activityPersistService.makeAndPersist(entityManager, Activity.class);
+        entityManager.getTransaction().commit();
 
         List<Activity> result = entityManager.createQuery("from Activity order by id", Activity.class).getResultList();
 
@@ -326,6 +350,7 @@ public class EntityMakerImplTest {
 
     @Test
     public void canMakeMultipleEntitiesOfSameType() {
+        entityManager.getTransaction().begin();
         // 3 documents
         HDocument document1 = maker.makeAndPersist(entityManager, HDocument.class);
         HDocument document2 = maker.makeAndPersist(entityManager, HDocument.class);
@@ -344,6 +369,7 @@ public class EntityMakerImplTest {
         EntityMakerBuilder.builder()
                 .reuseEntity(document1)
                 .build().makeAndPersist(entityManager, HTextFlowTarget.class);
+        entityManager.getTransaction().commit();
 
         List<HTextFlowTarget> result = entityManager.createQuery("from HTextFlowTarget order by id", HTextFlowTarget.class).getResultList();
 
@@ -357,8 +383,10 @@ public class EntityMakerImplTest {
 
     @Test
     public void canSetIndexColumn() {
+        entityManager.getTransaction().begin();
         maker.makeAndPersist(entityManager, LineItem.class);
         maker.makeAndPersist(entityManager, LineItem.class);
+        entityManager.getTransaction().commit();
 
         entityManager.clear();
         List<LineItem> result = entityManager.createQuery("from LineItem it order by it.number", LineItem.class).getResultList();
@@ -399,6 +427,8 @@ public class EntityMakerImplTest {
     @Test
     // to test wiki page is right
     public void wikiContentPageTest() {
+        entityManager.getTransaction().begin();
+
         //Assuming you have obtained an EntityManager instance
         //### Basic Usage:
         //```java
@@ -437,6 +467,8 @@ public class EntityMakerImplTest {
         assertThat(itemThree.getCategory().getName(), Matchers.equalTo("Awesomeness"));
         // optional OneToOne entity is also created
         assertThat(itemThree.getCategory().getCategoryOwner(), Matchers.notNullValue());
+
+        entityManager.getTransaction().commit();
     }
 
 
