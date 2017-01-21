@@ -1,7 +1,7 @@
 package com.github.huangp.entityunit.maker;
 
 import com.github.huangp.entityunit.util.Settable;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.hamcrest.Matcher;
@@ -136,7 +136,7 @@ public class PreferredValueMakersRegistry {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("makers", makers)
                 .toString();
     }
