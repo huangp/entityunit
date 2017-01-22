@@ -2,7 +2,7 @@ package com.github.huangp.entityunit.holder;
 
 import com.github.huangp.entityunit.entity.EntityMakerBuilder;
 import com.github.huangp.entityunit.maker.ScalarValueMakerFactory;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 
@@ -44,7 +44,7 @@ public class BeanValueHolder {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("map", map)
                 .toString();
     }

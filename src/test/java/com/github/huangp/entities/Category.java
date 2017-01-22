@@ -1,6 +1,6 @@
 package com.github.huangp.entities;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 import org.hibernate.annotations.IndexColumn;
@@ -43,7 +43,7 @@ public class Category extends Identifier {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("id", getId())
                 .add("name", name)
                 .add("lineItems", lineItems.size())

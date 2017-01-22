@@ -20,6 +20,7 @@
  */
 package org.zanata.model;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import lombok.AccessLevel;
@@ -358,7 +359,7 @@ public class HTextFlowTarget extends ModelEntityBase implements HasContents, Has
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this).
+        return MoreObjects.toStringHelper(this).
                 add("contents", getContents()).
                 add("locale", getLocale()).
                 add("state", getState()).

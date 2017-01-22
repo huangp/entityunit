@@ -1,6 +1,6 @@
 package com.github.huangp.entityunit.maker;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -25,7 +25,7 @@ public class FixedValueMaker<V> implements Maker<V> {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .addValue(fixedValue)
                 .toString();
     }
