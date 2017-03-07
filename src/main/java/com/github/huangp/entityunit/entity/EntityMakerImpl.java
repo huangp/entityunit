@@ -27,11 +27,17 @@ class EntityMakerImpl implements EntityMaker {
     private final EntityClassScanner scanner;
     private final MakeContext context;
     private final BeanValueHolder valueHolder;
+    private static boolean warnings = false;
 
     EntityMakerImpl(EntityClassScanner scanner, MakeContext context) {
         this.scanner = scanner;
         this.context = context;
         valueHolder = context.getBeanValueHolder();
+    }
+
+    EntityMakerImpl(EntityClassScanner scanner, MakeContext context, boolean warn) {
+        this(scanner, context);
+        warnings = warn;
     }
 
     @Override
@@ -129,7 +135,11 @@ class EntityMakerImpl implements EntityMaker {
         Optional keyOptional = holder.tryGet(keyType);
         Optional valueOptional = holder.tryGet(valueType);
         if (!keyOptional.isPresent()) {
-            log.warn("You have to manually resolve this: {} {}", element.getType(), element);
+            if(warnings) {
+                log.warn("You have to manually resolve this: {} {}", element.getType(), element);
+            } else {
+                log.info("You have to manually resolve this: {} {}", element.getType(), element);
+            }
         }
 
         if (keyOptional.isPresent() && valueOptional.isPresent()) {
