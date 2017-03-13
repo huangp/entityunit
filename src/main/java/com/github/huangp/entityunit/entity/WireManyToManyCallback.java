@@ -13,7 +13,7 @@ import java.util.Collection;
 
 /**
  * By default the EntityMaker will not wire many to many associations. This callback is provided to take care of it.
- * <p/>
+ * <p>
  * Example:
  * <pre>
  * <code>
@@ -22,7 +22,7 @@ import java.util.Collection;
  * class Account {
  *     {@literal @}ManyToMany(targetEntity = Role.class)
  *     {@literal @}JoinTable(name = "AccountMembership", joinColumns = @JoinColumn(name = "accountId"), inverseJoinColumns = @JoinColumn(name = "memberOf"))
- *     public Set<Role> getRoles() {
+ *     public Set{@literal <Role>} getRoles() {
  *         return roles;
  *     }
  *

@@ -22,15 +22,15 @@ import static com.github.huangp.entityunit.util.ClassUtil.findEntity;
 
 /**
  * <b>NOTE:</b> Altering primary key is not supported in JPA specification.
- * <p/>
+ * <p>
  * However in some occasion this is necessary.
  * i.e. some web app and framework keeps the entity id in session and if you delete and make a new object with different
  * id in your Selenium test it will fail.
- * <p/>
+ * <p>
  * The trick is to after hibernate persisted the entity and have a generated id, we alter it by using query.
  * The persistence context is polluted and can't be trusted. Therefore the entity will be detached first and re-loaded
  * again.
- * <p/>
+ * <p>
  * There is no guarantee referential constraints are defined with "on update cascade", therefore <b>this callback only
  * supports entity with no association.</b>
  *

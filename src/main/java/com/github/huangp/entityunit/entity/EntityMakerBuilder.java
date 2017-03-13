@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * Builder for EntityMaker.
- * <p/>
+ * <p>
  * Once built the EntityMaker is immutable.
  *
  * @author Patrick Huang

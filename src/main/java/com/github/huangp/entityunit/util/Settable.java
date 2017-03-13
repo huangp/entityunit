@@ -16,7 +16,7 @@ public interface Settable extends AnnotatedElement {
 
     /**
      * For field/property is the field name,
-     * <p/>
+     * <p>
      * For constructor it's arg# where # is the index of the argument in constructor method.
      *
      * @return simple name of this settable.
@@ -30,9 +30,9 @@ public interface Settable extends AnnotatedElement {
 
     /**
      * Use owner_class_name - simpleName as format.
-     * <p/>
+     * <p>
      * For settable field, property, i.e. org.example.Person - name.
-     * <p/>
+     * <p>
      * For settable constructor parameter, simple name is arg# where # is the index of argument,
      * i.e. org.example.Locale - arg0
      *

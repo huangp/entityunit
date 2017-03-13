@@ -22,7 +22,7 @@ import static com.github.huangp.entityunit.util.HasAnnotationPredicate.has;
 
 /**
  * The core maker that makes java bean.
- * <p/>
+ * <p>
  * For a given class type, the make process follows certain rules:
  * <pre>
  * 1. Ff it can find public constants, it will use that as value.

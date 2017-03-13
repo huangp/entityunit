@@ -46,11 +46,11 @@ import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * Adaptor of entity class.
- * <p/>
+ * <p>
  * It scans the class hierarchy and figure out what elements are of interest when making an entity bean.
- * <p/>
+ * <p>
  * It supports both access type: field and property.
- * <p/>
+ * <p>
  * Example:
  * <pre>
  * <code>
@@ -72,7 +72,7 @@ import static com.google.common.collect.Lists.newArrayList;
  *     String name;
  *
  *     {@literal @}OneToMany
- *     List<Item> items;
+ *     List{@literal <Item>} items;
  * }
  * </code>
  * // The resulting object is cached so calling it again with same arguments it won't do the reflection scan again.
@@ -82,7 +82,7 @@ import static com.google.common.collect.Lists.newArrayList;
  * // entityClass.getContainingEntitiesGetterMethods will return getItems() method
  * // entityClass.getManyToManyMethods will return empty
  * </pre>
- * <p/>
+ * <p>
  *
  * @author Patrick Huang
  */

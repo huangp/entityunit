@@ -13,10 +13,10 @@ import java.util.Date;
 
 /**
  * A Maker factory for field/property or constructor parameter value making.
- * <p/>
+ * <p>
  * If MakeContext.getPreferredValueMakers().getMaker(com.github.huangp.entityunit.util.Settable) returns a matched maker,
  * it will take precedence.
- * <p/>
+ * <p>
  * Otherwise base on the settable type, it will create different makers.
  * <pre>
  * For primitive type, a maker that uses primitive default values.

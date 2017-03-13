@@ -48,7 +48,7 @@ public final class EntityCleaner {
 
     /**
      * Delete all records from given entity representing tables and their many to many and element collection tables.
-     * <p/>
+     * <p>
      * The entity classes must be in correct order. Item references Category then Category must in front of the iterable.
      *
      * @param entityManager
@@ -73,7 +73,7 @@ public final class EntityCleaner {
     /**
      * Delete all records from given entity representing tables except exclusion. Exclusion are given as entity object.
      * So a match on id will be used.
-     * <p/>
+     * <p>
      * TODO manyToMany and element collection table do not consider exlusion yet
      *
      * @param entityManager

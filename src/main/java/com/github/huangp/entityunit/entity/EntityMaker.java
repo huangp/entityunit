@@ -1,7 +1,5 @@
 package com.github.huangp.entityunit.entity;
 
-import com.github.huangp.entityunit.holder.BeanValueHolder;
-
 import javax.persistence.EntityManager;
 
 /**
@@ -14,7 +12,7 @@ public interface EntityMaker {
     /**
      * Make the given type of entity and all entities that it depends(references) and then persist.
      * It also make sure associations are populated accordingly.
-     * <p/>
+     * <p>
      * If called multiple times, the asking entity will be made each time but depending entities will be reused.
      * <pre>
      * {@code
