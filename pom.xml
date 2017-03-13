@@ -25,7 +25,7 @@
 
     <scm>
         <connection>scm:git:git://github.com/huangp/entityunit.git</connection>
-        <developerConnection>scm:git:git://github.com/huangp/entityunit.git</developerConnection>
+        <developerConnection>scm:git:https://github.com/huangp/entityunit.git</developerConnection>
         <url>https://github.com/huangp/entityunit</url>
     </scm>
 
