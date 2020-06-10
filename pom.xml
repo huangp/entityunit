@@ -48,7 +48,7 @@
         <lombok.version>1.16.12</lombok.version>
         <guava.version>20.0</guava.version>
         <typetools.version>0.3.0</typetools.version>
-        <commons-beanutils.version>1.8.3</commons-beanutils.version>
+        <commons-beanutils.version>1.9.2</commons-beanutils.version>
         <commons-lang.version>2.6</commons-lang.version>
         <jpa-api.version>1.0.1.Final</jpa-api.version>
         <validation-api.version>1.0.0.GA</validation-api.version>
